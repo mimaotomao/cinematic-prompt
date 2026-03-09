@@ -528,6 +528,7 @@ function Viewport3D({azimuth,elevation,zoom,onChange,active}){
 
   return(
     <div ref={wrapRef} className="ctrl3d-canvas-wrap"
+      onClick={e=>e.stopPropagation()}
       onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end}
       onTouchStart={start} onTouchMove={move} onTouchEnd={end}>
       <canvas ref={canvasRef} style={{display:"block"}}/>
@@ -964,10 +965,12 @@ function AnglesPage(){
               style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
                 border:"2px solid "+(aspectRatio===r.id?"#e8780a":"var(--bd)"),
                 boxShadow:aspectRatio===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
-                transition:"all .15s",width:120}}>
-              <div style={{width:120,height:120,
+                transition:"all .15s",width:r.fw,
+                display:"flex",flexDirection:"column",alignItems:"center",
+                padding:"10px 8px",background:"var(--s1)",gap:6}}>
+              <div style={{width:80,height:80,flexShrink:0,
                 backgroundImage:"url(/format.png)",
-                backgroundSize:"600px 120px",
+                backgroundSize:"400px 80px",
                 backgroundPosition:r.sx+"px 0px",
                 backgroundRepeat:"no-repeat"}}/>
               <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
@@ -1157,11 +1160,11 @@ const COLOR_SPRITES=[
   {id:"warm",name:"Warm Vintage",sx:-450,sy:-167},
 ];
 const FORMAT_SPRITES=[
-  {id:"16:9",name:"16:9",fw:130,sx:0,sy:0},
-  {id:"9:16",name:"9:16",fw:55,sx:-80,sy:0},
-  {id:"2.39:1",name:"2.39:1",fw:170,sx:-160,sy:0},
-  {id:"4:3",name:"4:3",fw:110,sx:-240,sy:0},
-  {id:"1:1",name:"1:1",fw:90,sx:-320,sy:0},
+  {id:"16:9",name:"16:9",fw:130,sx:0},
+  {id:"9:16",name:"9:16",fw:55,sx:-80},
+  {id:"2.39:1",name:"2.39:1",fw:170,sx:-160},
+  {id:"4:3",name:"4:3",fw:110,sx:-240},
+  {id:"1:1",name:"1:1",fw:90,sx:-320},
 ];
 const UNIVERSE_SPRITES=[
   {id:"realism",name:"Photorealism",sx:0,sy:0},
@@ -1238,6 +1241,28 @@ const RARM_SPRITES=[
   {name:"Ghostly",sx:-300,sy:-200},
   {name:"Mechanical Claws",sx:-500,sy:-200},
   {name:"Bird Claws",sx:-100,sy:-300},
+];
+const LLEG_SPRITES=[
+  {name:"Natural",sx:0,sy:0},
+  {name:"Prosthetic Blade",sx:-170,sy:0},
+  {name:"Furry Paws",sx:-340,sy:0},
+  {name:"Natural Alt",sx:0,sy:-128},
+  {name:"Snake Tail",sx:-170,sy:-128},
+  {name:"Mermaid Tail",sx:-340,sy:-128},
+  {name:"Bird Claws",sx:0,sy:-256},
+  {name:"Mechanical",sx:-170,sy:-256},
+  {name:"Fur Hooves",sx:-340,sy:-256},
+];
+const RLEG_SPRITES=[
+  {name:"Natural",sx:-85,sy:0},
+  {name:"Prosthetic Blade",sx:-255,sy:0},
+  {name:"Furry Paws",sx:-425,sy:0},
+  {name:"Natural Alt",sx:-85,sy:-128},
+  {name:"Snake Tail",sx:-255,sy:-128},
+  {name:"Mermaid Tail",sx:-425,sy:-128},
+  {name:"Bird Claws",sx:-85,sy:-256},
+  {name:"Mechanical",sx:-255,sy:-256},
+  {name:"Fur Hooves",sx:-425,sy:-256},
 ];
 const WINGS_SPRITES=[
   {name:"None", sx:0, sy:0},
@@ -1963,8 +1988,43 @@ function AvatarsPage(){
             </div>
           ))}
         </div>
-        :bTab==="lLeg"?<Opts opts={AV_FIELDS.leg} stateKey="lLeg"/>
-        :bTab==="rLeg"?<Opts opts={AV_FIELDS.leg} stateKey="rLeg"/>
+        :bTab==="lLeg"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {LLEG_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("lLeg",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.lLeg===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.lLeg===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:85}}>
+                <div style={{width:85,height:128,
+                  backgroundImage:"url(/legs.png)",
+                  backgroundSize:"510px 384px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"4px 4px 5px",textAlign:"center",fontSize:10,fontWeight:600,
+                  color:c.lLeg===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        ):bTab==="rLeg"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {RLEG_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("rLeg",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.rLeg===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.rLeg===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:85}}>
+                <div style={{width:85,height:128,
+                  backgroundImage:"url(/legs.png)",
+                  backgroundSize:"510px 384px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"4px 4px 5px",textAlign:"center",fontSize:10,fontWeight:600,
+                  color:c.rLeg===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
         :bTab==="wings"?(
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             {WINGS_SPRITES.map(r=>(
