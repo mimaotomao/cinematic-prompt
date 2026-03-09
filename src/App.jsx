@@ -1998,7 +1998,7 @@ function AvatarsPage(){
                   transition:"all .15s",width:85}}>
                 <div style={{width:85,height:128,
                   backgroundImage:"url(/legs.png)",
-                  backgroundSize:"510px 384px",
+                  backgroundSize:"512px 512px",
                   backgroundPosition:r.sx+"px "+r.sy+"px",
                   backgroundRepeat:"no-repeat"}}/>
                 <div style={{padding:"4px 4px 5px",textAlign:"center",fontSize:10,fontWeight:600,
@@ -2016,7 +2016,7 @@ function AvatarsPage(){
                   transition:"all .15s",width:85}}>
                 <div style={{width:85,height:128,
                   backgroundImage:"url(/legs.png)",
-                  backgroundSize:"510px 384px",
+                  backgroundSize:"512px 512px",
                   backgroundPosition:r.sx+"px "+r.sy+"px",
                   backgroundRepeat:"no-repeat"}}/>
                 <div style={{padding:"4px 4px 5px",textAlign:"center",fontSize:10,fontWeight:600,
