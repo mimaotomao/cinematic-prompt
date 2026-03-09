@@ -932,21 +932,25 @@ function AnglesPage(){
       <div className="sec">
         <div className="sh"><span className="st">Aspect Ratio</span></div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-          {FORMAT_SPRITES.map(r=>(
+          {FORMAT_SPRITES.map(r=>{
+            const fw=r.fw||100;
+            return(
             <div key={r.id} onClick={()=>setAspectRatio(r.id)}
-              style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+              style={{cursor:"pointer",borderRadius:8,
                 border:"2px solid "+(aspectRatio===r.id?"#e8780a":"var(--bd)"),
                 boxShadow:aspectRatio===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
-                transition:"all .15s",width:100}}>
-              <div style={{width:100,height:100,
+                transition:"all .15s",width:fw,padding:8,background:"var(--s1)"}}>
+              <div style={{width:"100%",height:r.bsh,overflow:"hidden",borderRadius:4,
                 backgroundImage:"url(/format.png)",
-                backgroundSize:"500px 100px",
-                backgroundPosition:r.sx+"px 0px",
-                backgroundRepeat:"no-repeat"}}/>
-              <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                backgroundSize:r.bsw+"px "+r.bsh+"px",
+                backgroundPosition:r.sx+"px "+r.sy+"px",
+                backgroundRepeat:"no-repeat",
+                backgroundOrigin:"border-box"}}/>
+              <div style={{paddingTop:6,textAlign:"center",fontSize:11,fontWeight:600,
                 color:aspectRatio===r.id?"#e8780a":"var(--t)"}}>{r.name}</div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -1129,11 +1133,11 @@ const COLOR_SPRITES=[
   {id:"warm",name:"Warm Vintage",sx:-450,sy:-167},
 ];
 const FORMAT_SPRITES=[
-  {id:"16:9",name:"16:9",sx:0,sy:0},
-  {id:"9:16",name:"9:16",sx:-100,sy:0},
-  {id:"2.39:1",name:"2.39:1",sx:-200,sy:0},
-  {id:"4:3",name:"4:3",sx:-300,sy:0},
-  {id:"1:1",name:"1:1",sx:-400,sy:0},
+  {id:"16:9",name:"16:9",fw:140,sx:0,sy:0,bsw:700,bsh:140},
+  {id:"9:16",name:"9:16",fw:79,sx:-79,sy:0,bsw:395,bsh:79},
+  {id:"2.39:1",name:"2.39:1",fw:172,sx:-344,sy:0,bsw:860,bsh:172},
+  {id:"4:3",name:"4:3",fw:107,sx:-321,sy:0,bsw:535,bsh:107},
+  {id:"1:1",name:"1:1",fw:100,sx:-400,sy:0,bsw:500,bsh:100},
 ];
 const UNIVERSE_SPRITES=[
   {id:"realism",name:"Photorealism",sx:0,sy:0},
