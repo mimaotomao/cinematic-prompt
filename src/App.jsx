@@ -836,10 +836,10 @@ function AnglesPage(){
               style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
                 border:"2px solid "+(bg===r.id?"#e8780a":"var(--bd)"),
                 boxShadow:bg===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
-                transition:"all .15s",width:150}}>
-              <div style={{width:150,height:126,
+                transition:"all .15s",width:133}}>
+              <div style={{width:133,height:112,
                 backgroundImage:"url(/environment.png)",
-                backgroundSize:"900px 378px",
+                backgroundSize:"798px 336px",
                 backgroundPosition:r.sx+"px "+r.sy+"px",
                 backgroundRepeat:"no-repeat"}}/>
               <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
@@ -865,7 +865,7 @@ function AnglesPage(){
                 border:"2px solid "+(lens===r.mm?"#e8780a":"var(--bd)"),
                 boxShadow:lens===r.mm?"0 0 14px rgba(232,120,10,.4)":"none",
                 transition:"all .15s",width:150}}>
-              <div style={{width:150,height:84,
+              <div style={{width:150,height:112,
                 backgroundImage:"url(/lens.png)",
                 backgroundSize:"600px 336px",
                 backgroundPosition:r.sx+"px "+r.sy+"px",
@@ -891,9 +891,9 @@ function AnglesPage(){
                 border:"2px solid "+(filmStock===r.id?"#e8780a":"var(--bd)"),
                 boxShadow:filmStock===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
                 transition:"all .15s",width:150}}>
-              <div style={{width:150,height:84,
+              <div style={{width:150,height:167,
                 backgroundImage:"url(/film.png)",
-                backgroundSize:"600px 336px",
+                backgroundSize:"600px 334px",
                 backgroundPosition:r.sx+"px "+r.sy+"px",
                 backgroundRepeat:"no-repeat"}}/>
               <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
@@ -1226,34 +1226,34 @@ const EARS_SPRITES=[
   {name:"Wolf",sx:-300,sy:0},{name:"Bunny",sx:-400,sy:0},{name:"Demon",sx:-500,sy:0},{name:"None",sx:-600,sy:0},
 ];
 const SKINTRAIT_SPRITES=[
-  {name:"None", sx:0, sy:0},
-  {name:"Freckles", sx:-100, sy:0},
-  {name:"Vitiligo", sx:-200, sy:0},
-  {name:"Scars", sx:-300, sy:0},
-  {name:"Tattoos", sx:-400, sy:0},
-  {name:"Branding", sx:-500, sy:0},
-  {name:"Piercings", sx:-600, sy:0},
-  {name:"Bioluminescence", sx:0, sy:-100},
-  {name:"Fur", sx:-100, sy:-100},
-  {name:"Scales", sx:-200, sy:-100},
-  {name:"Feathers", sx:-300, sy:-100},
-  {name:"Cracked Stone", sx:-400, sy:-100},
-  {name:"Metallic", sx:-500, sy:-100},
+  {name:"None",label:"None",sx:0,sy:0},
+  {name:"Freckles",label:"Freckles",sx:-100,sy:0},
+  {name:"Vitiligo",label:"Vitiligo",sx:-200,sy:0},
+  {name:"Scars",label:"Scars",sx:-300,sy:0},
+  {name:"Tattoos",label:"Tattoos",sx:-400,sy:0},
+  {name:"Branding",label:"Branding",sx:-500,sy:0},
+  {name:"Piercings",label:"Piercings",sx:-600,sy:0},
+  {name:"Bioluminescence",label:"Bioluminescent",sx:0,sy:-98},
+  {name:"Fur",label:"Fur",sx:-100,sy:-98},
+  {name:"Scales",label:"Scales",sx:-200,sy:-98},
+  {name:"Feathers",label:"Feathers",sx:-300,sy:-98},
+  {name:"Cracked Stone",label:"Cracked Stone",sx:-400,sy:-98},
+  {name:"Metallic",label:"Metallic",sx:-500,sy:-98},
 ];
 const SKIN_SPRITES=[
-  {name:"Porcelain", sx:0, sy:0},
-  {name:"Fair", sx:-100, sy:0},
-  {name:"Light", sx:-200, sy:0},
-  {name:"Olive", sx:-300, sy:0},
-  {name:"Tan", sx:-400, sy:0},
-  {name:"Brown", sx:-500, sy:0},
-  {name:"Dark", sx:-600, sy:0},
-  {name:"Ebony", sx:0, sy:-100},
-  {name:"Grey", sx:-100, sy:-100},
-  {name:"Blue", sx:-200, sy:-100},
-  {name:"Green", sx:-300, sy:-100},
-  {name:"Gold", sx:-400, sy:-100},
-  {name:"Silver", sx:-500, sy:-100},
+  {name:"Porcelain",label:"Porcelain",sx:0,sy:0},
+  {name:"Fair",label:"Fair",sx:-100,sy:0},
+  {name:"Light",label:"Light",sx:-200,sy:0},
+  {name:"Olive",label:"Olive",sx:-300,sy:0},
+  {name:"Tan",label:"Tan",sx:-400,sy:0},
+  {name:"Brown",label:"Brown",sx:-500,sy:0},
+  {name:"Dark",label:"Dark",sx:-600,sy:0},
+  {name:"Ebony",label:"Ebony",sx:0,sy:-98},
+  {name:"Grey",label:"Grey",sx:-100,sy:-98},
+  {name:"Blue",label:"Blue",sx:-200,sy:-98},
+  {name:"Green",label:"Green",sx:-300,sy:-98},
+  {name:"Gold",label:"Gold",sx:-400,sy:-98},
+  {name:"Silver",label:"Silver",sx:-500,sy:-98},
 ];
 const EYE_SPRITES=[
   {name:"Black",         sx:0,    sy:0},
@@ -1545,7 +1545,7 @@ function AvatarsPage(){
                   transition:"all .15s",width:100}}>
                 <div style={{width:100,height:98,
                   backgroundImage:"url(/universe.png)",
-                  backgroundSize:"601px 98px",
+                  backgroundSize:"600px 98px",
                   backgroundPosition:r.sx+"px 0px",
                   backgroundRepeat:"no-repeat"}}/>
                 <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
@@ -1657,13 +1657,13 @@ function AvatarsPage(){
                   border:"2px solid "+(c.skinColor===r.name?"#e8780a":"var(--bd)"),
                   boxShadow:c.skinColor===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
                   transition:"all .15s",width:100}}>
-                <div style={{width:100,height:100,
+                <div style={{width:100,height:98,
                   backgroundImage:"url(/skin.png)",
-                  backgroundSize:"701px 200px",
+                  backgroundSize:"700px 200px",
                   backgroundPosition:r.sx+"px "+r.sy+"px",
                   backgroundRepeat:"no-repeat"}}/>
                 <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
-                  color:c.skinColor===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+                  color:c.skinColor===r.name?"#e8780a":"var(--t)"}}>{r.label}</div>
               </div>
             ))}
           </div>
@@ -1694,13 +1694,13 @@ function AvatarsPage(){
                   border:"2px solid "+(c.skinTraits===r.name?"#e8780a":"var(--bd)"),
                   boxShadow:c.skinTraits===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
                   transition:"all .15s",width:100}}>
-                <div style={{width:100,height:100,
+                <div style={{width:100,height:98,
                   backgroundImage:"url(/skintraits.png)",
-                  backgroundSize:"701px 200px",
+                  backgroundSize:"700px 200px",
                   backgroundPosition:r.sx+"px "+r.sy+"px",
                   backgroundRepeat:"no-repeat"}}/>
                 <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
-                  color:c.skinTraits===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+                  color:c.skinTraits===r.name?"#e8780a":"var(--t)"}}>{r.label}</div>
               </div>
             ))}
           </div>
