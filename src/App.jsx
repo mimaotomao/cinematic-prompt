@@ -520,7 +520,7 @@ function Viewport3D({azimuth,elevation,zoom,onChange,active}){
 
   useEffect(()=>{
     const el=wrapRef.current;
-    if(!el)return;
+    if(!el||!active)return;
     el.addEventListener('wheel',wheel,{passive:false});
     return()=>el.removeEventListener('wheel',wheel);
   },[wheel]);
@@ -1096,6 +1096,7 @@ const ENV_SPRITES=[
   {id:"cave",name:"Crystal Cave",sx:-266,sy:-224},
   {id:"western",name:"Wild West",sx:-399,sy:-224},
   {id:"abstract",name:"Abstract Void",sx:-532,sy:-224},
+  {id:"black",name:"Black Studio",sx:-665,sy:-224},
 ];
 const LENS_SPRITES=[
   {mm:"8mm",name:"Fisheye",sx:0,sy:0},
@@ -1152,35 +1153,35 @@ const UNIVERSE_SPRITES=[
 ];
 const ANGLE_SPRITES=[
   {name:"Wide establishing shot",sx:0,sy:0},
-  {name:"Medium eye-level shot",sx:-200,sy:0},
-  {name:"Low-angle hero shot",sx:-400,sy:0},
-  {name:"Over-the-shoulder shot",sx:-600,sy:0},
-  {name:"Close-up",sx:-800,sy:0},
-  {name:"High-angle shot",sx:0,sy:-70},
-  {name:"Profile side shot",sx:-200,sy:-70},
-  {name:"Dutch tilt shot",sx:-400,sy:-70},
-  {name:"Extreme wide master shot",sx:-600,sy:-70},
-  {name:"Bird's-eye vertical shot",sx:-800,sy:-70},
-  {name:"Ground-level worm's-eye shot",sx:0,sy:-140},
-  {name:"Three-quarter front angle",sx:-200,sy:-140},
-  {name:"Three-quarter rear angle",sx:-400,sy:-140},
-  {name:"Locked-off static frame",sx:-600,sy:-140},
-  {name:"Long-lens compression shot",sx:-800,sy:-140},
-  {name:"Foreground-obstructed shot",sx:0,sy:-210},
-  {name:"Reflected perspective shot",sx:-200,sy:-210},
-  {name:"Silhouette backlit shot",sx:-400,sy:-210},
-  {name:"Center-punched symmetrical shot",sx:-600,sy:-210},
-  {name:"Asymmetrical rule-of-thirds shot",sx:-800,sy:-210},
-  {name:"Hand-level perspective shot",sx:0,sy:-280},
-  {name:"Chest-height tracking angle",sx:-200,sy:-280},
-  {name:"Environmental frame-within-frame shot",sx:-400,sy:-280},
-  {name:"Extreme close environment shot",sx:-600,sy:-280},
-  {name:"Rear profile silhouette shot",sx:-800,sy:-280},
-  {name:"Shallow-focus foreground lead shot",sx:0,sy:-350},
-  {name:"Deep-focus wide shot",sx:-200,sy:-350},
-  {name:"Oblique corner angle shot",sx:-400,sy:-350},
-  {name:"Eye-line match perspective shot",sx:-600,sy:-350},
-  {name:"Environmental negative-space shot",sx:-800,sy:-350},
+  {name:"Medium eye-level shot",sx:-193,sy:0},
+  {name:"Low-angle hero shot",sx:-397,sy:0},
+  {name:"Over-the-shoulder shot",sx:-601,sy:0},
+  {name:"Close-up",sx:-805,sy:0},
+  {name:"High-angle shot",sx:-1009,sy:0},
+  {name:"Profile side shot",sx:0,sy:-100},
+  {name:"Dutch tilt shot",sx:-193,sy:-100},
+  {name:"Extreme wide master shot",sx:-397,sy:-100},
+  {name:"Bird's-eye vertical shot",sx:-601,sy:-100},
+  {name:"Ground-level worm's-eye shot",sx:-805,sy:-100},
+  {name:"Three-quarter front angle",sx:-1009,sy:-100},
+  {name:"Three-quarter rear angle",sx:0,sy:-201},
+  {name:"Locked-off static frame",sx:-193,sy:-201},
+  {name:"Long-lens compression shot",sx:-397,sy:-201},
+  {name:"Foreground-obstructed shot",sx:-601,sy:-201},
+  {name:"Reflected perspective shot",sx:-805,sy:-201},
+  {name:"Silhouette backlit shot",sx:-1009,sy:-201},
+  {name:"Center-punched symmetrical shot",sx:0,sy:-301},
+  {name:"Asymmetrical rule-of-thirds shot",sx:-193,sy:-301},
+  {name:"Hand-level perspective shot",sx:-397,sy:-301},
+  {name:"Chest-height tracking angle",sx:-601,sy:-301},
+  {name:"Environmental frame-within-frame shot",sx:-805,sy:-301},
+  {name:"Extreme close environment shot",sx:-1009,sy:-301},
+  {name:"Rear profile silhouette shot",sx:0,sy:-403},
+  {name:"Shallow-focus foreground lead shot",sx:-193,sy:-403},
+  {name:"Deep-focus wide shot",sx:-397,sy:-403},
+  {name:"Oblique corner angle shot",sx:-601,sy:-403},
+  {name:"Eye-line match perspective shot",sx:-805,sy:-403},
+  {name:"Environmental negative-space shot",sx:-1009,sy:-403},
 ];
 const CLOTHING_SPRITES=[
   {id:"Neutral (studio reference)",name:"Neutral",sx:0,sy:0},
@@ -1195,28 +1196,28 @@ const CLOTHING_SPRITES=[
   {id:"None",name:"None",sx:-480,sy:-167},
 ];
 const LARM_SPRITES=[
-  {name:"Natural",sx:-400,sy:0},
-  {name:"Prosthetic (steampunk)",sx:0,sy:0},
-  {name:"Prosthetic (cybernetic)",sx:-200,sy:0},
-  {name:"Extra arms",sx:0,sy:-100},
+  {name:"Natural",sx:0,sy:0},
+  {name:"Steampunk Prosthetic",sx:-200,sy:0},
+  {name:"Cybernetic Prosthetic",sx:-400,sy:0},
+  {name:"Extra Arms",sx:0,sy:-100},
   {name:"Tentacles",sx:-200,sy:-100},
-  {name:"Animal (furry)",sx:-400,sy:-100},
-  {name:"Animal (scaly)",sx:0,sy:-200},
+  {name:"Furry Animal",sx:-400,sy:-100},
+  {name:"Scaly",sx:0,sy:-200},
   {name:"Ghostly",sx:-200,sy:-200},
-  {name:"Mechanical claws",sx:-400,sy:-200},
-  {name:"No arm",sx:0,sy:-300},
+  {name:"Mechanical Claws",sx:-400,sy:-200},
+  {name:"Bird Claws",sx:0,sy:-300},
 ];
 const RARM_SPRITES=[
-  {name:"Natural",sx:-500,sy:0},
-  {name:"Prosthetic (steampunk)",sx:-100,sy:0},
-  {name:"Prosthetic (cybernetic)",sx:-300,sy:0},
-  {name:"Extra arms",sx:-100,sy:-100},
+  {name:"Natural",sx:-100,sy:0},
+  {name:"Steampunk Prosthetic",sx:-300,sy:0},
+  {name:"Cybernetic Prosthetic",sx:-500,sy:0},
+  {name:"Extra Arms",sx:-100,sy:-100},
   {name:"Tentacles",sx:-300,sy:-100},
-  {name:"Animal (furry)",sx:-500,sy:-100},
-  {name:"Animal (scaly)",sx:-100,sy:-200},
+  {name:"Furry Animal",sx:-500,sy:-100},
+  {name:"Scaly",sx:-100,sy:-200},
   {name:"Ghostly",sx:-300,sy:-200},
-  {name:"Mechanical claws",sx:-500,sy:-200},
-  {name:"No arm",sx:-100,sy:-300},
+  {name:"Mechanical Claws",sx:-500,sy:-200},
+  {name:"Bird Claws",sx:-100,sy:-300},
 ];
 const WINGS_SPRITES=[
   {name:"None", sx:0, sy:0},
@@ -1910,7 +1911,7 @@ function AvatarsPage(){
                 backgroundImage:"url(/arms.png)",
                 backgroundSize:"600px 600px",
                 backgroundPosition:r.sx+"px "+r.sy+"px",
-                backgroundRepeat:"no-repeat"}}/>
+                backgroundRepeat:"no-repeat"}}/>  
               <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:10,fontWeight:600,
                 color:c.lArm===r.name?"#e8780a":"var(--t)",lineHeight:1.2}}>{r.name}</div>
             </div>
@@ -1927,7 +1928,16 @@ function AvatarsPage(){
                 backgroundImage:"url(/arms.png)",
                 backgroundSize:"600px 600px",
                 backgroundPosition:r.sx+"px "+r.sy+"px",
-                backgroundRepeat:"no-repeat"}}/>
+                backgroundRepeat:"no-repeat"}}/>  
+
+
+
+
+
+
+
+
+
               <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:10,fontWeight:600,
                 color:c.rArm===r.name?"#e8780a":"var(--t)",lineHeight:1.2}}>{r.name}</div>
             </div>
