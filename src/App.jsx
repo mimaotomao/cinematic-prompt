@@ -1,21 +1,4 @@
-{FORMAT_SPRITES.map(r=>{
-            return(
-            <div key={r.id} onClick={()=>setAspectRatio(r.id)}
-              style={{cursor:"pointer",borderRadius:8,
-                border:"2px solid "+(aspectRatio===r.id?"#e8780a":"var(--bd)"),
-                boxShadow:aspectRatio===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
-                transition:"all .15s",width:r.fw,
-                display:"flex",flexDirection:"column",alignItems:"center",
-                padding:10,background:"var(--s1)",gap:6}}>
-              <div style={{width:80,height:80,flexShrink:0,
-                backgroundImage:"url(/format.png)",
-                backgroundSize:"400px 80px",
-                backgroundPosition:r.sx+"px 0px",
-                backgroundRepeat:"no-repeat"}}/>
-              <div style={{fontSize:11,fontWeight:600,color:aspectRatio===r.id?"#e8780a":"var(--t)"}}>{r.name}</div>
-            </div>
-            );
-          })}import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 const G = `
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
