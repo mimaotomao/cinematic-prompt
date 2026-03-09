@@ -237,15 +237,22 @@ const BACKGROUNDS = [
 ];
 
 const LENSES = [
-  {mm:"8mm",name:"Fisheye",p:"8mm fisheye lens, extreme spherical barrel distortion, hemispherical 180-degree field of view"},
-  {mm:"14mm",name:"Ultra-Wide",p:"14mm ultra-wide angle lens, expansive field of view, subtle edge distortion, strong environmental emphasis"},
-  {mm:"24mm",name:"Wide",p:"24mm wide-angle lens, cinematic wide framing, natural perspective, strong sense of space"},
-  {mm:"35mm",name:"Standard Wide",p:"35mm lens, classic cinematic perspective, balanced natural framing"},
-  {mm:"50mm",name:"Normal",p:"50mm standard lens, perspective closest to human vision, neutral optical character"},
-  {mm:"85mm",name:"Portrait",p:"85mm portrait lens, slight subject compression, flattering rendering, shallow depth of field"},
-  {mm:"135mm",name:"Short Tele",p:"135mm telephoto lens, noticeable background compression, strong subject isolation, smooth bokeh"},
-  {mm:"200mm",name:"Telephoto",p:"200mm telephoto lens, heavy background compression, extreme subject separation"},
-  {mm:"400mm",name:"Super Tele",p:"400mm super-telephoto lens, maximum compression, razor-thin focal plane, subject extracted from background"},
+  {mm:"8mm",name:"8mm",p:"8mm fisheye lens, extreme spherical barrel distortion, hemispherical 180-degree field of view"},
+  {mm:"12mm",name:"12mm",p:"12mm ultra-wide lens, extreme wide field of view, strong perspective distortion"},
+  {mm:"16mm",name:"16mm",p:"16mm wide-angle lens, very wide field of view, expanded environmental context"},
+  {mm:"20mm",name:"20mm",p:"20mm wide lens, expansive framing, strong spatial depth"},
+  {mm:"24mm",name:"24mm",p:"24mm wide-angle lens, cinematic wide framing, natural perspective, strong sense of space"},
+  {mm:"28mm",name:"28mm",p:"28mm lens, slightly wide, versatile documentary feel"},
+  {mm:"35mm",name:"35mm",p:"35mm lens, classic cinematic perspective, balanced natural framing"},
+  {mm:"50mm",name:"50mm",p:"50mm standard lens, perspective closest to human vision, neutral optical character"},
+  {mm:"70mm",name:"70mm",p:"70mm short telephoto, slightly compressed perspective, versatile portrait lens"},
+  {mm:"85mm",name:"85mm",p:"85mm portrait lens, slight subject compression, flattering rendering, shallow depth of field"},
+  {mm:"100mm",name:"100mm",p:"100mm macro telephoto, close-up capability, smooth background separation"},
+  {mm:"135mm",name:"135mm",p:"135mm telephoto lens, noticeable background compression, strong subject isolation, smooth bokeh"},
+  {mm:"200mm",name:"200mm",p:"200mm telephoto lens, heavy background compression, extreme subject separation"},
+  {mm:"300mm",name:"300mm",p:"300mm telephoto lens, significant compression, sports and wildlife framing"},
+  {mm:"400mm",name:"400mm",p:"400mm super-telephoto lens, maximum compression, razor-thin focal plane"},
+  {mm:"600mm",name:"600mm",p:"600mm extreme telephoto, ultra-compressed perspective, subject extracted from background"},
 ];
 
 const FILM_STOCKS = [
@@ -770,7 +777,7 @@ function AnglesPage(){
         <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
           {ANGLES.map((angle,i)=>{
             const ord=sel.indexOf(i);const isSel=ord!==-1;
-            const col=i%10, row=Math.floor(i/10);
+            const col=i%5, row=Math.floor(i/5);
             return(
               <div key={i}
                 onClick={()=>tog(i)}
@@ -782,7 +789,7 @@ function AnglesPage(){
                 <div style={{width:200,height:70,
                   backgroundImage:"url(/angles.png)",
                   backgroundSize:"1000px 420px",
-                  backgroundPosition:(-col*100)+"px "+(-row*140)+"px",
+                  backgroundPosition:(-col*200)+"px "+(-row*70)+"px",
                   backgroundRepeat:"no-repeat"}}/>
                 <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:10,fontWeight:600,
                   color:isSel?"#e8780a":"var(--t)",lineHeight:1.2}}>{angle.name}</div>
@@ -847,11 +854,6 @@ function AnglesPage(){
             </div>
           ))}
         </div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:8}}>
-            {[{id:"western",name:"Wild West"},{id:"abstract",name:"Abstract Void"}].map(b=>(
-              <div key={b.id} className={"pill"+(bg===b.id?" sel":"")} onClick={()=>tog1(setBg,b.id)}>{b.name}</div>
-            ))}
-          </div>
       </div>
 
       <div className="divider"/>
@@ -1090,14 +1092,21 @@ const ENV_SPRITES=[
 ];
 const LENS_SPRITES=[
   {mm:"8mm",name:"Fisheye",sx:0,sy:0},
-  {mm:"14mm",name:"Ultra-Wide",sx:-150,sy:0},
-  {mm:"24mm",name:"Wide",sx:-300,sy:0},
-  {mm:"35mm",name:"Standard Wide",sx:-450,sy:0},
-  {mm:"50mm",name:"Normal",sx:0,sy:-112},
-  {mm:"85mm",name:"Portrait",sx:-150,sy:-112},
-  {mm:"135mm",name:"Short Tele",sx:-300,sy:-112},
-  {mm:"200mm",name:"Telephoto",sx:-450,sy:-112},
-  {mm:"400mm",name:"Super Tele",sx:0,sy:-224},
+  {mm:"12mm",name:"Ultra-Wide",sx:-150,sy:0},
+  {mm:"16mm",name:"Wide-Angle",sx:-300,sy:0},
+  {mm:"20mm",name:"Super Wide",sx:-450,sy:0},
+  {mm:"24mm",name:"Wide",sx:0,sy:-84},
+  {mm:"28mm",name:"Moderate Wide",sx:-150,sy:-84},
+  {mm:"35mm",name:"Standard Wide",sx:-300,sy:-84},
+  {mm:"50mm",name:"Normal",sx:-450,sy:-84},
+  {mm:"70mm",name:"Short Tele",sx:0,sy:-168},
+  {mm:"85mm",name:"Portrait",sx:-150,sy:-168},
+  {mm:"100mm",name:"Macro Tele",sx:-300,sy:-168},
+  {mm:"135mm",name:"Medium Tele",sx:-450,sy:-168},
+  {mm:"200mm",name:"Telephoto",sx:0,sy:-252},
+  {mm:"300mm",name:"Super Tele",sx:-150,sy:-252},
+  {mm:"400mm",name:"Long Tele",sx:-300,sy:-252},
+  {mm:"600mm",name:"Extreme Tele",sx:-450,sy:-252},
 ];
 const FILM_SPRITES=[
   {id:"kodak",name:"Kodak Vision3",sx:0,sy:0},
