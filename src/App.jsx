@@ -1,4 +1,21 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+{FORMAT_SPRITES.map(r=>{
+            return(
+            <div key={r.id} onClick={()=>setAspectRatio(r.id)}
+              style={{cursor:"pointer",borderRadius:8,
+                border:"2px solid "+(aspectRatio===r.id?"#e8780a":"var(--bd)"),
+                boxShadow:aspectRatio===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
+                transition:"all .15s",width:r.fw,
+                display:"flex",flexDirection:"column",alignItems:"center",
+                padding:10,background:"var(--s1)",gap:6}}>
+              <div style={{width:80,height:80,flexShrink:0,
+                backgroundImage:"url(/format.png)",
+                backgroundSize:"400px 80px",
+                backgroundPosition:r.sx+"px 0px",
+                backgroundRepeat:"no-repeat"}}/>
+              <div style={{fontSize:11,fontWeight:600,color:aspectRatio===r.id?"#e8780a":"var(--t)"}}>{r.name}</div>
+            </div>
+            );
+          })}import { useState, useRef, useEffect, useCallback } from "react";
 
 const G = `
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
@@ -78,7 +95,7 @@ textarea::placeholder{color:var(--t4)}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--acc);color:#000;font-size:11px;font-weight:800;letter-spacing:3px;padding:10px 24px;border-radius:6px;z-index:200;pointer-events:none;animation:ft 2.5s forwards;text-transform:uppercase}
 @keyframes ft{0%{opacity:0;transform:translateX(-50%) translateY(20px) scale(.9)}15%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}85%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-10px)}}
 .divider{border:none;border-top:1px solid var(--bd);margin:32px 0}
-.scene-field{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:22px 24px;margin-bottom:28px;transition:all .2s}
+.scene-field{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r2);padding:22px 24px;margin-bottom:28px;transition:all .2s}
 .scene-field:focus-within{border-color:var(--bd2)}
 .scene-hint{font-size:11px;color:var(--t4);margin-top:10px;line-height:1.6}
 .ctrl3d{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden}
@@ -486,12 +503,13 @@ function Viewport3D({azimuth,elevation,zoom,onChange,active}){
     draw3D(canvas,azimuth,elevation,zoom);
   },[azimuth,elevation,zoom,active]);
 
-  const start=e=>{
+  const start=useCallback(e=>{
+    if(!active)return;
     drag.current=true;
     const cl=e.touches?e.touches[0]:e;
     last.current={x:cl.clientX,y:cl.clientY};
     e.preventDefault();
-  };
+  },[active]);
   const move=useCallback(e=>{
     if(!drag.current)return;
     const cl=e.touches?e.touches[0]:e;
@@ -505,11 +523,18 @@ function Viewport3D({azimuth,elevation,zoom,onChange,active}){
     });
     last.current={x:cl.clientX,y:cl.clientY};
   },[onChange]);
-  const end=()=>{drag.current=false};
+  const end=useCallback(()=>{drag.current=false;},[]);
   const wheel=useCallback(e=>{
     e.preventDefault();
     onChange(p=>({...p,zoom:Math.max(1,Math.min(20,p.zoom+e.deltaY*0.012))}));
   },[onChange]);
+
+  useEffect(()=>{
+    const el=wrapRef.current;
+    if(!el||!active)return;
+    el.addEventListener('wheel',wheel,{passive:false});
+    return()=>el.removeEventListener('wheel',wheel);
+  },[wheel,active]);
 
   if(!active)return(
     <div style={{minHeight:320,background:'var(--s2)',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8,borderRadius:'var(--r)'}}>
@@ -517,13 +542,6 @@ function Viewport3D({azimuth,elevation,zoom,onChange,active}){
       <span style={{color:'var(--t4)',fontSize:11}}>Enable toggle to activate viewport</span>
     </div>
   );
-
-  useEffect(()=>{
-    const el=wrapRef.current;
-    if(!el||!active)return;
-    el.addEventListener('wheel',wheel,{passive:false});
-    return()=>el.removeEventListener('wheel',wheel);
-  },[wheel]);
 
   return(
     <div ref={wrapRef} className="ctrl3d-canvas-wrap"
@@ -534,7 +552,6 @@ function Viewport3D({azimuth,elevation,zoom,onChange,active}){
     </div>
   );
 }
-
 
 
 function describe3D(az,el,zoom){
@@ -562,7 +579,7 @@ function describe3D(az,el,zoom){
 }
 
 // ─── PROMPT BUILDER ───────────────────────────────────────────────────────────
-function buildPrompt({scene,selectedAngles,lighting,bg,lens,cam,use3D,custom,filmStock,colorGrade,aspectRatio,batchSize}){
+function buildPrompt({scene,selectedAngles,lighting,bg,lens,cam,use3D,custom,filmStock,colorGrade,aspectRatio,batchSize,mode}){
 
   const gridDims=(n)=>{
     if(n===2)return[2,1];if(n===3)return[3,1];if(n===4)return[2,2];
@@ -581,9 +598,13 @@ function buildPrompt({scene,selectedAngles,lighting,bg,lens,cam,use3D,custom,fil
   if(use3D&&n<=1)techParts.push(describe3D(cam.azimuth,cam.elevation,cam.zoom));
   const techBlock=techParts.filter(Boolean).join(". ")+(techParts.length?".":"");
 
-  // ── NO ANGLES selected: preview only ────────────────────────────────────────
+  // ── NO ANGLES selected ───────────────────────────────────────────────────────
+  const modePrefix=mode==="photo"
+    ?"Use the attached reference photo as your only visual source. Maintain the exact same subject, environment, lighting, and mood. Generate a new rendering based on the settings below."
+    :"Generate a completely original scene from scratch based on the description and settings below.";
   if(n===0){
     const parts=[];
+    parts.push(modePrefix);
     if(scene.trim())parts.push(scene.trim());
     if(techBlock)parts.push(techBlock);
     if(custom.trim())parts.push(custom.trim());
@@ -594,8 +615,7 @@ function buildPrompt({scene,selectedAngles,lighting,bg,lens,cam,use3D,custom,fil
   if(n===1){
     const parts=[];
     const angleObj=ANGLES[selectedAngles[0]];
-    const rerender="Use the attached reference image as the only visual source. Re-render the same scene from a new camera position. Maintain the same subject, environment, lighting, mood, and time of day. Do not rotate or tilt the image in 2D. Generate a new physical camera viewpoint in 3D space with proper perspective and parallax.";
-    parts.push(rerender);
+    parts.push(modePrefix);
     if(scene.trim())parts.push(scene.trim());
     if(techBlock)parts.push(techBlock);
     const camDesc=use3D?describe3D(cam.azimuth,cam.elevation,cam.zoom):"";
@@ -616,8 +636,11 @@ function buildPrompt({scene,selectedAngles,lighting,bg,lens,cam,use3D,custom,fil
   const parts=[];
 
   // 1. GOAL — must be first so AI knows immediately what it's doing
+  const gridGoal=mode==="photo"
+    ?"Use the attached reference photo as the only visual source and generate a single composite output arranged as a clean "+gridLayout+". "
+    :"Generate a single composite output from scratch arranged as a clean "+gridLayout+". ";
   parts.push(
-    "Use the source image as the only reference and generate a single composite output arranged as a clean "+gridLayout+". "+
+    gridGoal+
     "Each cell must depict the exact same moment with identical characters, wardrobe, facial structure, lighting logic, and environment. "+
     "Preserve strict character consistency and cinematic realism. "+
     "Do not introduce any new people, creatures, or background characters in any frame. "+
@@ -706,6 +729,7 @@ function AnglesPage(){
   const[aspectRatio,setAspectRatio]=useState("16:9");
   const[batchSize,setBatchSize]=useState(1);
   const[use3D,setUse3D]=useState(false);
+  const[mode1,setMode1]=useState("photo"); // "photo" | "scratch"
   const[cam,setCam]=useState({azimuth:0,elevation:0,zoom:5});
 
   const[custom,setCustom]=useState("");
@@ -716,7 +740,7 @@ function AnglesPage(){
 
   const tog=(i)=>setSel(p=>p.includes(i)?p.filter(x=>x!==i):p.length>=MAX?p:[...p,i]);
   const tog1=(setter,id)=>setter(p=>p===id?null:id);
-  const prompt=buildPrompt({scene,selectedAngles:sel,lighting:light,bg,lens,cam,use3D,custom,filmStock,colorGrade,aspectRatio,batchSize});
+  const prompt=buildPrompt({scene,selectedAngles:sel,lighting:light,bg,lens,cam,use3D,custom,filmStock,colorGrade,aspectRatio,batchSize,mode:mode1});
   const hasAny=!!(scene.trim()||sel.length||light||bg||lens||filmStock||colorGrade||use3D||custom.trim());
 
   const doToast=m=>{setToast(m);setTimeout(()=>setToast(""),2500)};
@@ -767,6 +791,19 @@ function AnglesPage(){
         </div>
       </div>
 
+      <div style={{display:"flex",gap:0,marginBottom:20,borderRadius:10,overflow:"hidden",border:"1px solid var(--bd)",width:"fit-content"}}>
+        <button onClick={()=>setMode1("photo")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",background:mode1==="photo"?"#e8780a":"var(--s1)",color:mode1==="photo"?"#000":"var(--t3)",transition:"all .2s"}}>
+          ⊕ From reference photo
+        </button>
+        <button onClick={()=>setMode1("scratch")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",borderLeft:"1px solid var(--bd)",background:mode1==="scratch"?"#e8780a":"var(--s1)",color:mode1==="scratch"?"#000":"var(--t3)",transition:"all .2s"}}>
+          ✦ Create from scratch
+        </button>
+      </div>
+      {mode1==="photo"&&(
+        <div style={{background:"var(--acdim)",border:"1px solid var(--acc)",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:11,color:"var(--acc)",lineHeight:1.5}}>
+          <span style={{fontWeight:700}}>↑ Attach your reference photo</span> when pasting this prompt. The AI will use it as the visual base and apply your selected angles, lighting, and settings to it.
+        </div>
+      )}
       <div className="quick-actions">
         {[["portrait","Portrait Set"],["landscape","Landscape Set"],["action","Action Set"],["noir","Noir Set"]].map(([type,label])=>(
           <button key={type} className="quick-btn" onClick={()=>quickSet(type)}>{label}</button>
@@ -792,10 +829,10 @@ function AnglesPage(){
                   border:"2px solid "+(isSel?"#e8780a":"var(--bd)"),
                   boxShadow:isSel?"0 0 14px rgba(232,120,10,.4)":"none",
                   opacity:!isSel&&sel.length>=MAX?0.4:1,
-                  transition:"all .15s",width:200,flexShrink:0}}>
-                <div style={{width:200,height:100,
+                  transition:"all .15s",width:178,flexShrink:0}}>
+                <div style={{width:178,height:100,
                   backgroundImage:"url(/angles.png)",
-                  backgroundSize:"1200px 500px",
+                  backgroundSize:"1190px 500px",
                   backgroundPosition:(-col*200)+"px "+(-row*100)+"px",
                   backgroundRepeat:"no-repeat"}}/>
                 <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:10,fontWeight:600,
@@ -1137,11 +1174,11 @@ const COLOR_SPRITES=[
   {id:"warm",name:"Warm Vintage",sx:-450,sy:-167},
 ];
 const FORMAT_SPRITES=[
-  {id:"16:9",name:"16:9",fw:120,sx:0,sy:0,bsw:600,bsh:120},
-  {id:"9:16",name:"9:16",fw:120,sx:-120,sy:0,bsw:600,bsh:120},
-  {id:"2.39:1",name:"2.39:1",fw:120,sx:-240,sy:0,bsw:600,bsh:120},
-  {id:"4:3",name:"4:3",fw:120,sx:-360,sy:0,bsw:600,bsh:120},
-  {id:"1:1",name:"1:1",fw:120,sx:-480,sy:0,bsw:600,bsh:120},
+  {id:"16:9",name:"16:9",fw:130,sx:0,sy:0},
+  {id:"9:16",name:"9:16",fw:55,sx:-80,sy:0},
+  {id:"2.39:1",name:"2.39:1",fw:170,sx:-160,sy:0},
+  {id:"4:3",name:"4:3",fw:110,sx:-240,sy:0},
+  {id:"1:1",name:"1:1",fw:90,sx:-320,sy:0},
 ];
 const UNIVERSE_SPRITES=[
   {id:"realism",name:"Photorealism",sx:0,sy:0},
@@ -1152,36 +1189,36 @@ const UNIVERSE_SPRITES=[
   {id:"oil",name:"Oil Painting",sx:-500,sy:0},
 ];
 const ANGLE_SPRITES=[
-  {name:"Wide establishing shot",sx:0,sy:0},
-  {name:"Medium eye-level shot",sx:-193,sy:0},
-  {name:"Low-angle hero shot",sx:-397,sy:0},
-  {name:"Over-the-shoulder shot",sx:-601,sy:0},
-  {name:"Close-up",sx:-805,sy:0},
-  {name:"High-angle shot",sx:-1009,sy:0},
-  {name:"Profile side shot",sx:0,sy:-100},
-  {name:"Dutch tilt shot",sx:-193,sy:-100},
-  {name:"Extreme wide master shot",sx:-397,sy:-100},
-  {name:"Bird's-eye vertical shot",sx:-601,sy:-100},
-  {name:"Ground-level worm's-eye shot",sx:-805,sy:-100},
-  {name:"Three-quarter front angle",sx:-1009,sy:-100},
-  {name:"Three-quarter rear angle",sx:0,sy:-201},
-  {name:"Locked-off static frame",sx:-193,sy:-201},
-  {name:"Long-lens compression shot",sx:-397,sy:-201},
-  {name:"Foreground-obstructed shot",sx:-601,sy:-201},
-  {name:"Reflected perspective shot",sx:-805,sy:-201},
-  {name:"Silhouette backlit shot",sx:-1009,sy:-201},
-  {name:"Center-punched symmetrical shot",sx:0,sy:-301},
-  {name:"Asymmetrical rule-of-thirds shot",sx:-193,sy:-301},
-  {name:"Hand-level perspective shot",sx:-397,sy:-301},
-  {name:"Chest-height tracking angle",sx:-601,sy:-301},
-  {name:"Environmental frame-within-frame shot",sx:-805,sy:-301},
-  {name:"Extreme close environment shot",sx:-1009,sy:-301},
-  {name:"Rear profile silhouette shot",sx:0,sy:-403},
-  {name:"Shallow-focus foreground lead shot",sx:-193,sy:-403},
-  {name:"Deep-focus wide shot",sx:-397,sy:-403},
-  {name:"Oblique corner angle shot",sx:-601,sy:-403},
-  {name:"Eye-line match perspective shot",sx:-805,sy:-403},
-  {name:"Environmental negative-space shot",sx:-1009,sy:-403},
+  {name:"Wide establishing shot",sx:-10,sy:0},
+  {name:"Medium eye-level shot",sx:-208,sy:0},
+  {name:"Low-angle hero shot",sx:-406,sy:0},
+  {name:"Over-the-shoulder shot",sx:-604,sy:0},
+  {name:"Close-up",sx:-802,sy:0},
+  {name:"High-angle shot",sx:-1000,sy:0},
+  {name:"Profile side shot",sx:-10,sy:-100},
+  {name:"Dutch tilt shot",sx:-208,sy:-100},
+  {name:"Extreme wide master shot",sx:-406,sy:-100},
+  {name:"Bird's-eye vertical shot",sx:-604,sy:-100},
+  {name:"Ground-level worm's-eye shot",sx:-802,sy:-100},
+  {name:"Three-quarter front angle",sx:-1000,sy:-100},
+  {name:"Three-quarter rear angle",sx:-10,sy:-200},
+  {name:"Locked-off static frame",sx:-208,sy:-200},
+  {name:"Long-lens compression shot",sx:-406,sy:-200},
+  {name:"Foreground-obstructed shot",sx:-604,sy:-200},
+  {name:"Reflected perspective shot",sx:-802,sy:-200},
+  {name:"Silhouette backlit shot",sx:-1000,sy:-200},
+  {name:"Center-punched symmetrical shot",sx:-10,sy:-300},
+  {name:"Asymmetrical rule-of-thirds shot",sx:-208,sy:-300},
+  {name:"Hand-level perspective shot",sx:-406,sy:-300},
+  {name:"Chest-height tracking angle",sx:-604,sy:-300},
+  {name:"Environmental frame-within-frame shot",sx:-802,sy:-300},
+  {name:"Extreme close environment shot",sx:-1000,sy:-300},
+  {name:"Rear profile silhouette shot",sx:-10,sy:-400},
+  {name:"Shallow-focus foreground lead shot",sx:-208,sy:-400},
+  {name:"Deep-focus wide shot",sx:-406,sy:-400},
+  {name:"Oblique corner angle shot",sx:-604,sy:-400},
+  {name:"Eye-line match perspective shot",sx:-802,sy:-400},
+  {name:"Environmental negative-space shot",sx:-1000,sy:-400},
 ];
 const CLOTHING_SPRITES=[
   {id:"Neutral (studio reference)",name:"Neutral",sx:0,sy:0},
