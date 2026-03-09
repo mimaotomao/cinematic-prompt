@@ -767,13 +767,25 @@ function AnglesPage(){
 
       <div className="sec">
         <div className="sh"><span className="st">Camera Angles</span>{sel.length>0&&<span className="sb">{sel.length} SELECTED</span>}</div>
-        <div className="grid3">
+        <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
           {ANGLES.map((angle,i)=>{
             const ord=sel.indexOf(i);const isSel=ord!==-1;
+            const col=i%10, row=Math.floor(i/10);
             return(
-              <div key={i} className={`ac${isSel?" sel":""}${!isSel&&sel.length>=MAX?" dim":""}`} onClick={()=>tog(i)} title={angle.desc}>
-                <div className="abar"/>
-                <span className="an">{angle.name}</span>
+              <div key={i}
+                onClick={()=>toggleAngle(i)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",position:"relative",
+                  border:"2px solid "+(isSel?"#e8780a":"var(--bd)"),
+                  boxShadow:isSel?"0 0 14px rgba(232,120,10,.4)":"none",
+                  opacity:!isSel&&sel.length>=MAX?0.4:1,
+                  transition:"all .15s",width:100,flexShrink:0}}>
+                <div style={{width:100,height:140,
+                  backgroundImage:"url(/angles.png)",
+                  backgroundSize:"1000px 420px",
+                  backgroundPosition:(-col*100)+"px "+(-row*140)+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:10,fontWeight:600,
+                  color:isSel?"#e8780a":"var(--t)",lineHeight:1.2}}>{angle.name}</div>
                 {isSel&&<div className="anum">{ord+1}</div>}
               </div>
             );
@@ -795,8 +807,22 @@ function AnglesPage(){
 
       <div className="sec">
         <div className="sh"><span className="st">Lighting & Atmosphere</span></div>
-        <div className="rowpills">
-          {LIGHTING.map(l=><div key={l.id} className={`pill${light===l.id?" sel":""}`} onClick={()=>tog1(setLight,l.id)}>{l.name}</div>)}
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {LIGHT_SPRITES.map(r=>(
+            <div key={r.id} onClick={()=>tog1(setLight,r.id)}
+              style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                border:"2px solid "+(light===r.id?"#e8780a":"var(--bd)"),
+                boxShadow:light===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
+                transition:"all .15s",width:150}}>
+              <div style={{width:150,height:105,
+                backgroundImage:"url(/lighting.png)",
+                backgroundSize:"750px 315px",
+                backgroundPosition:r.sx+"px "+r.sy+"px",
+                backgroundRepeat:"no-repeat"}}/>
+              <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                color:light===r.id?"#e8780a":"var(--t)"}}>{r.name}</div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -804,20 +830,48 @@ function AnglesPage(){
 
       <div className="sec">
         <div className="sh"><span className="st">Environment / Background</span></div>
-        <div className="rowpills">
-          {BACKGROUNDS.map(b=><div key={b.id} className={`pill${bg===b.id?" sel":""}`} onClick={()=>tog1(setBg,b.id)}>{b.name}</div>)}
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {ENV_SPRITES.map(r=>(
+            <div key={r.id} onClick={()=>tog1(setBg,r.id)}
+              style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                border:"2px solid "+(bg===r.id?"#e8780a":"var(--bd)"),
+                boxShadow:bg===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
+                transition:"all .15s",width:150}}>
+              <div style={{width:150,height:126,
+                backgroundImage:"url(/environment.png)",
+                backgroundSize:"900px 378px",
+                backgroundPosition:r.sx+"px "+r.sy+"px",
+                backgroundRepeat:"no-repeat"}}/>
+              <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                color:bg===r.id?"#e8780a":"var(--t)"}}>{r.name}</div>
+            </div>
+          ))}
         </div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:8}}>
+            {[{id:"western",name:"Wild West"},{id:"abstract",name:"Abstract Void"}].map(b=>(
+              <div key={b.id} className={"pill"+(bg===b.id?" sel":"")} onClick={()=>tog1(setBg,b.id)}>{b.name}</div>
+            ))}
+          </div>
       </div>
 
       <div className="divider"/>
 
       <div className="sec">
         <div className="sh"><span className="st">Lens / Focal Length</span></div>
-        <div className="lens-row">
-          {LENSES.map(l=>(
-            <div key={l.mm} className={`lc${lens===l.mm?" sel":""}`} onClick={()=>tog1(setLens,l.mm)}>
-              <span className="lmm">{l.mm}</span>
-              <span className="llb">{l.name}</span>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {LENS_SPRITES.map(r=>(
+            <div key={r.mm} onClick={()=>tog1(setLens,r.mm)}
+              style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                border:"2px solid "+(lens===r.mm?"#e8780a":"var(--bd)"),
+                boxShadow:lens===r.mm?"0 0 14px rgba(232,120,10,.4)":"none",
+                transition:"all .15s",width:150}}>
+              <div style={{width:150,height:84,
+                backgroundImage:"url(/lens.png)",
+                backgroundSize:"600px 336px",
+                backgroundPosition:r.sx+"px "+r.sy+"px",
+                backgroundRepeat:"no-repeat"}}/>
+              <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                color:lens===r.mm?"#e8780a":"var(--t)"}}>{r.name}</div>
             </div>
           ))}
         </div>
@@ -830,15 +884,43 @@ function AnglesPage(){
         <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:20}}>
           <div>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:'uppercase',color:'var(--t3)',marginBottom:10}}>Film Stock</div>
-            <div className="rowpills">
-              {FILM_STOCKS.map(f=><div key={f.id} className={`pill${filmStock===f.id?" sel":""}`} onClick={()=>tog1(setFilmStock,f.id)}>{f.name}</div>)}
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {FILM_SPRITES.map(r=>(
+            <div key={r.id} onClick={()=>tog1(setFilmStock,r.id)}
+              style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                border:"2px solid "+(filmStock===r.id?"#e8780a":"var(--bd)"),
+                boxShadow:filmStock===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
+                transition:"all .15s",width:150}}>
+              <div style={{width:150,height:84,
+                backgroundImage:"url(/film.png)",
+                backgroundSize:"600px 336px",
+                backgroundPosition:r.sx+"px "+r.sy+"px",
+                backgroundRepeat:"no-repeat"}}/>
+              <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                color:filmStock===r.id?"#e8780a":"var(--t)"}}>{r.name}</div>
             </div>
+          ))}
+        </div>
           </div>
           <div>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:'uppercase',color:'var(--t3)',marginBottom:10}}>Color Grade</div>
-            <div className="rowpills">
-              {COLOR_GRADES.map(c=><div key={c.id} className={`pill${colorGrade===c.id?" sel":""}`} onClick={()=>tog1(setColorGrade,c.id)}>{c.name}</div>)}
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {COLOR_SPRITES.map(r=>(
+            <div key={r.id} onClick={()=>tog1(setColorGrade,r.id)}
+              style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                border:"2px solid "+(colorGrade===r.id?"#e8780a":"var(--bd)"),
+                boxShadow:colorGrade===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
+                transition:"all .15s",width:150}}>
+              <div style={{width:150,height:167,
+                backgroundImage:"url(/color.png)",
+                backgroundSize:"600px 334px",
+                backgroundPosition:r.sx+"px "+r.sy+"px",
+                backgroundRepeat:"no-repeat"}}/>
+              <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                color:colorGrade===r.id?"#e8780a":"var(--t)"}}>{r.name}</div>
             </div>
+          ))}
+        </div>
           </div>
         </div>
       </div>
@@ -847,8 +929,22 @@ function AnglesPage(){
 
       <div className="sec">
         <div className="sh"><span className="st">Aspect Ratio</span></div>
-        <div className="rowpills">
-          {ASPECT_RATIOS.map(ar=><div key={ar.id} className={`pill${aspectRatio===ar.id?" sel":""}`} onClick={()=>setAspectRatio(ar.id)}>{ar.name}</div>)}
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {FORMAT_SPRITES.map(r=>(
+            <div key={r.id} onClick={()=>setAspectRatio(r.id)}
+              style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                border:"2px solid "+(aspectRatio===r.id?"#e8780a":"var(--bd)"),
+                boxShadow:aspectRatio===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
+                transition:"all .15s",width:100}}>
+              <div style={{width:100,height:100,
+                backgroundImage:"url(/format.png)",
+                backgroundSize:"500px 100px",
+                backgroundPosition:r.sx+"px 0px",
+                backgroundRepeat:"no-repeat"}}/>
+              <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                color:aspectRatio===r.id?"#e8780a":"var(--t)"}}>{r.id}</div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -949,6 +1045,119 @@ function AnglesPage(){
 }
 
 // ─── AVATAR DATA ──────────────────────────────────────────────────────────────
+const COLOR_SPRITES=[
+  {id:"teal", sx:0, sy:0},
+  {id:"matrix", sx:-150, sy:0},
+  {id:"noir", sx:-300, sy:0},
+  {id:"sepia", sx:-450, sy:0},
+  {id:"cyber", sx:0, sy:-167},
+  {id:"natural", sx:-150, sy:-167},
+  {id:"bleach", sx:-300, sy:-167},
+  {id:"warm", sx:-450, sy:-167},
+];
+const LENS_SPRITES=[
+  {mm:"8mm", sx:0, sy:0},
+  {mm:"14mm", sx:-150, sy:0},
+  {mm:"24mm", sx:-300, sy:0},
+  {mm:"35mm", sx:-450, sy:0},
+  {mm:"50mm", sx:0, sy:-84},
+  {mm:"85mm", sx:-150, sy:-84},
+  {mm:"135mm", sx:-300, sy:-84},
+  {mm:"200mm", sx:-450, sy:-84},
+  {mm:"400mm", sx:0, sy:-168},
+];
+const FILM_SPRITES=[
+  {id:"kodak", sx:0, sy:0},
+  {id:"fuji", sx:-150, sy:0},
+  {id:"ilford", sx:-300, sy:0},
+  {id:"cinestill", sx:-450, sy:0},
+  {id:"polaroid", sx:0, sy:-84},
+  {id:"digital", sx:-150, sy:-84},
+  {id:"vintage", sx:-300, sy:-84},
+  {id:"anamorphic", sx:-450, sy:-84},
+];
+const LIGHT_SPRITES=[
+  {id:"golden", sx:0, sy:0},
+  {id:"midday", sx:-150, sy:0},
+  {id:"bluehour", sx:-300, sy:0},
+  {id:"night", sx:-450, sy:0},
+  {id:"overcast", sx:-600, sy:0},
+  {id:"sunrise", sx:0, sy:-105},
+  {id:"interior", sx:-150, sy:-105},
+  {id:"storm", sx:-300, sy:-105},
+  {id:"fog", sx:-450, sy:-105},
+  {id:"neon", sx:-600, sy:-105},
+  {id:"fire", sx:0, sy:-210},
+  {id:"moonlit", sx:-150, sy:-210},
+  {id:"studiokey", sx:-300, sy:-210},
+  {id:"magic", sx:-450, sy:-210},
+];
+const ENV_SPRITES=[
+  {id:"scifi", sx:0, sy:0},
+  {id:"ancient", sx:-150, sy:0},
+  {id:"retrofuture", sx:-300, sy:0},
+  {id:"forest", sx:-450, sy:0},
+  {id:"desert", sx:-600, sy:0},
+  {id:"underwater", sx:-750, sy:0},
+  {id:"space", sx:0, sy:-126},
+  {id:"cyberpunk", sx:-150, sy:-126},
+  {id:"medieval", sx:-300, sy:-126},
+  {id:"industrial", sx:-450, sy:-126},
+  {id:"arctic", sx:-600, sy:-126},
+  {id:"jungle", sx:-750, sy:-126},
+  {id:"studio", sx:0, sy:-252},
+  {id:"tokyo", sx:-150, sy:-252},
+  {id:"cave", sx:-300, sy:-252},
+  {id:"western", sx:-450, sy:-252},
+  {id:"abstract", sx:-600, sy:-252},
+];
+const ANGLE_SPRITES=[
+  {name:"Wide establishing shot", sx:0, sy:0},
+  {name:"Medium eye-level shot", sx:-100, sy:0},
+  {name:"Low-angle hero shot", sx:-200, sy:0},
+  {name:"Over-the-shoulder shot", sx:-300, sy:0},
+  {name:"Close-up", sx:-400, sy:0},
+  {name:"High-angle shot", sx:-500, sy:0},
+  {name:"Profile side shot", sx:-600, sy:0},
+  {name:"Dutch tilt shot", sx:-700, sy:0},
+  {name:"Extreme wide master shot", sx:-800, sy:0},
+  {name:"Bird's-eye vertical shot", sx:-900, sy:0},
+  {name:"Ground-level worm's-eye shot", sx:0, sy:-140},
+  {name:"Three-quarter front angle", sx:-100, sy:-140},
+  {name:"Three-quarter rear angle", sx:-200, sy:-140},
+  {name:"Locked-off static frame", sx:-300, sy:-140},
+  {name:"Long-lens compression shot", sx:-400, sy:-140},
+  {name:"Foreground-obstructed shot", sx:-500, sy:-140},
+  {name:"Reflected perspective shot", sx:-600, sy:-140},
+  {name:"Silhouette backlit shot", sx:-700, sy:-140},
+  {name:"Center-punched symmetrical shot", sx:-800, sy:-140},
+  {name:"Asymmetrical rule-of-thirds shot", sx:-900, sy:-140},
+  {name:"Hand-level perspective shot", sx:0, sy:-280},
+  {name:"Chest-height tracking angle", sx:-100, sy:-280},
+  {name:"Environmental frame-within-frame shot", sx:-200, sy:-280},
+  {name:"Extreme close environment shot", sx:-300, sy:-280},
+  {name:"Rear profile silhouette shot", sx:-400, sy:-280},
+  {name:"Shallow-focus foreground lead shot", sx:-500, sy:-280},
+  {name:"Deep-focus wide shot", sx:-600, sy:-280},
+  {name:"Oblique corner angle shot", sx:-700, sy:-280},
+  {name:"Eye-line match perspective shot", sx:-800, sy:-280},
+  {name:"Environmental negative-space shot", sx:-900, sy:-280},
+];
+const UNIVERSE_SPRITES=[
+  {id:"realism", name:"Photorealism", sx:0, sy:0},
+  {id:"anime", name:"Anime", sx:-100, sy:0},
+  {id:"3d", name:"3D Render", sx:-200, sy:0},
+  {id:"2d", name:"Vector Art", sx:-300, sy:0},
+  {id:"pixel", name:"Pixel Art", sx:-400, sy:0},
+  {id:"oil", name:"Oil Painting", sx:-500, sy:0},
+];
+const FORMAT_SPRITES=[
+  {id:"16:9", sx:0, sy:0},
+  {id:"9:16", sx:-100, sy:0},
+  {id:"2.39:1", sx:-200, sy:0},
+  {id:"4:3", sx:-300, sy:0},
+  {id:"1:1", sx:-400, sy:0},
+];
 const WINGS_SPRITES=[
   {name:"None", sx:0, sy:0},
   {name:"Angel", sx:-100, sy:0},
@@ -1178,8 +1387,7 @@ const AV_DEF={
 // ─── AVATAR PAGE ──────────────────────────────────────────────────────────────
 function AvatarsPage(){
   const[c,setC]=useState(AV_DEF);
-  const[advanced,setAdvanced]=useState(false);
-  const[iTab,setITab]=useState("universe");
+    const[iTab,setITab]=useState("universe");
   const[fTab,setFTab]=useState("hair");
   const[bTab,setBTab]=useState("bodyType");
   const[toast,setToast]=useState("");
@@ -1188,7 +1396,7 @@ function AvatarsPage(){
 
   const buildAvPrompt=()=>{
     const style=UNI_STYLE[c.universe]||UNI_STYLE.realism;
-    const faceAdv=advanced?` Eye type: ${c.eyeType.toLowerCase()}. Lips: ${c.lips.toLowerCase()}. Face markings: ${c.markings.toLowerCase()}. Horns: ${c.horns.toLowerCase()}.`:"";
+    const faceAdv=` Eye type: ${c.eyeType.toLowerCase()}. Lips: ${c.lips.toLowerCase()}. Face markings: ${c.markings.toLowerCase()}. Horns: ${c.horns.toLowerCase()}.`;
     const traits=c.skinTraits!=="None"?` Surface traits: ${c.skinTraits.toLowerCase()}.`:"";
     const clothesParts=c.clothing;
     const clothesPrompt=c.clothing==="Neutral (studio reference)"?"Wearing a minimal neutral black fitted top and black shorts, studio reference attire, no branding. Barefoot.":c.clothing==="None"?"Nude figure, tasteful artistic reference pose, professional studio photography.":"Wearing "+c.clothing.toLowerCase()+" attire appropriate to the character's anatomy, age, body type, race, and universe style.";
@@ -1329,13 +1537,19 @@ function AvatarsPage(){
         </div>
         {iTab==="universe"?(
           <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-            {AV_FIELDS.universe.map(u=>(
-              <div key={u.id} onClick={()=>set("universe",u.id)} style={{width:100,cursor:"pointer",borderRadius:8,overflow:"hidden",border:"2px solid "+(c.universe===u.id?"#e8780a":"var(--bd)"),boxShadow:c.universe===u.id?"0 0 14px rgba(232,120,10,.4)":"none",transition:"all .15s"}}>
-                <div style={{height:70,background:u.color,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                  <div style={{width:32,height:32,borderRadius:"50%",background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.2)"}}/>
-                </div>
-                <div style={{padding:"6px 4px",textAlign:"center",fontSize:11,fontWeight:600,color:c.universe===u.id?"#e8780a":"var(--t)"}}>{u.l}</div>
-                <div style={{fontSize:9,color:"var(--t4)",textAlign:"center",paddingBottom:8,padding:"0 4px 8px"}}>{u.desc}</div>
+            {UNIVERSE_SPRITES.map(r=>(
+              <div key={r.id} onClick={()=>set("universe",r.id)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.universe===r.id?"#e8780a":"var(--bd)"),
+                  boxShadow:c.universe===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:98,
+                  backgroundImage:"url(/universe.png)",
+                  backgroundSize:"601px 98px",
+                  backgroundPosition:r.sx+"px 0px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.universe===r.id?"#e8780a":"var(--t)"}}>{r.name}</div>
               </div>
             ))}
           </div>
@@ -1493,14 +1707,7 @@ function AvatarsPage(){
         )}
       </Sec>
 
-      <div className="toggle-row" onClick={()=>setAdvanced(v=>!v)}>
-        <span style={{fontSize:11,fontWeight:700,letterSpacing:2,color:advanced?"var(--t)":"var(--t3)"}}>ADVANCED FACE OPTIONS</span>
-        <div className="toggle-knob" style={{background:advanced?"#e8780a":"var(--s3)",border:"1px solid "+(advanced?"#e8780a":"var(--bd)")}}>
-          <div className="toggle-dot" style={{left:advanced?24:4}}/>
-        </div>
-      </div>
 
-      {advanced&&(
         <Sec title="Face Details">
           <div className="tab-strip">
             {[["hair","Hair"],["eyeType","Eye Type"],["lips","Lips"],["markings","Markings"],["horns","Horns"]].map(([k,l])=>(
@@ -1604,7 +1811,6 @@ function AvatarsPage(){
           </div>
         )}
         </Sec>
-      )}
 
       <Sec title="Body Structure">
         <div className="tab-strip">
