@@ -949,6 +949,129 @@ function AnglesPage(){
 }
 
 // ─── AVATAR DATA ──────────────────────────────────────────────────────────────
+const REGION_SPRITES=[
+  {name:"N.European", sx:0, sy:0},{name:"Mediterranean", sx:-100, sy:0},
+  {name:"East Asian", sx:-200, sy:0},{name:"S.Asian", sx:-300, sy:0},
+  {name:"African", sx:-400, sy:0},{name:"N.African", sx:-500, sy:0},
+  {name:"Middle Eastern", sx:-600, sy:0},{name:"Latin American", sx:0, sy:-100},
+  {name:"Indigenous", sx:-100, sy:-100},{name:"Polynesian", sx:-200, sy:-100},
+  {name:"Slavic", sx:-300, sy:-100},{name:"Nordic", sx:-400, sy:-100},
+  {name:"Celtic", sx:-500, sy:-100},{name:"Mixed", sx:-600, sy:-100},
+];
+const EXPRESSION_SPRITES=[
+  {name:"Neutral",sx:0,sy:0},{name:"Confident",sx:-100,sy:0},
+  {name:"Mysterious",sx:-200,sy:0},{name:"Fierce",sx:-300,sy:0},{name:"Gentle",sx:-400,sy:0},
+];
+const EYETYPE_SPRITES=[
+  {name:"Human",sx:0,sy:0},{name:"Almond",sx:-100,sy:0},{name:"Wide",sx:-200,sy:0},
+  {name:"Hooded",sx:-300,sy:0},{name:"Cat",sx:-400,sy:0},{name:"Dragon",sx:-500,sy:0},{name:"Compound",sx:-600,sy:0},
+];
+const LIPS_SPRITES=[
+  {name:"Thin",sx:0,sy:0},{name:"Medium",sx:-100,sy:0},{name:"Full",sx:-200,sy:0},
+  {name:"Wide",sx:-300,sy:0},{name:"Bow",sx:-400,sy:0},{name:"Downturned",sx:-500,sy:0},{name:"Scarred",sx:-600,sy:0},
+];
+const MARKINGS_SPRITES=[
+  {name:"None",sx:0,sy:0},{name:"Tribal",sx:-100,sy:0},{name:"War Paint",sx:-200,sy:0},
+  {name:"Runes",sx:-300,sy:0},{name:"Circuit",sx:-400,sy:0},{name:"Henna",sx:-500,sy:0},{name:"Skull",sx:-600,sy:0},
+  {name:"Third Eye",sx:0,sy:-100},{name:"Elemental",sx:-100,sy:-100},{name:"Dragon Scale",sx:-200,sy:-100},
+  {name:"Celestial",sx:-300,sy:-100},{name:"Clan Tattoo",sx:-400,sy:-100},{name:"Bioluminescent",sx:-500,sy:-100},
+];
+const HORNS_SPRITES=[
+  {name:"None",sx:0,sy:0},{name:"Nubs",sx:-100,sy:0},{name:"Ram",sx:-200,sy:0},
+  {name:"Bull",sx:-300,sy:0},{name:"Demon",sx:-400,sy:0},{name:"Antlers",sx:-500,sy:0},{name:"Unicorn",sx:-600,sy:0},
+  {name:"Ibex",sx:0,sy:-100},{name:"Dragon",sx:-100,sy:-100},{name:"Crystal",sx:-200,sy:-100},
+  {name:"Twisted",sx:-300,sy:-100},{name:"Crown",sx:-400,sy:-100},{name:"Bone Spikes",sx:-500,sy:-100},
+];
+const EARS_SPRITES=[
+  {name:"Human",sx:0,sy:0},{name:"Elf",sx:-100,sy:0},{name:"Cat",sx:-200,sy:0},
+  {name:"Wolf",sx:-300,sy:0},{name:"Bunny",sx:-400,sy:0},{name:"Demon",sx:-500,sy:0},{name:"None",sx:-600,sy:0},
+];
+const SKINTRAIT_SPRITES=[
+  {name:"None", sx:0, sy:0},
+  {name:"Freckles", sx:-100, sy:0},
+  {name:"Vitiligo", sx:-200, sy:0},
+  {name:"Scars", sx:-300, sy:0},
+  {name:"Tattoos", sx:-400, sy:0},
+  {name:"Branding", sx:-500, sy:0},
+  {name:"Piercings", sx:-600, sy:0},
+  {name:"Bioluminescence", sx:0, sy:-100},
+  {name:"Fur", sx:-100, sy:-100},
+  {name:"Scales", sx:-200, sy:-100},
+  {name:"Feathers", sx:-300, sy:-100},
+  {name:"Cracked Stone", sx:-400, sy:-100},
+  {name:"Metallic", sx:-500, sy:-100},
+];
+const SKIN_SPRITES=[
+  {name:"Porcelain", sx:0, sy:0},
+  {name:"Fair", sx:-100, sy:0},
+  {name:"Light", sx:-200, sy:0},
+  {name:"Olive", sx:-300, sy:0},
+  {name:"Tan", sx:-400, sy:0},
+  {name:"Brown", sx:-500, sy:0},
+  {name:"Dark", sx:-600, sy:0},
+  {name:"Ebony", sx:0, sy:-100},
+  {name:"Grey", sx:-100, sy:-100},
+  {name:"Blue", sx:-200, sy:-100},
+  {name:"Green", sx:-300, sy:-100},
+  {name:"Gold", sx:-400, sy:-100},
+  {name:"Silver", sx:-500, sy:-100},
+];
+const EYE_SPRITES=[
+  {name:"Black",         sx:0,    sy:0},
+  {name:"Blue",          sx:-100, sy:0},
+  {name:"Brown",         sx:-200, sy:0},
+  {name:"Green",         sx:-300, sy:0},
+  {name:"Grey",          sx:-400, sy:0},
+  {name:"Hazel",         sx:-500, sy:0},
+  {name:"Violet",        sx:-600, sy:0},
+  {name:"Red",           sx:0,    sy:-100},
+  {name:"Amber",         sx:-100, sy:-100},
+  {name:"White",         sx:-200, sy:-100},
+  {name:"Heterochromia", sx:-300, sy:-100},
+  {name:"Glowing",       sx:-400, sy:-100},
+  {name:"Blind",         sx:-500, sy:-100},
+];
+const GENDER_SPRITES=[
+  {name:"Female",     sx:0,    sy:0},
+  {name:"Male",       sx:-100, sy:0},
+  {name:"Non-binary", sx:-200, sy:0},
+  {name:"Androgynous",sx:-300, sy:0},
+  {name:"Trans Woman",sx:-400, sy:0},
+  {name:"Trans Man",  sx:-500, sy:0},
+];
+const AGE_SPRITES=[
+  {name:"Toddler",  sx:0,    sy:0},
+  {name:"Teenager", sx:-100, sy:0},
+  {name:"Adult",    sx:-200, sy:0},
+  {name:"Mature",   sx:-300, sy:0},
+  {name:"Senior",   sx:-400, sy:0},
+];
+const BODY_SPRITES=[
+  {name:"Slim",      sx:0,    sy:0},
+  {name:"Athletic",  sx:-100, sy:0},
+  {name:"Soft",      sx:-200, sy:0},
+  {name:"Muscular",  sx:-300, sy:0},
+  {name:"Curvy",     sx:-400, sy:0},
+  {name:"Skinny",    sx:0,    sy:-100},
+  {name:"Stocky",    sx:-100, sy:-100},
+  {name:"Tall",      sx:-200, sy:-100},
+  {name:"Short",     sx:-300, sy:-100},
+  {name:"Proportioned",sx:-400,sy:-100},
+];
+const HAIR_SPRITES=[
+  {name:"Bald",        sx:0,    sy:0},
+  {name:"Buzzcut",     sx:-100, sy:0},
+  {name:"Short",       sx:-200, sy:0},
+  {name:"Long",        sx:-300, sy:0},
+  {name:"Afro",        sx:0,    sy:-100},
+  {name:"Dreadlocks",  sx:-100, sy:-100},
+  {name:"Cornrows",    sx:-200, sy:-100},
+  {name:"Ponytail",    sx:-300, sy:-100},
+  {name:"Mohawk",      sx:0,    sy:-200},
+  {name:"Snakes",      sx:-100, sy:-200},
+  {name:"Tentacles",   sx:-200, sy:-200},
+  {name:"Fiber Optic", sx:-300, sy:-200},
+];
 const AV_FIELDS={
   universe:[
     {id:"realism",l:"Photorealism",desc:"Ultra-detailed photography",color:"#1a2332"},
@@ -958,19 +1081,36 @@ const AV_FIELDS={
     {id:"pixel",l:"Pixel Art",desc:"Retro 8/16-bit",color:"#2d1b2d"},
     {id:"oil",l:"Oil Painting",desc:"Classical fine art",color:"#2d2518"},
   ],
-  race:["Human","Elf","Dwarf","Orc","Fairy","Demon","Angel","Robot","Alien","Beastkin","Vampire","Merfolk","Dragonkin","Cyborg","Ghost","Elemental"],
+  race:[
+    {name:"Human",     sx:0,    sy:0},
+    {name:"Elf",       sx:-100, sy:0},
+    {name:"Dwarf",     sx:-200, sy:0},
+    {name:"Orc",       sx:-300, sy:0},
+    {name:"Fairy",     sx:-400, sy:0},
+    {name:"Demon",     sx:-500, sy:0},
+    {name:"Angel",     sx:-600, sy:0},
+    {name:"Robot",     sx:-700, sy:0},
+    {name:"Alien",     sx:0,    sy:-99},
+    {name:"Beastkin",  sx:-100, sy:-99},
+    {name:"Vampire",   sx:-200, sy:-99},
+    {name:"Merfolk",   sx:-300, sy:-99},
+    {name:"Dragonkin", sx:-400, sy:-99},
+    {name:"Cyborg",    sx:-500, sy:-99},
+    {name:"Ghost",     sx:-600, sy:-99},
+    {name:"Elemental", sx:-700, sy:-99},
+  ],
   gender:["Female","Male","Non-binary","Androgynous","Gender-fluid","Masculine","Feminine"],
   region:["Northern European","Mediterranean","East Asian","South Asian","Sub-Saharan African","North African","Middle Eastern","Latin American","Indigenous American","Polynesian","Slavic","Nordic","Celtic","Mixed Heritage"],
   eyeColor:["Amber","Blue","Brown","Green","Grey","Hazel","Violet","Red","Black","White","Heterochromia","Glowing","Blind/Clouded"],
   age:["Infant","Child","Teen","Young Adult","Adult","Middle Aged","Elder","Ancient","Ageless"],
   skinColor:["Porcelain","Fair","Light","Olive","Tan","Brown","Dark","Ebony","Grey","Blue","Green","Gold","Silver","Transparent"],
   skinTraits:["None","Freckles","Vitiligo","Scars","Tattoos","Branding","Piercings","Bioluminescence","Fur","Scales","Feathers","Cracked Stone","Metallic"],
-  hair:["Bald","Buzz Cut","Short","Medium","Long","Very Long","Afro","Dreadlocks","Braided","Ponytail","Bun","Mohawk","Spiky","Wavy","Curly","Coily","Undercut","Pompadour","Mullet"],
+  hair:["Bald","Buzz Cut","Short","Medium","Long","Very Long","Afro","Dreadlocks","Braided","Ponytail","Bun","Mohawk","Spiky","Wavy","Curly","Coily","Undercut","Pompadour","Mullet"], // sprite
   eyeType:["Human","Almond","Round","Hooded","Monolid","Deep-set","Cat-like","Snake-like","Insect compound","One-eyed","Third eye","Glowing","Blindfolded"],
   lips:["Thin","Medium","Full","Heart-shaped","Wide","Cleft lip","No lips"],
   markings:["None","Freckles","Beauty marks","Birthmarks","Scars","Tribal tattoos","Geometric tattoos","Floral tattoos","Piercings","Scarification","Cybernetic implants","Magic runes"],
   horns:["None","Small nubs","Medium curved","Large curled","Ram horns","Antlers","Unicorn","Multiple","Broken","Decorated","Glowing"],
-  bodyType:["Slim","Athletic","Soft","Muscular","Curvy","Skinny","Stocky","Tall","Short","Proportioned"],
+  bodyType:["Slim","Athletic","Soft","Muscular","Curvy","Skinny","Stocky","Tall","Short","Proportioned"], // sprite
   arm:["Natural","Prosthetic (steampunk)","Prosthetic (cybernetic)","No arm","Extra arms","Tentacles","Animal (furry)","Animal (scaly)","Ghostly","Mechanical claws"],
   leg:["Natural","Prosthetic","Digitigrade (animal)","No legs (floating)","Snake tail","Mermaid tail","Extra legs","Wheels","Mechanical","Hooves"],
   wings:["None","Feathered (bird)","Leathery (bat)","Butterfly","Dragonfly","Energy/Abstract","Mechanical","Small (decorative)","Multiple pairs","Broken/tattered"],
@@ -1169,14 +1309,158 @@ function AvatarsPage(){
               </div>
             ))}
           </div>
-        ):iTab==="race"?<Opts opts={AV_FIELDS.race} stateKey="race"/>
-        :iTab==="gender"?<Opts opts={AV_FIELDS.gender} stateKey="gender"/>
-        :iTab==="region"?<Opts opts={AV_FIELDS.region} stateKey="region"/>
-        :iTab==="eyeColor"?<Opts opts={AV_FIELDS.eyeColor} stateKey="eyeColor"/>
-        :iTab==="age"?<Opts opts={AV_FIELDS.age} stateKey="age"/>
-        :iTab==="skinColor"?<Opts opts={AV_FIELDS.skinColor} stateKey="skinColor"/>
-        :iTab==="expression"?<Opts opts={AV_FIELDS.expression} stateKey="expression"/>
-        :<Opts opts={AV_FIELDS.skinTraits} stateKey="skinTraits"/>}
+        ):iTab==="race"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {AV_FIELDS.race.map(r=>(
+              <div key={r.name} onClick={()=>set("race",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.race===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.race===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{
+                  width:100,height:99,
+                  backgroundImage:"url(/race.png)",
+                  backgroundSize:"800px 198px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.race===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
+        :iTab==="gender"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {GENDER_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("gender",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.gender===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.gender===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/gender.png)",
+                  backgroundSize:"601px 98px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.gender===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
+        :iTab==="region"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {REGION_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("region",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.region===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.region===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/region.png)",
+                  backgroundSize:"701px 200px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.region===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
+        :iTab==="eyeColor"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {EYE_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("eyeColor",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.eyeColor===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.eyeColor===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/eyes.png)",
+                  backgroundSize:"701px 200px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.eyeColor===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
+        :iTab==="age"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {AGE_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("age",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.age===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.age===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/age.png)",
+                  backgroundSize:"500px 100px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.age===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
+        :iTab==="skinColor"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {SKIN_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("skinColor",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.skinColor===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.skinColor===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/skin.png)",
+                  backgroundSize:"701px 200px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.skinColor===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
+        :iTab==="expression"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {EXPRESSION_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("expression",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.expression===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.expression===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/expression.png)",
+                  backgroundSize:"500px 100px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.expression===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
+        :(<div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {SKINTRAIT_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("skinTraits",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.skinTraits===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.skinTraits===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/skintraits.png)",
+                  backgroundSize:"701px 200px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.skinTraits===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </Sec>
 
       <div className="toggle-row" onClick={()=>setAdvanced(v=>!v)}>
@@ -1195,11 +1479,100 @@ function AvatarsPage(){
               </button>
             ))}
           </div>
-          {fTab==="hair"?<Opts opts={AV_FIELDS.hair} stateKey="hair"/>
-          :fTab==="eyeType"?<Opts opts={AV_FIELDS.eyeType} stateKey="eyeType"/>
-          :fTab==="lips"?<Opts opts={AV_FIELDS.lips} stateKey="lips"/>
-          :fTab==="markings"?<Opts opts={AV_FIELDS.markings} stateKey="markings"/>
-          :<Opts opts={AV_FIELDS.horns} stateKey="horns"/>}
+          {fTab==="hair"?(
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              {HAIR_SPRITES.map(r=>(
+                <div key={r.name} onClick={()=>set("hair",r.name)}
+                  style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                    border:"2px solid "+(c.hair===r.name?"#e8780a":"var(--bd)"),
+                    boxShadow:c.hair===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                    transition:"all .15s",width:100}}>
+                  <div style={{width:100,height:100,
+                    backgroundImage:"url(/hair.png)",
+                    backgroundSize:"400px 301px",
+                    backgroundPosition:r.sx+"px "+r.sy+"px",
+                    backgroundRepeat:"no-repeat"}}/>
+                  <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                    color:c.hair===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+                </div>
+              ))}
+            </div>
+          )
+          :fTab==="eyeType"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {EYETYPE_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("eyeType",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.eyeType===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.eyeType===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/eyetype.png)",
+                  backgroundSize:"702px 100px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.eyeType===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
+          :fTab==="lips"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {LIPS_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("lips",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.lips===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.lips===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/lips.png)",
+                  backgroundSize:"702px 100px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.lips===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
+          :fTab==="markings"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {MARKINGS_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("markings",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.markings===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.markings===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/markings.png)",
+                  backgroundSize:"701px 200px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.markings===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
+          :(<div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {HORNS_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("horns",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.horns===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.horns===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/horns.png)",
+                  backgroundSize:"701px 200px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.horns===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )}
         </Sec>
       )}
 
@@ -1211,14 +1584,49 @@ function AvatarsPage(){
             </button>
           ))}
         </div>
-        {bTab==="bodyType"?<Opts opts={AV_FIELDS.bodyType} stateKey="bodyType"/>
+        {bTab==="bodyType"?(
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {BODY_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("bodyType",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.bodyType===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.bodyType===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/body.png)",
+                  backgroundSize:"501px 200px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.bodyType===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )
         :bTab==="lArm"?<Opts opts={AV_FIELDS.arm} stateKey="lArm"/>
         :bTab==="rArm"?<Opts opts={AV_FIELDS.arm} stateKey="rArm"/>
         :bTab==="lLeg"?<Opts opts={AV_FIELDS.leg} stateKey="lLeg"/>
         :bTab==="rLeg"?<Opts opts={AV_FIELDS.leg} stateKey="rLeg"/>
         :bTab==="wings"?<Opts opts={AV_FIELDS.wings} stateKey="wings"/>
         :bTab==="tail"?<Opts opts={AV_FIELDS.tail} stateKey="tail"/>
-        :<Opts opts={AV_FIELDS.ears} stateKey="ears"/>}
+        :(<div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {EARS_SPRITES.map(r=>(
+              <div key={r.name} onClick={()=>set("ears",r.name)}
+                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                  border:"2px solid "+(c.ears===r.name?"#e8780a":"var(--bd)"),
+                  boxShadow:c.ears===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                  transition:"all .15s",width:100}}>
+                <div style={{width:100,height:100,
+                  backgroundImage:"url(/ears.png)",
+                  backgroundSize:"702px 100px",
+                  backgroundPosition:r.sx+"px "+r.sy+"px",
+                  backgroundRepeat:"no-repeat"}}/>
+                <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+                  color:c.ears===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </Sec>
 
       <Sec title="Clothing">
