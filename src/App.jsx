@@ -84,7 +84,7 @@ textarea::placeholder{color:var(--t4)}
 .ctrl3d{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden}
 .ctrl3d-body{display:grid;grid-template-columns:1fr 320px}
 @media(max-width:900px){.ctrl3d-body{grid-template-columns:1fr}}
-.ctrl3d-canvas-wrap{position:relative;min-height:320px;background:#040404;cursor:grab;overflow:hidden}
+.ctrl3d-canvas-wrap{position:relative;height:320px;min-height:320px;max-height:320px;background:#040404;cursor:grab;overflow:hidden}
 .ctrl3d-canvas-wrap:active{cursor:grabbing}
 .ctrl3d-drag-hint{position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--t4);pointer-events:none;white-space:nowrap;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:20px;border:1px solid var(--bd)}
 .ctrl3d-panel{padding:22px 24px;border-left:1px solid var(--bd);display:flex;flex-direction:column;gap:20px;background:var(--s1)}
@@ -506,10 +506,10 @@ function Viewport3D({azimuth,elevation,zoom,onChange,active}){
     last.current={x:cl.clientX,y:cl.clientY};
   },[onChange]);
   const end=()=>{drag.current=false};
-  const wheel=e=>{
+  const wheel=useCallback(e=>{
     e.preventDefault();
     onChange(p=>({...p,zoom:Math.max(1,Math.min(20,p.zoom+e.deltaY*0.012))}));
-  };
+  },[onChange]);
 
   if(!active)return(
     <div style={{minHeight:320,background:'var(--s2)',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8,borderRadius:'var(--r)'}}>
@@ -518,10 +518,17 @@ function Viewport3D({azimuth,elevation,zoom,onChange,active}){
     </div>
   );
 
+  useEffect(()=>{
+    const el=wrapRef.current;
+    if(!el)return;
+    el.addEventListener('wheel',wheel,{passive:false});
+    return()=>el.removeEventListener('wheel',wheel);
+  },[wheel]);
+
   return(
     <div ref={wrapRef} className="ctrl3d-canvas-wrap"
       onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end}
-      onTouchStart={start} onTouchMove={move} onTouchEnd={end} onWheel={wheel}>
+      onTouchStart={start} onTouchMove={move} onTouchEnd={end}>
       <canvas ref={canvasRef} style={{display:"block"}}/>
       <div className="ctrl3d-drag-hint">Drag to rotate · Scroll to zoom</div>
     </div>
@@ -587,7 +594,7 @@ function buildPrompt({scene,selectedAngles,lighting,bg,lens,cam,use3D,custom,fil
   if(n===1){
     const parts=[];
     const angleObj=ANGLES[selectedAngles[0]];
-    const rerender="Re-render the same scene from a new camera position. Maintain the same subject, environment, lighting, mood, and time of day. Do not rotate or tilt the image in 2D. Generate a new physical camera viewpoint in 3D space with proper perspective and parallax.";
+    const rerender="Use the attached reference image as the only visual source. Re-render the same scene from a new camera position. Maintain the same subject, environment, lighting, mood, and time of day. Do not rotate or tilt the image in 2D. Generate a new physical camera viewpoint in 3D space with proper perspective and parallax.";
     parts.push(rerender);
     if(scene.trim())parts.push(scene.trim());
     if(techBlock)parts.push(techBlock);
@@ -777,7 +784,7 @@ function AnglesPage(){
         <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
           {ANGLES.map((angle,i)=>{
             const ord=sel.indexOf(i);const isSel=ord!==-1;
-            const col=i%5, row=Math.floor(i/5);
+            const col=i%6, row=Math.floor(i/6);
             return(
               <div key={i}
                 onClick={()=>tog(i)}
@@ -786,10 +793,10 @@ function AnglesPage(){
                   boxShadow:isSel?"0 0 14px rgba(232,120,10,.4)":"none",
                   opacity:!isSel&&sel.length>=MAX?0.4:1,
                   transition:"all .15s",width:200,flexShrink:0}}>
-                <div style={{width:200,height:70,
+                <div style={{width:200,height:100,
                   backgroundImage:"url(/angles.png)",
-                  backgroundSize:"1000px 420px",
-                  backgroundPosition:(-col*200)+"px "+(-row*70)+"px",
+                  backgroundSize:"1200px 500px",
+                  backgroundPosition:(-col*200)+"px "+(-row*100)+"px",
                   backgroundRepeat:"no-repeat"}}/>
                 <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:10,fontWeight:600,
                   color:isSel?"#e8780a":"var(--t)",lineHeight:1.2}}>{angle.name}</div>
@@ -867,9 +874,9 @@ function AnglesPage(){
                 border:"2px solid "+(lens===r.mm?"#e8780a":"var(--bd)"),
                 boxShadow:lens===r.mm?"0 0 14px rgba(232,120,10,.4)":"none",
                 transition:"all .15s",width:150}}>
-              <div style={{width:150,height:112,
+              <div style={{width:150,height:83,
                 backgroundImage:"url(/lens.png)",
-                backgroundSize:"600px 336px",
+                backgroundSize:"600px 332px",
                 backgroundPosition:r.sx+"px "+r.sy+"px",
                 backgroundRepeat:"no-repeat"}}/>
               <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
@@ -932,39 +939,35 @@ function AnglesPage(){
       <div className="sec">
         <div className="sh"><span className="st">Aspect Ratio</span></div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-          {FORMAT_SPRITES.map(r=>{
-            const fw=r.fw||100;
-            return(
+          {FORMAT_SPRITES.map(r=>(
             <div key={r.id} onClick={()=>setAspectRatio(r.id)}
-              style={{cursor:"pointer",borderRadius:8,
+              style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
                 border:"2px solid "+(aspectRatio===r.id?"#e8780a":"var(--bd)"),
                 boxShadow:aspectRatio===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
-                transition:"all .15s",width:fw,padding:8,background:"var(--s1)"}}>
-              <div style={{width:"100%",height:r.bsh,overflow:"hidden",borderRadius:4,
+                transition:"all .15s",width:120}}>
+              <div style={{width:120,height:120,
                 backgroundImage:"url(/format.png)",
-                backgroundSize:r.bsw+"px "+r.bsh+"px",
-                backgroundPosition:r.sx+"px "+r.sy+"px",
-                backgroundRepeat:"no-repeat",
-                backgroundOrigin:"border-box"}}/>
-              <div style={{paddingTop:6,textAlign:"center",fontSize:11,fontWeight:600,
+                backgroundSize:"600px 120px",
+                backgroundPosition:r.sx+"px 0px",
+                backgroundRepeat:"no-repeat"}}/>
+              <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
                 color:aspectRatio===r.id?"#e8780a":"var(--t)"}}>{r.name}</div>
             </div>
-            );
-          })}
+          ))}
         </div>
       </div>
 
       <div className="divider"/>
 
-      <div className="sec">
+      <div className="sec" onClick={()=>setUse3D(v=>!v)} style={{cursor:"pointer"}}>
         <div className="sh">
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <span className="st">3D Camera Control</span>
             <span style={{fontSize:10,fontWeight:700,letterSpacing:1.5,padding:"2px 7px",borderRadius:3,border:"1px solid var(--bd)",color:"var(--t3)"}}>BETA</span>
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:11,color:use3D?"var(--acc)":"var(--t4)"}}>{use3D?"Active — added to prompt":"Disabled"}</span>
-            <div onClick={()=>setUse3D(v=>!v)} style={{width:44,height:24,borderRadius:12,cursor:"pointer",position:"relative",background:use3D?"#e8780a":"var(--s3)",border:"1px solid "+(use3D?"#e8780a":"var(--bd)"),transition:"all .2s"}}>
+          <div onClick={e=>{e.stopPropagation();setUse3D(v=>!v);}} style={{display:"flex",alignItems:"center",gap:10,marginLeft:"auto",cursor:"pointer",userSelect:"none"}}>
+            <span style={{fontSize:11,color:use3D?"var(--acc)":"var(--t4)",marginLeft:"auto"}}>{use3D?"Active — added to prompt":"Disabled"}</span>
+            <div style={{width:44,height:24,borderRadius:12,position:"relative",background:use3D?"#e8780a":"var(--s3)",border:"1px solid "+(use3D?"#e8780a":"var(--bd)"),transition:"all .2s",flexShrink:0}}>
               <div style={{position:"absolute",top:4,left:use3D?24:4,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left .2s"}}/>
             </div>
           </div>
@@ -1103,10 +1106,10 @@ const LENS_SPRITES=[
   {mm:"28mm",name:"Moderate Wide",sx:-150,sy:-84},
   {mm:"35mm",name:"Standard Wide",sx:-300,sy:-84},
   {mm:"50mm",name:"Normal",sx:-450,sy:-84},
-  {mm:"70mm",name:"Short Tele",sx:0,sy:-168},
-  {mm:"85mm",name:"Portrait",sx:-150,sy:-168},
-  {mm:"100mm",name:"Macro Tele",sx:-300,sy:-168},
-  {mm:"135mm",name:"Medium Tele",sx:-450,sy:-168},
+  {mm:"70mm",name:"Short Tele",sx:0,sy:-166},
+  {mm:"85mm",name:"Portrait",sx:-150,sy:-166},
+  {mm:"100mm",name:"Macro Tele",sx:-300,sy:-166},
+  {mm:"135mm",name:"Medium Tele",sx:-450,sy:-166},
   {mm:"200mm",name:"Telephoto",sx:0,sy:-252},
   {mm:"300mm",name:"Super Tele",sx:-150,sy:-252},
   {mm:"400mm",name:"Long Tele",sx:-300,sy:-252},
@@ -1133,11 +1136,11 @@ const COLOR_SPRITES=[
   {id:"warm",name:"Warm Vintage",sx:-450,sy:-167},
 ];
 const FORMAT_SPRITES=[
-  {id:"16:9",name:"16:9",fw:140,sx:0,sy:0,bsw:700,bsh:140},
-  {id:"9:16",name:"9:16",fw:79,sx:-79,sy:0,bsw:395,bsh:79},
-  {id:"2.39:1",name:"2.39:1",fw:172,sx:-344,sy:0,bsw:860,bsh:172},
-  {id:"4:3",name:"4:3",fw:107,sx:-321,sy:0,bsw:535,bsh:107},
-  {id:"1:1",name:"1:1",fw:100,sx:-400,sy:0,bsw:500,bsh:100},
+  {id:"16:9",name:"16:9",fw:120,sx:0,sy:0,bsw:600,bsh:120},
+  {id:"9:16",name:"9:16",fw:120,sx:-120,sy:0,bsw:600,bsh:120},
+  {id:"2.39:1",name:"2.39:1",fw:120,sx:-240,sy:0,bsw:600,bsh:120},
+  {id:"4:3",name:"4:3",fw:120,sx:-360,sy:0,bsw:600,bsh:120},
+  {id:"1:1",name:"1:1",fw:120,sx:-480,sy:0,bsw:600,bsh:120},
 ];
 const UNIVERSE_SPRITES=[
   {id:"realism",name:"Photorealism",sx:0,sy:0},
@@ -2047,6 +2050,7 @@ export default function App(){
           <div className="ntabs">
             <button className={`nt${page==="angles"?" on":""}`} onClick={()=>setPage("angles")}>Camera Angles</button>
             <button className={`nt${page==="avatars"?" on":""}`} onClick={()=>setPage("avatars")}>Avatar Builder</button>
+            <a href="https://github.com/mimaotomao/cinematic-prompt" target="_blank" rel="noopener noreferrer" className="nt" style={{textDecoration:"none"}}>GitHub ↗</a>
           </div>
         </nav>
         {page==="angles"?<AnglesPage/>:<AvatarsPage/>}
