@@ -1013,6 +1013,7 @@ function AvatarsPage(){
   const[fTab,setFTab]=useState("hair");
   const[bTab,setBTab]=useState("bodyType");
   const[toast,setToast]=useState("");
+  const[mode,setMode]=useState("scratch"); // "scratch" | "photo"
   const set=(k,v)=>setC(p=>({...p,[k]:v}));
 
   const buildAvPrompt=()=>{
@@ -1024,7 +1025,11 @@ function AvatarsPage(){
     const parts=[];
 
     // 1. GOAL — what AI must produce, format first
+    const goalPrefix=mode==="photo"
+      ?"Use the attached reference photo as the identity base for this character. Extract and preserve the exact face structure, skin tone, and distinctive facial features from the photo. Apply the selected traits below as modifications or additions on top of this reference identity. Do not change the face — only apply the style, body, and trait modifications."
+      :"Generate a completely original character from scratch based only on the selections below. Do not base this on any real person.";
     parts.push(
+      goalPrefix+"\n\n"+
       "Generate a single composite character reference sheet arranged as a clean 1x3 grid with three panels. "+
       "All three panels must depict the exact same character with identical anatomy, skin color, surface traits, facial structure, wardrobe, and physical proportions. "+
       "Do not alter identity, age, gender, body type, costume details, or non-human features between panels. "+
@@ -1129,6 +1134,20 @@ function AvatarsPage(){
         <div className="pt">Avatar <b>Builder</b></div>
         <div className="ps">Character reference sheet prompt builder with detailed anatomy and style controls</div>
       </div>
+
+      <div style={{display:"flex",gap:0,marginBottom:28,borderRadius:10,overflow:"hidden",border:"1px solid var(--bd)",width:"fit-content"}}>
+        <button onClick={()=>setMode("scratch")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",background:mode==="scratch"?"#e8780a":"var(--s1)",color:mode==="scratch"?"#000":"var(--t3)",transition:"all .2s"}}>
+          ✦ Create from scratch
+        </button>
+        <button onClick={()=>setMode("photo")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",borderLeft:"1px solid var(--bd)",background:mode==="photo"?"#e8780a":"var(--s1)",color:mode==="photo"?"#000":"var(--t3)",transition:"all .2s"}}>
+          ⊕ From reference photo
+        </button>
+      </div>
+      {mode==="photo"&&(
+        <div style={{background:"var(--s1)",border:"1px solid var(--bd)",borderRadius:10,padding:"16px 20px",marginBottom:28,fontSize:13,color:"var(--t3)",lineHeight:1.7}}>
+          <span style={{color:"#e8780a",fontWeight:700}}>↑ Attach your reference photo</span> to the message when pasting this prompt into your AI image generator. The prompt will instruct the AI to use it as the identity base and apply your selected traits as modifications.
+        </div>
+      )}
 
       <Sec title="Identity">
         <div className="tab-strip">
