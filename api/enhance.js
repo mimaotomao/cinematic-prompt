@@ -1,5 +1,4 @@
 const ALLOWED_ORIGIN = "https://cinematic-prompt-snowy.vercel.app";
-const GEMINI_MODEL = "gemini-2.0-flash";
 const MAX_INPUT = 8000;
 const CLIENT_ID = "730553596086-s59f1v381pocjk3gr992m8u18s3724k2.apps.googleusercontent.com";
 
@@ -18,8 +17,24 @@ async function verifyGoogleToken(idToken) {
   return data;
 }
 
+async function getBestModel(apiKey) {
+  const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+  if (!resp.ok) return "gemini-1.5-flash";
+  const data = await resp.json();
+  const models = (data.models || []).map(m => m.name.replace("models/", ""));
+  // prefer flash variants in order of preference
+  const preferred = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
+  for (const p of preferred) {
+    const match = models.find(m => m.startsWith(p));
+    if (match) return match;
+  }
+  // fallback: first model that supports generateContent
+  return models[0] || "gemini-1.5-flash";
+}
+
 async function callGemini(prompt, instructions, apiKey) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+  const model = await getBestModel(apiKey);
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const system = `You are an expert AI image/video prompt engineer. Enhance the given prompt — richer visual language, more cinematic precision, weave in any additional instructions naturally. Return ONLY the enhanced prompt text, nothing else.`;
   const userMsg = instructions?.trim()
     ? `Enhance this prompt. Additional instructions: "${instructions}"\n\nPrompt:\n${prompt}`
@@ -41,7 +56,7 @@ async function callGemini(prompt, instructions, apiKey) {
   return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
@@ -64,4 +79,4 @@ export default async function handler(req, res) {
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
-}
+};
