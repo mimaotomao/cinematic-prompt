@@ -257,7 +257,7 @@ function AuthModal({onClose}){
         <div className="modal-title">✦ <b>Enhance</b></div>
         <div className="modal-sub">
           The app works fully without an account — all prompt builders, selectors, and copy functions are free and open.<br/><br/>
-          <span style={{color:"var(--acc)",fontWeight:600}}>✦ Enhance</span> uses Google AI (Gemini) to cinematically rewrite your prompt. Sign in once with Google to unlock it — free, no credit card, no data stored.
+          <span style={{color:"var(--acc)",fontWeight:600}}>✦ AI Prompt Enhance</span> uses Google AI (Gemini) to cinematically rewrite your prompt. Sign in once with Google to unlock it — free, no credit card, no data stored.
         </div>
         <div style={{display:"flex",justifyContent:"center"}}>
           <GoogleSignInBtn/>
@@ -519,7 +519,7 @@ const LIGHTING = [
   {id:"neon",name:"Neon Night",p:"neon-lit night scene, vibrant colored light spill, deep blacks, high-contrast cyberpunk illumination"},
   {id:"fire",name:"Firelight",p:"warm firelight, flickering orange-amber glow, strong directional heat-source lighting, dancing shadows"},
   {id:"moonlit",name:"Moonlit",p:"moonlit scene, cool silver-blue ambient light, long faint shadows, serene nocturnal atmosphere"},
-  {id:"studiokey",name:"Studio Key",p:"professional studio key lighting, softbox main with fill and rim, controlled three-point setup, polished commercial look"},
+  {id:"studiokey",name:"Studio Key",p:"professional studio portrait lighting, soft main light from upper-left, gentle fill from opposite side, subtle edge separation light on shoulders, controlled polished commercial look, no harsh shadows"},
   {id:"magic",name:"Magic Hour",p:"magic hour with lens flare, anamorphic light streaks, dreamlike halation, cinematic perfection"},
 ];
 
@@ -1180,8 +1180,8 @@ function AnglesPage(){
 
   return(
     <div className="page">
+      <PipelineStrip active={2}/>
       <div className="ph">
-        <div className="pt">Multi-<b>Shot</b></div>
         <div className="ps">Multi-Shot Prompt Builder — Design cinematic angle sets (up to 9 views) with perfect subject &amp; lighting consistency. Real-time 3D camera orbit &amp; zoom.</div>
         <div className={`pc${sel.length===MAX?" full":""}`}>
           <span>{sel.length} / {MAX} angles</span>
@@ -1470,7 +1470,7 @@ function AnglesPage(){
           <button className="btn" onClick={random}>Random</button>
           <button className="btn" onClick={enhance} disabled={!hasAny||enhancing}
             style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"var(--t4)":"var(--acc)",background:"var(--acdim)"}}>
-            {enhancing?"ENHANCING…":"✦ Enhance"}
+            {enhancing?"ENHANCING…":"✦ AI Prompt Enhance"}
           </button>
           <button className={`btn${hasAny?" pri":""}`} onClick={copy} disabled={!hasAny}>Copy Prompt</button>
         </div>
@@ -2100,6 +2100,7 @@ function AvatarsPage(){
 
   return(
     <div className="page">
+      <PipelineStrip active={1}/>
       <div className="ph">
         <div className="pt">Character <b>Sheet</b></div>
         <div className="ps">Character reference sheet prompt builder with detailed anatomy and style controls</div>
@@ -2691,7 +2692,7 @@ function AvatarsPage(){
           <button className="btn" onClick={surprise}>Surprise Me</button>
           <button className="btn" onClick={enhance} disabled={enhancing}
             style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"var(--t4)":"var(--acc)",background:"var(--acdim)"}}>
-            {enhancing?"ENHANCING…":"✦ Enhance"}
+            {enhancing?"ENHANCING…":"✦ AI Prompt Enhance"}
           </button>
           <button className="btn pri" onClick={copy}>Copy Prompt</button>
         </div>
@@ -2945,9 +2946,144 @@ function VideoPromptPage(){
   );
 }
 
+// ─── HOW IT WORKS PAGE ────────────────────────────────────────────────────────
+function HowItWorksPage(){
+  const setPage = React.useContext(PageCtx);
+
+  const acc = ["#e8780a","#4fa3e0","#a78bfa","#34d399"];
+
+  return(
+    <div style={{maxWidth:860,margin:"0 auto",padding:"40px 24px 80px"}}>
+      <div style={{textAlign:"center",marginBottom:48}}>
+        <div style={{fontSize:28,fontWeight:800,color:"var(--t)",letterSpacing:-0.5}}>
+          How PrompTo <span style={{color:"var(--acc)"}}>miniStudio</span> works
+        </div>
+        <div style={{fontSize:14,color:"var(--t)",opacity:.6,marginTop:8,maxWidth:520,margin:"10px auto 0"}}>
+          A four-step pipeline from character creation to full-quality cinematic shots
+        </div>
+      </div>
+
+      {/* PIPELINE VISUAL */}
+      <div style={{display:"flex",flexDirection:"column",gap:0}}>
+        {[0,1,2,3].map(i=>{
+          const color = acc[i];
+          const num = i+1;
+          const isLast = i===3;
+          const configs = [
+            {icon:"🧬", title:"Build your character", sub:"Character Sheet tab", page:"avatars",
+             body:"Design a character from scratch using traits, region, body type and clothing — or skip if you already have a reference photo.",
+             note:null,
+             links:null,
+             cta:"Open Character Sheet →"},
+            {icon:"🎬", title:"Create a multi-shot grid prompt", sub:"Multi-Shot tab", page:"angles",
+             body:"Pick camera angles, lighting, environment and lens. The tool builds a prompt instructing the AI to generate multiple numbered shots of the same character in a single composite grid.",
+             note:null,
+             links:null,
+             cta:"Open Multi-Shot →"},
+            {icon:"✦", title:"Generate in your AI of choice", sub:"Grok · Gemini · Midjourney",
+             body:"Paste the prompt into an AI image generator. Attach your reference photo or character sheet if you have one. The AI returns a numbered grid — one image, multiple cinematic shots.",
+             note:"📎 Always attach your reference photo for character consistency.",
+             links:[
+               {label:"Grok Imagine ↗", url:"https://grok.com/imagine"},
+               {label:"Gemini ↗", url:"https://gemini.google.com"},
+               {label:"Midjourney ↗", url:"https://midjourney.com"},
+               {label:"Arena.ai ↗", url:"https://www.arena.ai"},
+             ],
+             cta:null},
+            {icon:"🔍", title:"Expand any panel to full resolution", sub:"Back in Multi-Shot",  page:"angles",
+             body:"Take your generated grid and attach it back to the generator. In Multi-Shot → Expand Panel to Full Shot, each numbered panel has its own prompt. Click, attach the grid, get one full-quality cinematic image.",
+             note:"💡 The grid is your reference — attach it every time you expand a panel.",
+             links:null,
+             cta:"Open Multi-Shot →"},
+          ];
+          const c = configs[i];
+          return(
+            <div key={i} style={{display:"flex",gap:0}}>
+              {/* LEFT: number column + connector */}
+              <div style={{display:"flex",flexDirection:"column",alignItems:"center",width:56,flexShrink:0}}>
+                <div style={{
+                  width:44,height:44,borderRadius:"50%",
+                  background:`${color}22`,border:`2px solid ${color}`,
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                  fontSize:18,fontWeight:900,color:color,flexShrink:0,zIndex:1
+                }}>{num}</div>
+                {!isLast&&<div style={{width:2,flexGrow:1,background:`linear-gradient(${color}88,${acc[i+1]}44)`,minHeight:32,margin:"4px 0"}}/>}
+              </div>
+              {/* RIGHT: card */}
+              <div style={{
+                flexGrow:1,marginBottom:isLast?0:16,marginLeft:16,
+                padding:"18px 20px",borderRadius:10,
+                border:`1px solid ${color}33`,
+                background:`${color}08`
+              }}>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+                  <span style={{fontSize:20}}>{c.icon}</span>
+                  <div>
+                    <div style={{fontSize:15,fontWeight:800,color:"var(--t)"}}>{c.title}</div>
+                    <div style={{fontSize:11,color:color,fontWeight:600,letterSpacing:.5,marginTop:1}}>{c.sub}</div>
+                  </div>
+                </div>
+                <div style={{fontSize:13,color:"var(--t)",opacity:.8,lineHeight:1.65,marginBottom:c.note||c.links||c.cta?12:0}}>
+                  {c.body}
+                </div>
+                {c.note&&(
+                  <div style={{fontSize:11,color:"var(--t)",opacity:.6,background:"rgba(255,255,255,.04)",borderRadius:6,padding:"7px 10px",marginBottom:10,lineHeight:1.5}}>
+                    {c.note}
+                  </div>
+                )}
+                {c.links&&(
+                  <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+                    {c.links.map(l=>(
+                      <a key={l.label} href={l.url} target="_blank" rel="noopener noreferrer"
+                        style={{padding:"6px 14px",borderRadius:6,border:`1px solid ${color}55`,
+                          background:`${color}11`,color:color,fontSize:12,fontWeight:700,
+                          textDecoration:"none",transition:"all .2s"}}
+                        onMouseOver={e=>{e.currentTarget.style.background=`${color}28`}}
+                        onMouseOut={e=>{e.currentTarget.style.background=`${color}11`}}
+                      >{l.label}</a>
+                    ))}
+                  </div>
+                )}
+                {c.cta&&(
+                  <button onClick={()=>setPage(c.page)}
+                    style={{marginTop:4,padding:"7px 16px",borderRadius:6,border:`1px solid ${color}`,
+                      background:"transparent",color:color,fontSize:12,fontWeight:700,cursor:"pointer",
+                      transition:"all .2s"}}
+                    onMouseOver={e=>{e.currentTarget.style.background=`${color}22`}}
+                    onMouseOut={e=>{e.currentTarget.style.background="transparent"}}
+                  >{c.cta}</button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* BOTTOM CTA */}
+      <div style={{marginTop:48,padding:"24px 28px",borderRadius:12,border:"1px solid var(--bdh)",background:"var(--s2)",textAlign:"center"}}>
+        <div style={{fontSize:13,color:"var(--t)",opacity:.7,marginBottom:16}}>Ready to start?</div>
+        <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
+          <button onClick={()=>setPage("avatars")}
+            style={{padding:"10px 24px",borderRadius:8,border:"1px solid var(--bdh)",
+              background:"var(--s3)",color:"var(--t)",fontSize:13,fontWeight:700,cursor:"pointer"}}>
+            🧬 Build a character
+          </button>
+          <button onClick={()=>setPage("angles")}
+            style={{padding:"10px 24px",borderRadius:8,border:"1px solid var(--acc)",
+              background:"var(--acdim)",color:"var(--acc)",fontSize:13,fontWeight:700,cursor:"pointer"}}>
+            🎬 Create multi-shot grid
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── ROOT ──────────────────────────────────────────────────────────────────────
+const PageCtx = React.createContext(()=>{});
+
 export default function App(){
-  const[page,setPage]=useState("angles");
+  const[page,setPage]=useState("avatars");
   const[scrolled,setScrolled]=useState(false);
   const auth=useGoogleAuth();
   useEffect(()=>{
@@ -2957,11 +3093,12 @@ export default function App(){
   },[]);
   return(
     <AuthCtx.Provider value={auth}>
+      <PageCtx.Provider value={setPage}>
       <style>{G}</style>
       <div className="shell">
         <nav className={`nav${scrolled?" scrolled":""}`} style={{flexDirection:"column",height:"auto",padding:"12px 28px 0",gap:0}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",paddingBottom:10}}>
-            <div className="logo">PrompTo <span>miniStudio</span></div>
+            <div className="logo" style={{cursor:"pointer"}} onClick={()=>setPage("how")}>PrompTo <span>miniStudio</span></div>
             <div style={{display:"flex",alignItems:"center",gap:12,justifyContent:"flex-end"}}>
               {auth.user?(
                 <button className="user-chip" onClick={auth.signOut} title="Sign out">
@@ -2972,7 +3109,7 @@ export default function App(){
               ):(
                 <div style={{display:"flex",alignItems:"center",gap:10}}>
                   <span style={{fontSize:11,color:"var(--t)",opacity:.7,whiteSpace:"nowrap"}}>
-                    Sign in to unlock <span style={{color:"var(--acc)",fontWeight:700}}>✦ Enhance</span>
+                    Sign in to unlock <span style={{color:"var(--acc)",fontWeight:700}}>✦ AI Prompt Enhance</span>
                   </span>
                   <GoogleSignInBtn compact/>
                 </div>
@@ -2980,14 +3117,16 @@ export default function App(){
             </div>
           </div>
           <div className="ntabs" style={{position:"static",transform:"none",borderTop:"1px solid var(--bd)",paddingTop:2,paddingBottom:2,width:"100%",justifyContent:"center"}}>
+            <button className={`nt${page==="how"?" on":""}`} onClick={()=>setPage("how")}>How it works</button>
             <button className={`nt${page==="angles"?" on":""}`} onClick={()=>setPage("angles")}>Multi-Shot</button>
             <button className={`nt${page==="avatars"?" on":""}`} onClick={()=>setPage("avatars")}>Character Sheet</button>
-            <button className={`nt${page==="video"?" on":""}`} onClick={()=>setPage("video")}>🚧 Under Construction</button>
+            <button className={`nt${page==="video"?" on":""}`} onClick={()=>setPage("video")}>🚧 Video</button>
             <a href="https://github.com/mimaotomao/prompto_ministudio" target="_blank" rel="noopener noreferrer" className="nt" style={{textDecoration:"none"}}>GitHub ↗</a>
           </div>
         </nav>
-        {page==="angles"?<AnglesPage/>:page==="avatars"?<AvatarsPage/>:<VideoPromptPage/>}
+        {page==="how"?<HowItWorksPage/>:page==="angles"?<AnglesPage/>:page==="avatars"?<AvatarsPage/>:<VideoPromptPage/>}
       </div>
+      </PageCtx.Provider>
     </AuthCtx.Provider>
   );
 }
