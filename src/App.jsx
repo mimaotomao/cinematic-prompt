@@ -396,7 +396,7 @@ function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmS
         <div style={stepHeadStyle}>
           <div style={badgeStyle("var(--acc)")}>1</div>
           <div>
-            <div style={{fontSize:12,fontWeight:800,color:"var(--t)",letterSpacing:.5}}>
+            <div style={{fontSize:12,fontWeight:800,color:"var(--t)",letterSpacing:.5}} translate="no">
               Generate the grid
             </div>
             <div style={{fontSize:11,color:"var(--t)",opacity:.6,marginTop:1}}>
@@ -406,7 +406,7 @@ function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmS
             </div>
           </div>
         </div>
-        <div style={{padding:"12px 16px",display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"}}>
+        <div style={{padding:"12px 16px",display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"}} translate="no">
           {targets.map(t=>(
             <button key={t.label} className="genwith-btn" onClick={()=>handleGenerateClick(t.url)}>
               <span>{t.icon}</span>{t.label} ↗
@@ -1238,13 +1238,13 @@ function AnglesPage(){
       </div>
 
       <div className="scene-field">
-        <div className="sh"><span className="st">Scene Description</span><span className="sb">PROMPT INTRO</span></div>
+        <div className="sh"><span className="st">Scene Description</span><span className="sb" translate="no">PROMPT INTRO</span></div>
         <textarea rows={4} value={scene} onChange={e=>setScene(e.target.value)} placeholder="Describe your scene or subject. This appears first in the generated prompt — use it to set context, paste a reference prompt, or describe the character and environment. The more specific, the better."/>
         <div className="scene-hint">This is the foundation of your prompt. Include character details, actions, environment mood, and key visual elements you want preserved across all frames.</div>
       </div>
 
       <div className="sec">
-        <div className="sh"><span className="st">Camera Angles</span>{sel.length>0&&<span className="sb">{sel.length} SELECTED</span>}</div>
+        <div className="sh"><span className="st">Camera Angles</span>{sel.length>0&&<span className="sb" translate="no">{sel.length} SELECTED</span>}</div>
         <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
           {ANGLES.map((angle,i)=>{
             const ord=sel.indexOf(i);const isSel=ord!==-1;
@@ -1479,12 +1479,12 @@ function AnglesPage(){
       <div className="divider"/>
 
       <div className="scene-field">
-        <div className="sh"><span className="st">Custom Additions</span><span className="sb">APPENDED</span></div>
+        <div className="sh"><span className="st">Custom Additions</span><span className="sb" translate="no">APPENDED</span></div>
         <textarea rows={3} value={custom} onChange={e=>setCustom(e.target.value)} placeholder="Add extra instructions, negative prompts, style notes, or specific technical requirements. This is appended after the auto-generated content."/>
       </div>
 
       <div className="sec">
-        <div className="sh"><span className="st">Generated Prompt</span>{hasAny&&<span className="sb">LIVE</span>}</div>
+        <div className="sh"><span className="st">Generated Prompt</span>{hasAny&&<span className="sb" translate="no">LIVE</span>}</div>
         <div className={`pbox${hasAny?" live":""}`}>
           {hasAny?(enhanced||prompt):<span className="pbox-empty">Fill fields above to generate your prompt in real time.</span>}
         </div>
@@ -1493,14 +1493,14 @@ function AnglesPage(){
             ✦ Enhanced by Gemini — <button onClick={()=>setEnhanced("")} style={{background:"none",border:"none",color:"var(--t4)",fontSize:11,cursor:"pointer",textDecoration:"underline"}}>revert to original</button>
           </div>
         )}
-        <div className="pbar">
+        <div className="pbar" translate="no">
           <button className="btn" onClick={reset}>Reset</button>
           <button className="btn" onClick={random}>Random</button>
           <button className="btn" onClick={enhance} disabled={!hasAny||enhancing}
             style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"var(--t4)":"var(--acc)",background:"var(--acdim)"}}>
             {enhancing?"ENHANCING…":"✦ AI Prompt Enhance"}
           </button>
-          <button className={`btn${hasAny?" pri":""}`} onClick={copy} disabled={!hasAny}>Copy Prompt</button>
+          <button className={`btn${hasAny?" pri":""}`} onClick={copy} disabled={!hasAny}><span translate="no">Copy Prompt</span> <span style={{fontSize:10,opacity:.6,fontWeight:400}}>EN</span></button>
         </div>
         {hasAny&&<WorkflowPanel
           getPrompt={()=>enhanced||prompt}
@@ -1977,7 +1977,7 @@ const Sec=({title,children,badge})=>(
   <div className="av-sec">
     <div className="sh" style={{marginBottom:14}}>
       <span className="st">{title}</span>
-      {badge&&<span className="sb">{badge}</span>}
+      {badge&&<span className="sb" translate="no">{badge}</span>}
     </div>
     {children}
   </div>
@@ -1986,7 +1986,7 @@ const Sec=({title,children,badge})=>(
 const Opts=({opts,stateKey,val,onSet})=>(
   <div className="optbtns">
     {opts.map(o=>(
-      <button key={o} className={`ob${val===o?" sel":""}`} onClick={()=>onSet(stateKey,o)}>{o}</button>
+      <button key={o} className={`ob${val===o?" sel":""}`} onClick={()=>onSet(stateKey,o)} translate="no">{o}</button>
     ))}
   </div>
 );
@@ -2300,7 +2300,7 @@ function AvatarsPage(){
                   backgroundPosition:r.sx+"px "+r.sy+"px",
                   backgroundRepeat:"no-repeat"}}/>
                 <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
-                  color:c.skinColor===r.name?"#e8780a":"var(--t)"}}>{r.label}</div>
+                  color:c.skinColor===r.name?"#e8780a":"var(--t)"}}><span translate="no">{r.label}</span></div>
               </div>
             ))}
           </div>
@@ -2337,7 +2337,7 @@ function AvatarsPage(){
                   backgroundPosition:r.sx+"px "+r.sy+"px",
                   backgroundRepeat:"no-repeat"}}/>
                 <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
-                  color:c.skinTraits===r.name?"#e8780a":"var(--t)"}}>{r.label}</div>
+                  color:c.skinTraits===r.name?"#e8780a":"var(--t)"}}><span translate="no">{r.label}</span></div>
               </div>
             ))}
           </div>
@@ -2724,21 +2724,21 @@ function AvatarsPage(){
       </Sec>
 
       <div className="sec">
-        <div className="sh"><span className="st">Generated Prompt</span><span className="sb">LIVE</span></div>
+        <div className="sh"><span className="st">Generated Prompt</span><span className="sb" translate="no">LIVE</span></div>
         <div className="pbox live" style={{fontSize:11}}>{enhanced||prompt}</div>
         {enhanced&&(
           <div style={{marginTop:8,fontSize:11,color:"var(--acc)",fontWeight:600,letterSpacing:1}}>
             ✦ Enhanced by Gemini — <button onClick={()=>setEnhanced("")} style={{background:"none",border:"none",color:"var(--t4)",fontSize:11,cursor:"pointer",textDecoration:"underline"}}>revert to original</button>
           </div>
         )}
-        <div className="pbar">
+        <div className="pbar" translate="no">
           <button className="btn" onClick={()=>{setC(AV_DEF);setEnhanced("");setITab("universe");setFTab("hair");setBTab("bodyType");doToast("RESET");}}>Reset</button>
           <button className="btn" onClick={surprise}>Surprise Me</button>
           <button className="btn" onClick={enhance} disabled={enhancing}
             style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"var(--t4)":"var(--acc)",background:"var(--acdim)"}}>
             {enhancing?"ENHANCING…":"✦ AI Prompt Enhance"}
           </button>
-          <button className="btn pri" onClick={copy}>Copy Prompt</button>
+          <button className="btn pri" onClick={copy}><span translate="no">Copy Prompt</span> <span style={{fontSize:10,opacity:.6,fontWeight:400}}>EN</span></button>
         </div>
         <WorkflowPanel
           getPrompt={()=>enhanced||prompt}
@@ -2897,19 +2897,19 @@ function VideoPromptPage(){
       )}
 
       <div className="sec">
-        <div className="sh"><span className="st">Scene</span><span className="sb">CORE</span></div>
+        <div className="sh"><span className="st">Scene</span><span className="sb" translate="no">CORE</span></div>
         <textarea rows={3} value={scene} onChange={e=>setScene(e.target.value)}
           placeholder="What happens in the video? e.g. A lone figure walks through a rain-soaked city street at night, neon reflections on the pavement..."/>
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,padding:"0 0 4px"}}>
         <div className="sec" style={{margin:0}}>
-          <div className="sh"><span className="st">First Frame</span><span className="sb">OPENING</span></div>
+          <div className="sh"><span className="st">First Frame</span><span className="sb" translate="no">OPENING</span></div>
           <textarea rows={3} value={firstFrame} onChange={e=>setFirstFrame(e.target.value)}
             placeholder="Opening shot description — used as image prompt for frame generation"/>
         </div>
         <div className="sec" style={{margin:0}}>
-          <div className="sh"><span className="st">Last Frame</span><span className="sb">CLOSING</span></div>
+          <div className="sh"><span className="st">Last Frame</span><span className="sb" translate="no">CLOSING</span></div>
           <textarea rows={3} value={lastFrame} onChange={e=>setLastFrame(e.target.value)}
             placeholder="Closing shot description — used as image prompt for frame generation"/>
         </div>
@@ -2983,25 +2983,25 @@ function VideoPromptPage(){
       </div>
 
       <div className="sec">
-        <div className="sh"><span className="st">Custom Additions</span><span className="sb">OPTIONAL</span></div>
+        <div className="sh"><span className="st">Custom Additions</span><span className="sb" translate="no">OPTIONAL</span></div>
         <textarea rows={2} value={custom} onChange={e=>setCustom(e.target.value)} placeholder="Additional notes, props, atmosphere, negative elements..."/>
       </div>
 
       <div className="sec">
-        <div className="sh"><span className="st">Video Prompt</span>{hasAny&&<span className="sb">LIVE</span>}</div>
+        <div className="sh"><span className="st">Video Prompt</span>{hasAny&&<span className="sb" translate="no">LIVE</span>}</div>
         <div className={`pbox${hasAny?" live":""}`}>
           {hasAny?prompt:<span className="pbox-empty">Fill scene above to generate your video prompt.</span>}
         </div>
-        <div className="pbar">
+        <div className="pbar" translate="no">
           <button className="btn" onClick={reset}>Reset</button>
-          <button className={`btn${hasAny?" pri":""}`} onClick={copy} disabled={!hasAny}>Copy Prompt</button>
+          <button className={`btn${hasAny?" pri":""}`} onClick={copy} disabled={!hasAny}><span translate="no">Copy Prompt</span> <span style={{fontSize:10,opacity:.6,fontWeight:400}}>EN</span></button>
         </div>
         {hasAny&&<GenWithLinks getPrompt={()=>prompt} onCopy={()=>doToast("VIDEO PROMPT COPIED")} targets={VID_GEN_TARGETS}/>}
       </div>
 
       {(firstFrame.trim()||lastFrame.trim())&&(
         <div className="sec">
-          <div className="sh"><span className="st">Frame Generation</span><span className="sb">IMAGE PROMPTS</span></div>
+          <div className="sh"><span className="st">Frame Generation</span><span className="sb" translate="no">IMAGE PROMPTS</span></div>
           <div style={{fontSize:11,color:"var(--t)",marginBottom:12,lineHeight:1.6}}>
             Generate key frames as images first — use as reference for your video generation tool.
           </div>
@@ -3261,9 +3261,9 @@ export default function App(){
           <div className="ntabs" style={{position:"static",transform:"none",borderTop:"1px solid var(--bd)",paddingTop:2,paddingBottom:2,width:"100%",justifyContent:"center"}}>
             <button className={`nt${page==="how"?" on":""}`} onClick={()=>setPage("how")}>How it works</button>
             <button className={`nt${page==="avatars"?" on":""}`} onClick={()=>setPage("avatars")}>Character Sheet</button>
-            <button className={`nt${page==="angles"?" on":""}`} onClick={()=>setPage("angles")}>Multi-Shot</button>
+            <button className={`nt${page==="angles"?" on":""}`} onClick={()=>setPage("angles")} translate="no">Multi-Shot</button>
             <button className={`nt${page==="video"?" on":""}`} onClick={()=>setPage("video")}>Video</button>
-            <a href="https://github.com/mimaotomao/prompto_ministudio" target="_blank" rel="noopener noreferrer" className="nt" style={{textDecoration:"none"}}>GitHub ↗</a>
+            <a href="https://github.com/mimaotomao/prompto_ministudio" target="_blank" rel="noopener noreferrer" className="nt" style={{textDecoration:"none"}} translate="no">GitHub ↗</a>
             <button
               className="nt"
               onClick={toggleEN}
