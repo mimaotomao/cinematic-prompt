@@ -302,6 +302,25 @@ function GenWithLinks({getPrompt,onCopy,targets}){
   );
 }
 
+function RefPhotoHint(){
+  return(
+    <div style={{margin:"16px 0 0",padding:"12px 16px",borderRadius:"var(--r)",border:"1px solid rgba(255,180,0,.25)",background:"rgba(255,180,0,.05)",display:"flex",gap:12,alignItems:"flex-start"}}>
+      <span style={{fontSize:18,flexShrink:0,marginTop:1}}>📎</span>
+      <div style={{fontSize:12,color:"var(--t)",lineHeight:1.6}}>
+        <span style={{fontWeight:700,color:"rgba(255,200,80,.9)"}}>Remember to attach your reference photo</span> in the AI generator — this prompt creates <em>variations of an existing subject or scene</em>.
+        {" "}For generating something entirely new (no reference), use the{" "}
+        <span style={{fontWeight:700,color:"var(--acc)"}}>Create from scratch</span> option in your generator of choice.
+        {" "}<a href="https://grok.com/imagine" target="_blank" rel="noopener noreferrer"
+          style={{color:"var(--acc)",textDecoration:"none",fontWeight:600}}>Grok ↗</a>
+        {" · "}<a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer"
+          style={{color:"var(--acc)",textDecoration:"none",fontWeight:600}}>Gemini ↗</a>
+        {" · "}<a href="https://midjourney.com" target="_blank" rel="noopener noreferrer"
+          style={{color:"var(--acc)",textDecoration:"none",fontWeight:600}}>Midjourney ↗</a>
+      </div>
+    </div>
+  );
+}
+
 const ANGLES = [
   {name:"Wide establishing shot",
    desc:"ultra-wide frame, subjects occupy no more than 1/5 of frame height, environment fills remaining space. Place horizon line on upper third. Subjects centered or slightly off-axis. Full location readable in single frame. No cropping of environment edges."},
@@ -1243,6 +1262,7 @@ function AnglesPage(){
           <button className={`btn${hasAny?" pri":""}`} onClick={copy} disabled={!hasAny}>Copy Prompt</button>
         </div>
         {hasAny&&<GenWithLinks getPrompt={()=>enhanced||prompt} onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}/>}
+        {hasAny&&<RefPhotoHint/>}
       </div>
 
       {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)} />}
@@ -2458,6 +2478,7 @@ function AvatarsPage(){
           <button className="btn pri" onClick={copy}>Copy Prompt</button>
         </div>
         <GenWithLinks getPrompt={()=>enhanced||prompt} onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}/>
+        <RefPhotoHint/>
       </div>
 
       {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)} />}
