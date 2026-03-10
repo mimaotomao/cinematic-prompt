@@ -1,10 +1,10 @@
-# PrompTo Studio
+# PrompTo miniStudio
 
 Professional prompt engineering tool for AI image generation. Inspired by [jaffsavage.lovable.app/savage-angles](https://jaffsavage.lovable.app/savage-angles).
 
-## What is PrompTo Studio?
+## What is PrompTo miniStudio?
 
-PrompTo Studio helps you create precise, detailed prompts for AI image generators. Built for both **text-to-image (txt2img)** generation from scratch and **image-to-image (img2img)** workflows using existing reference photos.
+PrompTo miniStudio helps you create precise, detailed prompts for AI image generators. Built for both **text-to-image (txt2img)** generation from scratch and **image-to-image (img2img)** workflows using existing reference photos.
 
 The tool structures your creative vision into machine-readable instructions with visual feedback through sprite-based selectors.
 
@@ -91,7 +91,7 @@ Built with React, Vite, and excessive attention to detail.
 
 ---
 
-*PrompTo Studio — Build better images with better prompts.*
+*PrompTo miniStudio — Build better images with better prompts.*
 
 
 # React + Vite
