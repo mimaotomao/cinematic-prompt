@@ -1304,8 +1304,28 @@ const REGION_SPRITES=[
   {name:"Celtic", sx:-500, sy:-100},{name:"Mixed", sx:-600, sy:-100},
 ];
 const EXPRESSION_SPRITES=[
-  {name:"Neutral",sx:0,sy:0},{name:"Confident",sx:-100,sy:0},
-  {name:"Mysterious",sx:-200,sy:0},{name:"Fierce",sx:-300,sy:0},{name:"Gentle",sx:-400,sy:0},
+  {name:"Neutral",sx:0,sy:0},{name:"Subtle Smile",sx:-100,sy:0},
+  {name:"Focused",sx:-200,sy:0},{name:"Composed",sx:-300,sy:0},{name:"Wry Smirk",sx:-400,sy:0},
+  {name:"Happy",sx:0,sy:-100},{name:"Calm",sx:-100,sy:-100},
+  {name:"Skeptical",sx:-200,sy:-100},{name:"Stern",sx:-300,sy:-100},{name:"Grimace",sx:-400,sy:-100},
+  {name:"Shocked",sx:0,sy:-200},{name:"Worried",sx:-100,sy:-200},
+  {name:"Surprised",sx:-200,sy:-200},{name:"Tense",sx:-300,sy:-200},{name:"Playful",sx:-400,sy:-200},
+  {name:"Winking",sx:0,sy:-300},{name:"Sad",sx:-100,sy:-300},
+  {name:"Amazed",sx:-200,sy:-300},{name:"Joyful",sx:-300,sy:-300},{name:"Pensive",sx:-400,sy:-300},
+  {name:"Smirking",sx:0,sy:-400},{name:"Startled",sx:-100,sy:-400},
+  {name:"Horrified",sx:-200,sy:-400},{name:"Intense",sx:-300,sy:-400},{name:"Serene",sx:-400,sy:-400},
+];
+const LAYOUT_SPRITES=[
+  {name:"Style Sheet",sx:0,sy:0,p:"Generate a single composite character reference sheet arranged as a clean 1x3 grid with three panels. Panel layout:\n1. Front-facing close-up portrait — head and shoulders only, face centered, camera at eye level, even studio lighting.\n2. Side profile close-up — pure 90-degree lateral view, head and shoulders, full silhouette readable.\n3. Full body reference shot — complete head-to-toe figure, arms slightly away from body, relaxed natural stance, full anatomy and costume visible."},
+  {name:"Headshot",sx:-140,sy:0,p:"Generate a single headshot portrait — head and shoulders only, face centered, camera at eye level, professional studio framing. Clean single-panel output."},
+  {name:"Half Body",sx:0,sy:-200,p:"Generate a single half-body shot — framed from the waist up, arms visible, clean studio framing. Single panel output."},
+  {name:"Full Body Front",sx:-140,sy:-200,p:"Generate a single full-body front view — complete head-to-toe figure, arms slightly away from body, relaxed natural stance, camera at eye level. Single panel output."},
+  {name:"Bust",sx:0,sy:-400,p:"Generate a single bust portrait — framed from the chest up, close and intimate, face and upper chest visible. Single panel output."},
+  {name:"Full Body Walking",sx:-140,sy:-400,p:"Generate a single full-body dynamic walking pose — mid-stride, natural gait, full head-to-toe visible, slight forward motion implied. Single panel output."},
+  {name:"Action Stance",sx:0,sy:-600,p:"Generate a single full-body action stance — wide combat-ready pose, knees slightly bent, arms engaged, dynamic energy. Single panel output."},
+  {name:"Side Seated",sx:-140,sy:-600,p:"Generate a single side-profile seated pose — 90-degree lateral view, character seated, full silhouette readable, composed posture. Single panel output."},
+  {name:"Back View",sx:0,sy:-800,p:"Generate a single full-body rear view — character facing away from camera, complete back silhouette visible from head to toe, natural stance. Single panel output."},
+  {name:"Face Close-up",sx:-140,sy:-800,p:"Generate a single extreme face close-up — tight framing on the face only, from chin to top of forehead, no shoulders visible, maximum facial detail. Single panel output."},
 ];
 const EYETYPE_SPRITES=[
   {name:"Human",sx:0,sy:0},{name:"Almond",sx:-100,sy:0},{name:"Wide",sx:-200,sy:0},
@@ -1461,7 +1481,7 @@ const AV_FIELDS={
   wings:["None","Feathered (bird)","Leathery (bat)","Butterfly","Dragonfly","Energy/Abstract","Mechanical","Small (decorative)","Multiple pairs","Broken/tattered"],
   tail:["None","Cat","Wolf","Reptile","Demon (spade)","Fish","Fox (fluffy)","Dragon","Scorpion","Feathered","Energy","Mechanical"],
   ears:["Human","Pointed (elf)","Cat","Dog","Rabbit","Long (elf)","Broad (orc)","Fin (merfolk)","Multiple","Cyborg","Decorated"],
-  expression:["Neutral","Confident","Mysterious","Fierce","Gentle","Smiling","Serious","Melancholy","Determined"],
+  expression:["Neutral","Subtle Smile","Focused","Composed","Wry Smirk","Happy","Calm","Skeptical","Stern","Grimace","Shocked","Worried","Surprised","Tense","Playful","Winking","Sad","Amazed","Joyful","Pensive","Smirking","Startled","Horrified","Intense","Serene"],
   clothing:[
     "Neutral (studio reference)",
     "Modern Casual",
@@ -1488,7 +1508,7 @@ const AV_DEF={
   skinColor:"Fair",skinTraits:"None",hair:"Long",eyeType:"Human",lips:"Medium",markings:"None",expression:"Neutral",
   horns:"None",bodyType:"Athletic",lArm:"Natural",rArm:"Natural",lLeg:"Natural",rLeg:"Natural",
   wings:"None",tail:"None",ears:"Human",clothing:"Neutral (studio reference)",details:"",
-  avLight:"",avEnv:"",avLens:"",avAspect:"16:9"
+  avLight:"",avEnv:"",avLens:"",avAspect:"16:9",avLayout:"Style Sheet"
 };
 
 // ─── AVATAR PAGE ──────────────────────────────────────────────────────────────
@@ -1526,26 +1546,17 @@ function AvatarsPage(){
     const clothesParts=c.clothing;
     const clothesPrompt=c.clothing==="Neutral (studio reference)"?"Wearing a minimal neutral black fitted top and black shorts, studio reference attire, no branding. Barefoot.":c.clothing==="None"?"Wearing a minimal swimsuit, tasteful studio reference pose, professional photography.":"Wearing "+c.clothing.toLowerCase()+" attire appropriate to the character's anatomy, age, body type, race, and universe style.";
     const parts=[];
+    const isMultiPanel=c.avLayout==="Style Sheet";
 
     // 1. GOAL — what AI must produce, format first
     const goalPrefix=mode==="photo"
       ?"Use the attached reference photo as the identity base for this character. Extract and preserve the exact face structure, skin tone, and distinctive facial features from the photo. Apply the selected traits below as modifications or additions on top of this reference identity. Do not change the face — only apply the style, body, and trait modifications."
       :"Generate a completely original character from scratch based only on the selections below. Do not base this on any real person.";
-    parts.push(
-      goalPrefix+"\n\n"+
-      "Generate a single composite character reference sheet arranged as a clean 1x3 grid with three panels. "+
-      "All three panels must depict the exact same character with identical anatomy, skin color, surface traits, facial structure, wardrobe, and physical proportions. "+
-      "Do not alter identity, age, gender, body type, costume details, or non-human features between panels. "+
-      "Maintain strict character consistency across all three frames."
-    );
-
-    // 2. Panel layout instructions — what each panel contains
-    parts.push(
-      "Panel layout:\n"+
-      "1. Front-facing close-up portrait — head and shoulders only, face centered, camera at eye level, neutral expression, even studio lighting, no shadows obscuring features.\n"+
-      "2. Side profile close-up — pure 90-degree lateral view, head and shoulders, full silhouette of face and hair readable, same lighting as panel 1.\n"+
-      "3. Full body reference shot — complete head-to-toe figure, arms slightly away from body, relaxed natural stance, full anatomy and costume visible, camera at eye level, no cropping of feet or top of head."
-    );
+    const layoutObj=LAYOUT_SPRITES.find(l=>l.name===c.avLayout)||LAYOUT_SPRITES[0];
+    const consistencyText=isMultiPanel
+      ?" All panels must depict the exact same character with identical anatomy, skin color, surface traits, facial structure, wardrobe, and physical proportions. Do not alter identity, age, gender, body type, costume details, or non-human features between panels. Maintain strict character consistency across all frames."
+      :"";
+    parts.push(goalPrefix+"\n\n"+layoutObj.p+consistencyText);
 
     // 3. Universe / art style
     parts.push(style+".");
@@ -1577,14 +1588,15 @@ function AvatarsPage(){
     if(c.details)parts.push("Additional details: "+c.details);
 
     // 10. Technical output spec
-    const avLightStr=c.avLight?"Lighting: "+c.avLight+".":"Lighting: soft even professional studio lighting, consistent across all panels.";
-    const avEnvStr=c.avEnv?"Background/Environment: "+c.avEnv+".":"Background: plain neutral grey studio background across all three panels.";
+    const avLightStr=c.avLight?"Lighting: "+c.avLight+".":"Lighting: soft even professional studio lighting"+(isMultiPanel?", consistent across all panels.":".");
+    const avEnvStr=c.avEnv?"Background/Environment: "+c.avEnv+".":"Background: plain neutral grey studio background"+(isMultiPanel?" across all three panels.":".");
     const avLensStr=c.avLens?"Lens: "+c.avLens+".":"";
     const avAspectStr=c.avAspect&&c.avAspect!=="16:9"?"Aspect ratio: "+c.avAspect+".":"";
+    const layoutSpec=isMultiPanel?"single 1x3 grid image":"single image";
     parts.push(
       [avEnvStr,avLightStr,avLensStr,avAspectStr].filter(Boolean).join(" ")+"\n"+
-      "Output as a single 1x3 grid image. Ultra high resolution, sharp focus, physically accurate anatomy. "+
-      "No text, captions, labels, UI elements, branding, or watermarks in any panel."
+      "Output as a "+layoutSpec+". Ultra high resolution, sharp focus, physically accurate anatomy. "+
+      "No text, captions, labels, UI elements, branding, or watermarks."
     );
 
     return parts.join("\n\n");
@@ -1790,7 +1802,7 @@ function AvatarsPage(){
                   transition:"all .15s",width:100}}>
                 <div style={{width:100,height:100,
                   backgroundImage:"url(/expression.png)",
-                  backgroundSize:"500px 100px",
+                  backgroundSize:"500px 500px",
                   backgroundPosition:r.sx+"px "+r.sy+"px",
                   backgroundRepeat:"no-repeat"}}/>
                 <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
@@ -2109,6 +2121,25 @@ function AvatarsPage(){
         </div>
       </Sec>
 
+      <Sec title="Output Layout">
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {LAYOUT_SPRITES.map(r=>(
+            <div key={r.name} onClick={()=>set("avLayout",r.name)}
+              style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                border:"2px solid "+(c.avLayout===r.name?"#e8780a":"var(--bd)"),
+                boxShadow:c.avLayout===r.name?"0 0 14px rgba(232,120,10,.4)":"none",
+                transition:"all .15s",width:140}}>
+              <div style={{width:140,height:200,
+                backgroundImage:"url(/layout.png)",
+                backgroundSize:"281px 1000px",
+                backgroundPosition:r.sx+"px "+r.sy+"px",
+                backgroundRepeat:"no-repeat"}}/>
+              <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:10,fontWeight:600,
+                color:c.avLayout===r.name?"#e8780a":"var(--t)"}}>{r.name}</div>
+            </div>
+          ))}
+        </div>
+      </Sec>
 
       <Sec title="Background &amp; Lighting" badge="OPTIONAL">
         <div style={{marginBottom:16}}>
