@@ -1422,13 +1422,13 @@ function AnglesPage(){
                 boxShadow:aspectRatio===r.id?"0 0 14px rgba(232,120,10,.4)":"none",
                 transition:"all .15s",width:r.fw,
                 display:"flex",flexDirection:"column",alignItems:"center",
-                padding:"10px 8px",background:"var(--s1)",gap:6}}>
+                paddingTop:10,background:"var(--s1)",gap:6}}>
               <div style={{width:80,height:80,flexShrink:0,
                 backgroundImage:"url(/format.png)",
                 backgroundSize:"400px 80px",
                 backgroundPosition:r.sx+"px 0px",
                 backgroundRepeat:"no-repeat"}}/>
-              <div style={{padding:"5px 4px 6px",textAlign:"center",fontSize:11,fontWeight:600,
+              <div style={{paddingBottom:6,textAlign:"center",fontSize:11,fontWeight:600,
                 color:aspectRatio===r.id?"#e8780a":"var(--t)"}}><span translate="no">{r.name}</span></div>
             </div>
           ))}
@@ -2881,6 +2881,10 @@ function VideoPromptPage(){
   return(
     <div className="page">
       <PipelineStrip active={2}/>
+      <div style={{margin:"0 0 20px",padding:"10px 16px",borderRadius:8,border:"1px solid rgba(255,180,0,.3)",background:"rgba(255,180,0,.07)",fontSize:12,color:"var(--t)",display:"flex",alignItems:"center",gap:10}}>
+        <span style={{fontSize:16}}>🚧</span>
+        <span><strong style={{color:"rgba(255,200,80,.9)"}}>Under Construction</strong> — Video prompt builder is work in progress. Prompt generation works but may need tuning.</span>
+      </div>
       <div className="ph">
         <div className="pt">🎬 Video <b>Prompt</b></div>
         <div className="ps">Build cinematic video prompts for Sora, Runway, Kling and Pika.</div>
