@@ -25,7 +25,8 @@ textarea::placeholder{color:var(--t4)}
 .shell{min-height:100vh;padding-bottom:100px}
 .nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:100;background:rgba(6,6,6,.95);backdrop-filter:blur(20px);transition:all .3s}
 .nav.scrolled{border-bottom-color:var(--s2);background:rgba(6,6,6,.98)}
-.logo{font-family:var(--disp);font-size:20px;letter-spacing:6px;color:var(--t)}
+.logo{font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--t);line-height:1.2;white-space:nowrap}
+.logo span{color:var(--acc);font-weight:400}
 .ntabs{display:flex;gap:4px;position:absolute;left:50%;transform:translateX(-50%)}
 .nt{font-size:12px;font-weight:600;letter-spacing:1px;padding:7px 18px;border-radius:var(--r);border:none;background:transparent;color:var(--t3);cursor:pointer;transition:all .2s var(--ease-out)}
 .nt:hover{color:var(--t);background:var(--s2)}
@@ -69,6 +70,7 @@ textarea::placeholder{color:var(--t4)}
 .pbox.live{border-color:var(--bd2);color:var(--t);background:var(--s2)}
 .pbox-empty{color:var(--t4);font-style:italic;font-size:13px;font-family:var(--font)}
 .bbar{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(to top,var(--bg) 0%,rgba(6,6,6,.95) 100%);border-top:1px solid var(--bd);padding:14px 28px;display:flex;align-items:center;justify-content:center;gap:12px;backdrop-filter:blur(20px);z-index:90}
+.pbar{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
 .btn{font-size:12px;font-weight:600;letter-spacing:1.5px;padding:11px 24px;border-radius:var(--r);border:1px solid var(--bd);background:var(--s2);color:var(--t);cursor:pointer;transition:all .15s;user-select:none;text-transform:uppercase}
 .btn:hover{border-color:var(--bdh);color:var(--t);background:var(--s3)}
 .btn:active{transform:translateY(0)}
@@ -149,18 +151,25 @@ textarea::placeholder{color:var(--t4)}
 .user-chip{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:20px;background:var(--s2);border:1px solid var(--bd);font-size:11px;color:var(--t3);cursor:pointer;transition:all .2s}
 .user-chip:hover{border-color:var(--bdh);color:var(--t)}
 .user-chip img{width:20px;height:20px;border-radius:50%}
-.genwith{display:flex;align-items:center;gap:8px;padding:10px 28px 0;flex-wrap:wrap}
+.genwith{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
 .genwith-label{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--t4);text-transform:uppercase;white-space:nowrap}
+.genwith-note{font-size:10px;color:var(--t4);font-style:italic;margin-left:4px}
 .genwith-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1px solid var(--bd);background:var(--s2);color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;white-space:nowrap}
 .genwith-btn:hover{border-color:var(--acc);color:var(--acc);background:var(--acdim);transform:translateY(-1px)}
 `;
 
 // ─── GOOGLE AUTH ──────────────────────────────────────────────────────────────
 const CLIENT_ID="730553596086-s59f1v381pocjk3gr992m8u18s3724k2.apps.googleusercontent.com";
+const AUTH_KEY="pmstudio_user";
 
 function useGoogleAuth(){
-  const[user,setUser]=useState(null);
+  const[user,setUser]=useState(()=>{
+    try{const s=localStorage.getItem(AUTH_KEY);return s?JSON.parse(s):null;}catch{return null;}
+  });
   const[ready,setReady]=useState(false);
+
+  const saveUser=(u)=>{setUser(u);try{if(u)localStorage.setItem(AUTH_KEY,JSON.stringify(u));else localStorage.removeItem(AUTH_KEY);}catch{}};
+
   useEffect(()=>{
     const script=document.createElement("script");
     script.src="https://accounts.google.com/gsi/client";
@@ -171,25 +180,27 @@ function useGoogleAuth(){
         client_id:CLIENT_ID,
         callback:(resp)=>{
           const payload=JSON.parse(atob(resp.credential.split(".")[1]));
-          setUser({name:payload.name,email:payload.email,picture:payload.picture,idToken:resp.credential});
+          saveUser({name:payload.name,email:payload.email,picture:payload.picture,idToken:resp.credential,exp:payload.exp});
         },
-        auto_select:false,
+        auto_select:true,
+        context:"signin",
+        itp_support:true,
       });
+      // auto-prompt — will silently sign in if already consented
+      window.google.accounts.id.prompt();
       setReady(true);
     };
     document.head.appendChild(script);
-    return()=>{document.head.removeChild(script)};
+    return()=>{try{document.head.removeChild(script);}catch{}}
   },[]);
-  const signIn=(cb)=>{
-    if(!ready)return;
-    window.google.accounts.id.prompt((n)=>{
-      if(n.isSkippedMoment()||n.isDismissedMoment())cb&&cb(null);
-    });
-  };
-  const signOut=()=>{
-    if(window.google)window.google.accounts.id.disableAutoSelect();
-    setUser(null);
-  };
+
+  // check token expiry on mount
+  useEffect(()=>{
+    if(user&&user.exp&&user.exp<Date.now()/1000){saveUser(null);}
+  },[]);
+
+  const signIn=()=>{if(ready)window.google.accounts.id.prompt();};
+  const signOut=()=>{if(window.google)window.google.accounts.id.disableAutoSelect();saveUser(null);};
   return{user,ready,signIn,signOut};
 }
 
@@ -231,7 +242,8 @@ const GEN_TARGETS=[
   {label:"Gemini",url:"https://gemini.google.com",icon:"◈"},
   {label:"Arena.ai",url:"https://arena.ai/?mode=direct&chat-modality=image",icon:"⊕"},
 ];
-function GenWithLinks({getPrompt,onCopy}){
+function GenWithLinks({getPrompt,onCopy,targets}){
+  const list=targets||GEN_TARGETS;
   const handle=async(url)=>{
     await copyText(getPrompt());
     onCopy&&onCopy();
@@ -240,11 +252,12 @@ function GenWithLinks({getPrompt,onCopy}){
   return(
     <div className="genwith">
       <span className="genwith-label">Generate with</span>
-      {GEN_TARGETS.map(t=>(
+      {list.map(t=>(
         <button key={t.label} className="genwith-btn" onClick={()=>handle(t.url)}>
           <span>{t.icon}</span>{t.label} ↗
         </button>
       ))}
+      <span className="genwith-note">— clicking copies prompt to clipboard</span>
     </div>
   );
 }
@@ -1177,18 +1190,16 @@ function AnglesPage(){
             ✦ Enhanced by Gemini — <button onClick={()=>setEnhanced("")} style={{background:"none",border:"none",color:"var(--t4)",fontSize:11,cursor:"pointer",textDecoration:"underline"}}>revert to original</button>
           </div>
         )}
-      </div>
-      {hasAny&&<GenWithLinks getPrompt={()=>enhanced||prompt} onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}/> }
-
-
-      <div className="bbar">
-        <button className="btn" onClick={reset}>Reset</button>
-        <button className="btn" onClick={random}>Random</button>
-        <button className="btn" onClick={enhance} disabled={!hasAny||enhancing}
-          style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"var(--t4)":"var(--acc)",background:"var(--acdim)"}}>
-          {enhancing?"ENHANCING…":"✦ Enhance"}
-        </button>
-        <button className={`btn${hasAny?" pri":""}`} onClick={copy} disabled={!hasAny}>Copy Prompt</button>
+        <div className="pbar">
+          <button className="btn" onClick={reset}>Reset</button>
+          <button className="btn" onClick={random}>Random</button>
+          <button className="btn" onClick={enhance} disabled={!hasAny||enhancing}
+            style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"var(--t4)":"var(--acc)",background:"var(--acdim)"}}>
+            {enhancing?"ENHANCING…":"✦ Enhance"}
+          </button>
+          <button className={`btn${hasAny?" pri":""}`} onClick={copy} disabled={!hasAny}>Copy Prompt</button>
+        </div>
+        {hasAny&&<GenWithLinks getPrompt={()=>enhanced||prompt} onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}/>}
       </div>
 
       {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)} />}
@@ -2372,19 +2383,18 @@ function AvatarsPage(){
             ✦ Enhanced by Gemini — <button onClick={()=>setEnhanced("")} style={{background:"none",border:"none",color:"var(--t4)",fontSize:11,cursor:"pointer",textDecoration:"underline"}}>revert to original</button>
           </div>
         )}
+        <div className="pbar">
+          <button className="btn" onClick={()=>{setC(AV_DEF);setEnhanced("");}}>Reset</button>
+          <button className="btn" onClick={surprise}>Surprise Me</button>
+          <button className="btn" onClick={enhance} disabled={enhancing}
+            style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"var(--t4)":"var(--acc)",background:"var(--acdim)"}}>
+            {enhancing?"ENHANCING…":"✦ Enhance"}
+          </button>
+          <button className="btn pri" onClick={copy}>Copy Prompt</button>
+        </div>
+        <GenWithLinks getPrompt={()=>enhanced||prompt} onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}/>
       </div>
 
-      <GenWithLinks getPrompt={()=>enhanced||prompt} onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}/>
-
-      <div className="bbar">
-        <button className="btn" onClick={()=>{setC(AV_DEF);setEnhanced("");}}>Reset</button>
-        <button className="btn" onClick={surprise}>Surprise Me</button>
-        <button className="btn" onClick={enhance} disabled={enhancing}
-          style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"var(--t4)":"var(--acc)",background:"var(--acdim)"}}>
-          {enhancing?"ENHANCING…":"✦ Enhance"}
-        </button>
-        <button className="btn pri" onClick={copy}>Copy Prompt</button>
-      </div>
       {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)} />}
       {toast&&<div className="toast">{toast}</div>}
     </div>
@@ -2392,151 +2402,235 @@ function AvatarsPage(){
 }
 
 // ─── VIDEO PROMPT PAGE ────────────────────────────────────────────────────────
-const VP_STYLES=["Simple","Cinematic","Documentary","Commercial","Abstract","Horror","Action","Romance","Sci-Fi","Fantasy"];
-const VP_CAMERA_STYLES=["None","Handheld","Steadicam","Drone","Dolly","Gimbal","POV","Static Tripod","360° Rotating"];
-const VP_CAMERA_DIR=["None","Push In","Pull Out","Pan Left","Pan Right","Tilt Up","Tilt Down","Orbit","Crane Up","Crane Down"];
-const VP_PACING=["None","Slow & Deliberate","Normal","Fast Cuts","Hyper Edit","Rhythmic","Montage"];
-const VP_FX=["None","Lens Flare","Bokeh","Rack Focus","Depth of Field","Motion Blur","Light Leaks","Film Grain","Anamorphic Flare"];
-const VP_LENGTH=["Short","Medium","Long","Extended"];
-const VP_MODELS=["claude-sonnet-4-20250514"];
+const VP_CAM_MOVES=["Static","Slow Push In","Pull Out","Pan Left","Pan Right","Tilt Up","Tilt Down","Orbit Subject","Crane Up","Handheld Drift","Drone Flyover","Dutch Tilt"];
+const VP_PACING_OPTS=["Slow & Deliberate","Normal Flow","Fast Cuts","Rhythmic Match","Montage","Single Take"];
+const VP_DURATION=["3s","5s","8s","10s","15s","30s"];
+const VP_SOUND=["Silent","Ambient Sound","Music Driven","Dialogue","Natural Sound","Score"];
+const VP_STYLE_OPTS=["Cinematic","Documentary","Commercial","Music Video","Horror","Action","Romantic","Sci-Fi","Fantasy","Noir","Nature","Animation Style"];
+const VID_GEN_TARGETS=[
+  {label:"Sora",url:"https://sora.com",icon:"◉"},
+  {label:"Runway",url:"https://runwayml.com",icon:"▶"},
+  {label:"Kling",url:"https://klingai.com",icon:"◆"},
+  {label:"Pika",url:"https://pika.art",icon:"⚡"},
+];
+const FRAME_GEN_TARGETS=[
+  {label:"Grok Imagine",url:"https://grok.com/imagine",icon:"✦"},
+  {label:"Gemini",url:"https://gemini.google.com",icon:"◈"},
+  {label:"Arena.ai",url:"https://arena.ai/?mode=direct&chat-modality=image",icon:"⊕"},
+];
+
+function buildVideoPrompt({scene,firstFrame,lastFrame,camMove,pacing,duration,sound,lighting,colorGrade,lens,filmStock,style,custom}){
+  if(!scene.trim()&&!firstFrame.trim()&&!lastFrame.trim())return"";
+  const parts=[];
+  if(scene.trim())parts.push(scene.trim()+".");
+  if(firstFrame.trim())parts.push(`Opens on: ${firstFrame.trim()}.`);
+  if(lastFrame.trim())parts.push(`Ends with: ${lastFrame.trim()}.`);
+  const cam=[];
+  if(camMove&&camMove!=="Static")cam.push(camMove.toLowerCase()+" camera movement");
+  if(lens){const l=LENSES.find(x=>x.mm===lens);if(l)cam.push(l.mm+" lens");}
+  if(cam.length)parts.push("Camera: "+cam.join(", ")+".");
+  const vis=[];
+  if(lighting){const l=LIGHTING.find(x=>x.id===lighting);if(l)vis.push(l.name.toLowerCase()+" lighting");}
+  if(colorGrade){const c=COLOR_GRADES.find(x=>x.id===colorGrade);if(c)vis.push(c.name.toLowerCase()+" color grade");}
+  if(filmStock){const f=FILM_STOCKS.find(x=>x.id===filmStock);if(f)vis.push(f.name.toLowerCase()+" film stock");}
+  if(vis.length)parts.push("Visual: "+vis.join(", ")+".");
+  const rhythm=[];
+  if(pacing)rhythm.push(pacing.toLowerCase()+" pacing");
+  if(duration)rhythm.push(duration+" duration");
+  if(sound&&sound!=="Silent")rhythm.push(sound.toLowerCase());
+  if(rhythm.length)parts.push("Rhythm: "+rhythm.join(", ")+".");
+  if(style)parts.push("Style: "+style.toLowerCase()+".");
+  if(custom.trim())parts.push(custom.trim());
+  return parts.join(" ");
+}
+
+function buildFramePrompt(frameDesc,{lighting,colorGrade,lens,filmStock,style}){
+  if(!frameDesc.trim())return"";
+  const vis=[];
+  if(lighting){const l=LIGHTING.find(x=>x.id===lighting);if(l)vis.push(l.name.toLowerCase()+" lighting");}
+  if(colorGrade){const c=COLOR_GRADES.find(x=>x.id===colorGrade);if(c)vis.push(c.name.toLowerCase()+" color");}
+  if(filmStock){const f=FILM_STOCKS.find(x=>x.id===filmStock);if(f)vis.push(f.name.toLowerCase()+" film look");}
+  if(lens)vis.push(lens+" lens");
+  if(style)vis.push(style.toLowerCase()+" style");
+  return frameDesc.trim()+(vis.length?". "+vis.join(", ")+".":"");
+}
 
 function VideoPromptPage(){
-  const[concept,setConcept]=useState("");
-  const[style,setStyle]=useState("Simple");
-  const[camStyle,setCamStyle]=useState("None");
-  const[camDir,setCamDir]=useState("None");
-  const[pacing,setPacing]=useState("None");
-  const[fx,setFx]=useState("None");
-  const[length,setLength]=useState("Medium");
+  const[scene,setScene]=useState("");
+  const[firstFrame,setFirstFrame]=useState("");
+  const[lastFrame,setLastFrame]=useState("");
+  const[camMove,setCamMove]=useState("Static");
+  const[pacing,setPacing]=useState("Normal Flow");
+  const[duration,setDuration]=useState("8s");
+  const[sound,setSound]=useState("Ambient Sound");
+  const[style,setStyle]=useState("Cinematic");
+  const[lighting,setLighting]=useState(null);
+  const[colorGrade,setColorGrade]=useState(null);
+  const[lens,setLens]=useState(null);
+  const[filmStock,setFilmStock]=useState(null);
   const[custom,setCustom]=useState("");
-  const[result,setResult]=useState("");
-  const[loading,setLoading]=useState(false);
   const[toast,setToast]=useState("");
   const doToast=m=>{setToast(m);setTimeout(()=>setToast(""),2500)};
 
-  const generate=async()=>{
-    if(!concept.trim()){doToast("ENTER A CONCEPT FIRST");return;}
-    setLoading(true);setResult("");
-    const parts=[];
-    parts.push("Concept: "+concept.trim());
-    parts.push("Style: "+style);
-    if(camStyle!=="None")parts.push("Camera style: "+camStyle);
-    if(camDir!=="None")parts.push("Camera direction: "+camDir);
-    if(pacing!=="None")parts.push("Pacing: "+pacing);
-    if(fx!=="None")parts.push("Special effects: "+fx);
-    parts.push("Prompt length: "+length);
-    if(custom.trim())parts.push("Custom elements: "+custom.trim());
-    const userMsg=parts.join("\n");
+  const vparams={scene,firstFrame,lastFrame,camMove,pacing,duration,sound,lighting,colorGrade,lens,filmStock,style,custom};
+  const prompt=buildVideoPrompt(vparams);
+  const hasAny=!!(scene.trim()||firstFrame.trim()||lastFrame.trim());
 
-    const systemPrompt=`You are a professional video prompt engineer specializing in AI video generation (Sora, Runway, Kling, Pika, Luma).
+  const copy=async()=>{const ok=await copyText(prompt);doToast(ok?"COPIED":"COPY FAILED");};
+  const reset=()=>{setScene("");setFirstFrame("");setLastFrame("");setCamMove("Static");setPacing("Normal Flow");setDuration("8s");setSound("Ambient Sound");setStyle("Cinematic");setLighting(null);setColorGrade(null);setLens(null);setFilmStock(null);setCustom("");doToast("RESET");};
+  const tog1=(setter,id)=>setter(p=>p===id?null:id);
 
-Generate a single, ready-to-use video generation prompt based on the user's parameters. The prompt must:
-- Be written as a direct, vivid scene description (not instructions)
-- Include precise camera movement, framing, and visual details
-- Match the requested style, pacing, and effects naturally woven into the prose
-- Be ${length==="Short"?"1-2 sentences":length==="Medium"?"3-4 sentences":length==="Long"?"5-6 sentences":"7-9 sentences"} long
-- Use cinematic language: focal length, lens quality, color grading, atmosphere
-- End with a technical spec line: [style | camera | aspect ratio | mood]
-
-Output ONLY the prompt. No preamble, no explanation, no quotes.`;
-
-    try{
-      const resp=await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          model:"claude-sonnet-4-20250514",
-          max_tokens:1000,
-          system:systemPrompt,
-          messages:[{role:"user",content:userMsg}]
-        })
-      });
-      const data=await resp.json();
-      const text=data.content?.find(b=>b.type==="text")?.text||"";
-      setResult(text);
-    }catch(e){
-      doToast("API ERROR — CHECK CONSOLE");
-      console.error(e);
-    }
-    setLoading(false);
-  };
-
-  const copy=async()=>{
-    if(!result)return;
-    const ok=await copyText(result);
-    doToast(ok?"COPIED TO CLIPBOARD":"COPY FAILED");
-  };
-
-  const Row=({label,children})=>(
+  const ORow=({label,stateKey,val,onSet,opts})=>(
     <div style={{display:"flex",flexDirection:"column",gap:6}}>
-      <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:"var(--t4)"}}>{label}</div>
-      {children}
+      <div style={{fontSize:10,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:"var(--t4)"}}>{label}</div>
+      <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+        {opts.map(o=>(
+          <button key={o} className={`ob${val===o?" sel":""}`} onClick={()=>onSet(stateKey,o)}>{o}</button>
+        ))}
+      </div>
     </div>
   );
 
-  const Sel=({val,opts,onChange})=>(
-    <select value={val} onChange={e=>onChange(e.target.value)}
-      style={{background:"var(--s2)",border:"1px solid var(--bd)",borderRadius:"var(--r)",
-        color:"var(--t)",fontSize:13,padding:"10px 14px",outline:"none",cursor:"pointer",
-        fontFamily:"var(--font)",appearance:"none",
-        backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M6 8L0 0h12z'/%3E%3C/svg%3E\")",
-        backgroundRepeat:"no-repeat",backgroundPosition:"right 14px center",paddingRight:36,
-        transition:"all .15s"}}>
-      {opts.map(o=><option key={o} value={o}>{o}</option>)}
-    </select>
-  );
+  const setField=(key,val)=>{
+    if(key==="camMove")setCamMove(val);
+    else if(key==="pacing")setPacing(val);
+    else if(key==="duration")setDuration(val);
+    else if(key==="sound")setSound(val);
+    else if(key==="style")setStyle(val);
+  };
 
   return(
-    <div className="page" style={{maxWidth:720}}>
+    <div className="page">
       <div className="ph">
         <div className="pt">Video <b>Prompt</b></div>
-        <div className="ps">AI-powered video prompt generator. Describe your concept, set camera and style parameters — Claude writes the cinematic prompt for Sora, Runway, Kling, Pika.</div>
+        <div className="ps">Build cinematic video prompts for Sora, Runway, Kling and Pika. Define your scene, set first and last frames, pick visual style — generate separately.</div>
       </div>
 
-      <div style={{background:"var(--s1)",border:"1px solid var(--bd)",borderRadius:"var(--r2)",padding:"28px 28px 24px",display:"flex",flexDirection:"column",gap:20}}>
+      <div className="sec">
+        <div className="sh"><span className="st">Scene</span><span className="sb">CORE</span></div>
+        <textarea rows={3} value={scene} onChange={e=>setScene(e.target.value)}
+          placeholder="What happens in the video? e.g. A lone figure walks through a rain-soaked city street at night, neon reflections on the pavement..."/>
+      </div>
 
-        <Row label="Input Concept">
-          <textarea rows={4} value={concept} onChange={e=>setConcept(e.target.value)}
-            placeholder="e.g., A lone astronaut walking through an abandoned space station at dawn..."/>
-        </Row>
-
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-          <Row label="Style"><Sel val={style} opts={VP_STYLES} onChange={setStyle}/></Row>
-          <Row label="Prompt Length"><Sel val={length} opts={VP_LENGTH} onChange={setLength}/></Row>
-          <Row label="Camera Style"><Sel val={camStyle} opts={VP_CAMERA_STYLES} onChange={setCamStyle}/></Row>
-          <Row label="Camera Direction"><Sel val={camDir} opts={VP_CAMERA_DIR} onChange={setCamDir}/></Row>
-          <Row label="Pacing"><Sel val={pacing} opts={VP_PACING} onChange={setPacing}/></Row>
-          <Row label="Special Effects"><Sel val={fx} opts={VP_FX} onChange={setFx}/></Row>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,padding:"0 0 4px"}}>
+        <div className="sec" style={{margin:0}}>
+          <div className="sh"><span className="st">First Frame</span><span className="sb">OPENING</span></div>
+          <textarea rows={3} value={firstFrame} onChange={e=>setFirstFrame(e.target.value)}
+            placeholder="Opening shot description — used as image prompt for frame generation"/>
         </div>
-
-        <Row label="Custom Elements (Optional)">
-          <textarea rows={2} value={custom} onChange={e=>setCustom(e.target.value)}
-            placeholder="e.g., neon signs, rain, specific props, color palette..."/>
-        </Row>
-
-        <button onClick={generate} disabled={loading}
-          style={{padding:"14px 0",fontSize:13,fontWeight:700,letterSpacing:2,textTransform:"uppercase",
-            background:loading?"var(--s3)":"var(--acc)",border:"none",borderRadius:"var(--r)",
-            color:loading?"var(--t4)":"#000",cursor:loading?"not-allowed":"pointer",
-            transition:"all .2s",boxShadow:loading?"none":"0 0 30px var(--acglow)"}}>
-          {loading?"GENERATING…":"GENERATE VIDEO PROMPT"}
-        </button>
-
-        {result&&(
-          <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:"var(--t4)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span>Generated Prompt</span>
-              <button onClick={copy}
-                style={{fontSize:11,fontWeight:700,letterSpacing:1,padding:"5px 14px",
-                  borderRadius:4,border:"1px solid var(--acc)",background:"var(--acdim)",
-                  color:"var(--acc)",cursor:"pointer",textTransform:"uppercase"}}>
-                Copy ↗
-              </button>
-            </div>
-            <div className="pbox live" style={{fontSize:12}}>{result}</div>
-          </div>
-        )}
+        <div className="sec" style={{margin:0}}>
+          <div className="sh"><span className="st">Last Frame</span><span className="sb">CLOSING</span></div>
+          <textarea rows={3} value={lastFrame} onChange={e=>setLastFrame(e.target.value)}
+            placeholder="Closing shot description — used as image prompt for frame generation"/>
+        </div>
       </div>
+
+      <div className="sec">
+        <div className="sh"><span className="st">Camera & Motion</span></div>
+        <ORow label="Camera Movement" stateKey="camMove" val={camMove} onSet={setField} opts={VP_CAM_MOVES}/>
+        <div style={{marginTop:14}}>
+          <ORow label="Duration" stateKey="duration" val={duration} onSet={setField} opts={VP_DURATION}/>
+        </div>
+        <div style={{marginTop:14}}>
+          <ORow label="Pacing" stateKey="pacing" val={pacing} onSet={setField} opts={VP_PACING_OPTS}/>
+        </div>
+        <div style={{marginTop:14}}>
+          <ORow label="Sound" stateKey="sound" val={sound} onSet={setField} opts={VP_SOUND}/>
+        </div>
+      </div>
+
+      <div className="sec">
+        <div className="sh"><span className="st">Visual Style</span></div>
+        <ORow label="Style" stateKey="style" val={style} onSet={setField} opts={VP_STYLE_OPTS}/>
+      </div>
+
+      <div className="sec">
+        <div className="sh"><span className="st">Lighting</span></div>
+        <div className="sprite-grid">
+          {LIGHTING.map(l=>(
+            <div key={l.id} className={`scard${lighting===l.id?" sel":""}`} onClick={()=>tog1(setLighting,l.id)}>
+              <div className="simg" style={{width:150,height:105,backgroundImage:`url(${l.src})`,backgroundSize:"750px 315px",backgroundPosition:`-${l.sx}px -${l.sy}px`}}/>
+              <div className="slabel">{l.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="sec">
+        <div className="sh"><span className="st">Color Grade</span></div>
+        <div className="sprite-grid">
+          {COLOR_GRADES.map(c=>(
+            <div key={c.id} className={`scard${colorGrade===c.id?" sel":""}`} onClick={()=>tog1(setColorGrade,c.id)}>
+              <div className="simg" style={{width:150,height:167,backgroundImage:`url(${c.src})`,backgroundSize:"600px 334px",backgroundPosition:`-${c.sx}px -${c.sy}px`}}/>
+              <div className="slabel">{c.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="sec">
+        <div className="sh"><span className="st">Lens</span></div>
+        <div className="sprite-grid">
+          {LENSES.map(l=>(
+            <div key={l.mm} className={`scard${lens===l.mm?" sel":""}`} onClick={()=>tog1(setLens,l.mm)}>
+              <div className="simg" style={{width:150,height:83,backgroundImage:`url(${l.src})`,backgroundSize:"600px 332px",backgroundPosition:`-${l.sx}px -${l.sy}px`}}/>
+              <div className="slabel">{l.mm}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="sec">
+        <div className="sh"><span className="st">Film Stock</span></div>
+        <div className="sprite-grid">
+          {FILM_STOCKS.map(f=>(
+            <div key={f.id} className={`scard${filmStock===f.id?" sel":""}`} onClick={()=>tog1(setFilmStock,f.id)}>
+              <div className="simg" style={{width:150,height:167,backgroundImage:`url(${f.src})`,backgroundSize:"600px 334px",backgroundPosition:`-${f.sx}px -${f.sy}px`}}/>
+              <div className="slabel">{f.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="sec">
+        <div className="sh"><span className="st">Custom Additions</span><span className="sb">OPTIONAL</span></div>
+        <textarea rows={2} value={custom} onChange={e=>setCustom(e.target.value)} placeholder="Additional notes, props, atmosphere, negative elements..."/>
+      </div>
+
+      <div className="sec">
+        <div className="sh"><span className="st">Video Prompt</span>{hasAny&&<span className="sb">LIVE</span>}</div>
+        <div className={`pbox${hasAny?" live":""}`}>
+          {hasAny?prompt:<span className="pbox-empty">Fill scene above to generate your video prompt.</span>}
+        </div>
+        <div className="pbar">
+          <button className="btn" onClick={reset}>Reset</button>
+          <button className={`btn${hasAny?" pri":""}`} onClick={copy} disabled={!hasAny}>Copy Prompt</button>
+        </div>
+        {hasAny&&<GenWithLinks getPrompt={()=>prompt} onCopy={()=>doToast("VIDEO PROMPT COPIED")} targets={VID_GEN_TARGETS}/>}
+      </div>
+
+      {(firstFrame.trim()||lastFrame.trim())&&(
+        <div className="sec">
+          <div className="sh"><span className="st">Frame Generation</span><span className="sb">IMAGE PROMPTS</span></div>
+          <div style={{fontSize:11,color:"var(--t3)",marginBottom:12,lineHeight:1.6}}>
+            Generate key frames as images first — use as reference for your video generation tool.
+          </div>
+          {firstFrame.trim()&&(
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:10,fontWeight:700,letterSpacing:2,color:"var(--t4)",marginBottom:6}}>FIRST FRAME PROMPT</div>
+              <div className="pbox" style={{fontSize:11,marginBottom:8}}>{buildFramePrompt(firstFrame,vparams)}</div>
+              <GenWithLinks getPrompt={()=>buildFramePrompt(firstFrame,vparams)} onCopy={()=>doToast("FIRST FRAME PROMPT COPIED")} targets={FRAME_GEN_TARGETS}/>
+            </div>
+          )}
+          {lastFrame.trim()&&(
+            <div>
+              <div style={{fontSize:10,fontWeight:700,letterSpacing:2,color:"var(--t4)",marginBottom:6}}>LAST FRAME PROMPT</div>
+              <div className="pbox" style={{fontSize:11,marginBottom:8}}>{buildFramePrompt(lastFrame,vparams)}</div>
+              <GenWithLinks getPrompt={()=>buildFramePrompt(lastFrame,vparams)} onCopy={()=>doToast("LAST FRAME PROMPT COPIED")} targets={FRAME_GEN_TARGETS}/>
+            </div>
+          )}
+        </div>
+      )}
 
       {toast&&<div className="toast">{toast}</div>}
     </div>
@@ -2558,7 +2652,7 @@ export default function App(){
       <style>{G}</style>
       <div className="shell">
         <nav className={`nav${scrolled?" scrolled":""}`}>
-          <div className="logo">CINEMATIC</div>
+          <div className="logo">PrompTo <span>miniStudio</span></div>
           <div className="ntabs">
             <button className={`nt${page==="angles"?" on":""}`} onClick={()=>setPage("angles")}>Multi-Shot</button>
             <button className={`nt${page==="avatars"?" on":""}`} onClick={()=>setPage("avatars")}>Character Sheet</button>
