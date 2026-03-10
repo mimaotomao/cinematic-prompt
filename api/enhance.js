@@ -55,7 +55,7 @@ Rules:
       body: JSON.stringify({
         system_instruction: { parts: [{ text: systemPrompt }] },
         contents: [{ role: "user", parts: [{ text: userMsg }] }],
-        generationConfig: { temperature: 0.9, maxOutputTokens: 3000 }
+        generationConfig: { temperature: 0.9, maxOutputTokens: 8192 }
       })
     });
 
