@@ -3168,10 +3168,28 @@ function HowItWorksPage(){
 // ─── ROOT ──────────────────────────────────────────────────────────────────────
 const PageCtx = React.createContext(()=>{});
 
+function useTranslation(){
+  const[forceEN,setForceEN]=useState(()=>localStorage.getItem("pmstudio_lang")==="en");
+  useEffect(()=>{
+    const html=document.documentElement;
+    if(forceEN){
+      html.setAttribute("translate","no");
+      html.classList.add("notranslate");
+      localStorage.setItem("pmstudio_lang","en");
+    } else {
+      html.removeAttribute("translate");
+      html.classList.remove("notranslate");
+      localStorage.removeItem("pmstudio_lang");
+    }
+  },[forceEN]);
+  return{forceEN,toggleEN:()=>setForceEN(v=>!v)};
+}
+
 export default function App(){
   const[page,setPage]=useState("avatars");
   const[scrolled,setScrolled]=useState(false);
   const auth=useGoogleAuth();
+  const{forceEN,toggleEN}=useTranslation();
   useEffect(()=>{
     const onScroll=()=>setScrolled(window.scrollY>50);
     window.addEventListener('scroll',onScroll);
@@ -3208,6 +3226,20 @@ export default function App(){
             <button className={`nt${page==="angles"?" on":""}`} onClick={()=>setPage("angles")}>Multi-Shot</button>
             <button className={`nt${page==="video"?" on":""}`} onClick={()=>setPage("video")}>🚧 Video</button>
             <a href="https://github.com/mimaotomao/prompto_ministudio" target="_blank" rel="noopener noreferrer" className="nt" style={{textDecoration:"none"}}>GitHub ↗</a>
+            <button
+              className="nt"
+              onClick={toggleEN}
+              title={forceEN?"Allow browser translation":"Force English — disable browser translation"}
+              style={{
+                display:"flex",alignItems:"center",gap:4,
+                borderLeft:"1px solid var(--bd)",
+                color:forceEN?"var(--acc)":"var(--t)",
+                fontWeight:forceEN?700:500,
+                opacity:forceEN?1:.6
+              }}
+            >
+              🌐 {forceEN?"EN ✓":"EN"}
+            </button>
           </div>
         </nav>
         {page==="how"?<HowItWorksPage/>:page==="angles"?<AnglesPage/>:page==="avatars"?<AvatarsPage/>:<VideoPromptPage/>}
