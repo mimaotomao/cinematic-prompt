@@ -10,7 +10,7 @@ async function verifyGoogleToken(idToken) {
   } catch { return null; }
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -46,7 +46,7 @@ module.exports = async function handler(req, res) {
     const text = await gemResp.text();
     let data;
     try { data = JSON.parse(text); }
-    catch { return res.status(500).json({ error: "Gemini returned non-JSON: " + text.slice(0, 300) }); }
+    catch { return res.status(500).json({ error: "Gemini returned: " + text.slice(0, 300) }); }
 
     if (!gemResp.ok) return res.status(500).json({ error: data.error?.message || "Gemini error", model });
     const result = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
@@ -55,4 +55,4 @@ module.exports = async function handler(req, res) {
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
-};
+}
