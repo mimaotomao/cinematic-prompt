@@ -78,6 +78,10 @@ textarea::placeholder{color:var(--t4)}
 .btn.pri:hover{background:var(--acc2);box-shadow:0 0 40px var(--acglow)}
 .btn:disabled{opacity:.3;pointer-events:none}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--acc);color:#000;font-size:11px;font-weight:800;letter-spacing:3px;padding:10px 24px;border-radius:6px;z-index:200;pointer-events:none;animation:ft 2.5s forwards;text-transform:uppercase}
+.enhancing-bar{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--acc),var(--acc2),var(--acc));background-size:200% 100%;animation:enhbar 1.5s linear infinite;z-index:500;pointer-events:none}
+@keyframes enhbar{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.enhancing-badge{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:rgba(6,6,6,.92);border:1px solid var(--acc);color:var(--acc);font-size:11px;font-weight:700;letter-spacing:2px;padding:8px 20px;border-radius:20px;z-index:499;pointer-events:none;display:flex;align-items:center;gap:8px;backdrop-filter:blur(10px);text-transform:uppercase;animation:fadein .2s ease}
+@keyframes fadein{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes ft{0%{opacity:0;transform:translateX(-50%) translateY(20px) scale(.9)}15%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}85%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-10px)}}
 .divider{border:none;border-top:1px solid var(--bd);margin:32px 0}
 .scene-field{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r2);padding:22px 24px;margin-bottom:28px;transition:all .2s}
@@ -228,9 +232,11 @@ async function callEnhance(prompt, instructions, idToken){
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({prompt,instructions,idToken})
   });
-  const data=await resp.json();
+  let data;
+  try{data=await resp.json();}
+  catch{throw new Error("Server error ("+resp.status+") — API not deployed or unreachable");}
   if(resp.status===401){const e=new Error(data.error||"Unauthorized");e.status=401;throw e;}
-  if(!resp.ok)throw new Error(data.error||"API error");
+  if(!resp.ok)throw new Error(data.error||"API error "+resp.status);
   return data.result||"";
 }
 
@@ -238,11 +244,16 @@ const AuthCtx=React.createContext({user:null,ready:false,signOut:()=>{}});
 
 // ─── AUTH MODAL ───────────────────────────────────────────────────────────────
 function AuthModal({onClose}){
+  const{user}=React.useContext(AuthCtx);
+  useEffect(()=>{if(user)onClose();},[user]);
   return(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e=>e.stopPropagation()}>
         <div className="modal-title">✦ <b>Enhance</b></div>
-        <div className="modal-sub">Sign in with Google to use AI-powered prompt enhancement — free, no credit card required.</div>
+        <div className="modal-sub">
+          The app works fully without an account — all prompt builders, selectors, and copy functions are free and open.<br/><br/>
+          <span style={{color:"var(--acc)",fontWeight:600}}>✦ Enhance</span> uses Google AI (Gemini) to cinematically rewrite your prompt. Sign in once with Google to unlock it — free, no credit card, no data stored.
+        </div>
         <div style={{display:"flex",justifyContent:"center"}}>
           <GoogleSignInBtn/>
         </div>
@@ -252,7 +263,20 @@ function AuthModal({onClose}){
   );
 }
 
-// ─── GENERATE WITH LINKS ─────────────────────────────────────────────────────
+function EnhancingIndicator(){
+  const[dot,setDot]=useState(0);
+  useEffect(()=>{const t=setInterval(()=>setDot(d=>(d+1)%4),400);return()=>clearInterval(t);},[]);
+  const dots=".".repeat(dot+1).padEnd(3," ");
+  return(
+    <>
+      <div className="enhancing-bar"/>
+      <div className="enhancing-badge">
+        <span style={{fontSize:14}}>✦</span>
+        AI enhancing prompt{dots}
+      </div>
+    </>
+  );
+}
 const GEN_TARGETS=[
   {label:"Grok Imagine",url:"https://grok.com/imagine",icon:"✦"},
   {label:"Gemini",url:"https://gemini.google.com",icon:"◈"},
@@ -1222,6 +1246,7 @@ function AnglesPage(){
       </div>
 
       {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)} />}
+      {enhancing&&<EnhancingIndicator/>}
       {toast&&<div className="toast">{toast}</div>}
 
       <button className={`floating-btn${showHistory?" active":""}`} onClick={()=>setShowHistory(v=>!v)}>
@@ -2436,6 +2461,7 @@ function AvatarsPage(){
       </div>
 
       {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)} />}
+      {enhancing&&<EnhancingIndicator/>}
       {toast&&<div className="toast">{toast}</div>}
     </div>
   );
@@ -2694,7 +2720,7 @@ export default function App(){
         <nav className={`nav${scrolled?" scrolled":""}`} style={{flexDirection:"column",height:"auto",padding:"12px 28px 0",gap:0}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",paddingBottom:10}}>
             <div className="logo">PrompTo <span>miniStudio</span></div>
-            <div style={{display:"flex",justifyContent:"flex-end"}}>
+            <div style={{display:"flex",alignItems:"center",gap:12,justifyContent:"flex-end"}}>
               {auth.user?(
                 <button className="user-chip" onClick={auth.signOut} title="Sign out">
                   <img src={auth.user.picture} alt=""/>
@@ -2702,7 +2728,12 @@ export default function App(){
                   <span style={{color:"var(--t)"}}>✕</span>
                 </button>
               ):(
-                <GoogleSignInBtn compact/>
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  <span style={{fontSize:11,color:"var(--t)",opacity:.7,whiteSpace:"nowrap"}}>
+                    Sign in to unlock <span style={{color:"var(--acc)",fontWeight:700}}>✦ Enhance</span>
+                  </span>
+                  <GoogleSignInBtn compact/>
+                </div>
               )}
             </div>
           </div>
