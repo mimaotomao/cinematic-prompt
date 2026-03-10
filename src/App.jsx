@@ -295,6 +295,7 @@ const GEN_TARGETS=[
   {label:"Arena.ai",url:"https://arena.ai/?mode=direct&chat-modality=image",icon:"⊕"},
 ];
 function GenWithLinks({getPrompt,onCopy,targets}){
+  // kept for VideoPromptPage which uses custom targets
   const list=targets||GEN_TARGETS;
   const handle=async(url)=>{
     await copyText(getPrompt());
@@ -314,21 +315,131 @@ function GenWithLinks({getPrompt,onCopy,targets}){
   );
 }
 
-function RefPhotoHint(){
+// ─── WORKFLOW PANEL (replaces GenWithLinks + RefPhotoHint + ExpandToFullShot) ──
+function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmStock, colorGrade, aspectRatio, mode, onToast, isPhoto}){
+  const targets = GEN_TARGETS;
+  const[expanded, setExpanded] = useState(false);
+  const hasGrid = sel && sel.length >= 2;
+
+  const handleGenerate = async(url)=>{
+    await copyText(getPrompt());
+    onCopy && onCopy();
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleExpand = async(panelNum, angleIdx, url)=>{
+    const p = buildExpandPrompt(panelNum, sel.length, {scene, lighting, bg, lens, filmStock, colorGrade, aspectRatio, mode, angleIdx});
+    await copyText(p);
+    onToast(`PANEL ${panelNum} PROMPT COPIED — ATTACH YOUR GRID IMAGE`);
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const stepStyle = {
+    borderRadius:"var(--r)",
+    border:"1px solid var(--bdh)",
+    background:"var(--s2)",
+    overflow:"hidden",
+    marginTop:12
+  };
+  const stepHeadStyle = {
+    display:"flex", alignItems:"center", gap:10,
+    padding:"12px 16px",
+    borderBottom:"1px solid var(--bdh)"
+  };
+  const badgeStyle = (color)=>({
+    width:22, height:22, borderRadius:"50%",
+    background:color, color:"#000",
+    fontSize:11, fontWeight:800,
+    display:"flex", alignItems:"center", justifyContent:"center",
+    flexShrink:0
+  });
+
   return(
-    <div style={{margin:"16px 0 0",padding:"12px 16px",borderRadius:"var(--r)",border:"1px solid rgba(255,180,0,.25)",background:"rgba(255,180,0,.05)",display:"flex",gap:12,alignItems:"flex-start"}}>
-      <span style={{fontSize:18,flexShrink:0,marginTop:1}}>📎</span>
-      <div style={{fontSize:12,color:"var(--t)",lineHeight:1.6}}>
-        <span style={{fontWeight:700,color:"rgba(255,200,80,.9)"}}>Remember to attach your reference photo</span> in the AI generator — this prompt creates <em>variations of an existing subject or scene</em>.
-        {" "}For generating something entirely new (no reference), use the{" "}
-        <span style={{fontWeight:700,color:"var(--acc)"}}>Create from scratch</span> option in your generator of choice.
-        {" "}<a href="https://grok.com/imagine" target="_blank" rel="noopener noreferrer"
-          style={{color:"var(--acc)",textDecoration:"none",fontWeight:600}}>Grok ↗</a>
-        {" · "}<a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer"
-          style={{color:"var(--acc)",textDecoration:"none",fontWeight:600}}>Gemini ↗</a>
-        {" · "}<a href="https://midjourney.com" target="_blank" rel="noopener noreferrer"
-          style={{color:"var(--acc)",textDecoration:"none",fontWeight:600}}>Midjourney ↗</a>
+    <div style={{marginTop:8}}>
+
+      {/* STEP 1 */}
+      <div style={stepStyle}>
+        <div style={stepHeadStyle}>
+          <div style={badgeStyle("var(--acc)")}>1</div>
+          <div>
+            <div style={{fontSize:12,fontWeight:800,color:"var(--t)",letterSpacing:.5}}>
+              Generate the grid
+            </div>
+            <div style={{fontSize:11,color:"var(--t)",opacity:.6,marginTop:1}}>
+              {isPhoto
+                ? "Attach your reference photo, then open a generator"
+                : "Open a generator and paste the prompt"}
+            </div>
+          </div>
+        </div>
+        <div style={{padding:"12px 16px",display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"}}>
+          {targets.map(t=>(
+            <button key={t.label} className="genwith-btn" onClick={()=>handleGenerate(t.url)}>
+              <span>{t.icon}</span>{t.label} ↗
+            </button>
+          ))}
+          <span style={{fontSize:11,color:"var(--t)",opacity:.5,marginLeft:4}}>— copies prompt on click</span>
+        </div>
+        {isPhoto&&(
+          <div style={{margin:"0 16px 12px",padding:"8px 12px",borderRadius:6,background:"rgba(255,180,0,.07)",border:"1px solid rgba(255,180,0,.2)",fontSize:11,color:"var(--t)",lineHeight:1.6}}>
+            📎 <strong style={{color:"rgba(255,200,80,.9)"}}>Attach your reference photo</strong> — this prompt generates variations of that subject/scene.
+            {" "}No reference? Switch mode to <strong style={{color:"var(--acc)"}}>Create from scratch</strong> above.
+          </div>
+        )}
       </div>
+
+      {/* STEP 2 — only when grid has multiple panels */}
+      {hasGrid&&(
+        <div style={stepStyle}>
+          <div style={{...stepHeadStyle,cursor:"pointer",userSelect:"none"}} onClick={()=>setExpanded(v=>!v)}>
+            <div style={badgeStyle("rgba(120,180,255,.8)")}>2</div>
+            <div style={{flexGrow:1}}>
+              <div style={{fontSize:12,fontWeight:800,color:"var(--t)",letterSpacing:.5}}>
+                Expand a panel to full shot
+              </div>
+              <div style={{fontSize:11,color:"var(--t)",opacity:.6,marginTop:1}}>
+                Got your grid? Attach it and expand any panel to a single full-quality image
+              </div>
+            </div>
+            <span style={{fontSize:14,color:"var(--t)",opacity:.5}}>{expanded?"▲":"▼"}</span>
+          </div>
+          {expanded&&(
+            <div style={{padding:"8px 16px 14px"}}>
+              <div style={{fontSize:11,color:"var(--t)",opacity:.55,marginBottom:10}}>
+                Attach the grid image you just generated, then click a panel:
+              </div>
+              {sel.map((angleIdx, idx)=>{
+                const panelNum = idx+1;
+                const angle = ANGLES[angleIdx];
+                return(
+                  <div key={angleIdx} style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",padding:"6px 0",borderTop:idx>0?"1px solid var(--bd)":"none"}}>
+                    <div style={{
+                      width:24,height:24,borderRadius:5,
+                      background:"rgba(255,255,255,.07)",border:"1px solid var(--bdh)",
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      fontSize:12,fontWeight:800,color:"var(--t)",flexShrink:0
+                    }}>{panelNum}</div>
+                    <div style={{fontSize:11,color:"var(--t)",opacity:.75,flexGrow:1,minWidth:100}}>
+                      {angle.name}
+                    </div>
+                    <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                      {targets.slice(0,3).map(t=>(
+                        <button key={t.label}
+                          onClick={()=>handleExpand(panelNum, angleIdx, t.url)}
+                          className="genwith-btn"
+                          style={{fontSize:11,padding:"5px 10px"}}
+                        >
+                          {t.icon} {t.label} ↗
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -1363,9 +1474,13 @@ function AnglesPage(){
           </button>
           <button className={`btn${hasAny?" pri":""}`} onClick={copy} disabled={!hasAny}>Copy Prompt</button>
         </div>
-        {hasAny&&<GenWithLinks getPrompt={()=>enhanced||prompt} onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}/>}
-        {hasAny&&<RefPhotoHint/>}
-        {sel.length>=2&&<ExpandToFullShot sel={sel} totalPanels={sel.length} scene={scene} lighting={light} bg={bg} lens={lens} filmStock={filmStock} colorGrade={colorGrade} aspectRatio={aspectRatio} mode={mode1} onToast={doToast}/>}
+        {hasAny&&<WorkflowPanel
+          getPrompt={()=>enhanced||prompt}
+          onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}
+          sel={sel} scene={scene} lighting={light} bg={bg} lens={lens}
+          filmStock={filmStock} colorGrade={colorGrade} aspectRatio={aspectRatio}
+          mode={mode1} onToast={doToast} isPhoto={mode1==="photo"}
+        />}
       </div>
 
       {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)} />}
@@ -2580,8 +2695,11 @@ function AvatarsPage(){
           </button>
           <button className="btn pri" onClick={copy}>Copy Prompt</button>
         </div>
-        <GenWithLinks getPrompt={()=>enhanced||prompt} onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}/>
-        <RefPhotoHint/>
+        <WorkflowPanel
+          getPrompt={()=>enhanced||prompt}
+          onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}
+          sel={[]} scene={""} onToast={doToast} isPhoto={true}
+        />
       </div>
 
       {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)} />}
