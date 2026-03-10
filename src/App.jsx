@@ -28,7 +28,7 @@ textarea::placeholder{color:var(--t4)}
 .logo{font-family:var(--font);font-size:52px;font-weight:800;letter-spacing:0px;color:var(--t);line-height:1.1;white-space:nowrap}
 .logo span{color:var(--acc);font-weight:300;font-size:44px}
 .ntabs{display:flex;gap:4px;position:absolute;left:50%;transform:translateX(-50%)}
-.nt{font-size:12px;font-weight:600;letter-spacing:1px;padding:7px 18px;border-radius:var(--r);border:none;background:transparent;color:var(--t3);cursor:pointer;transition:all .2s var(--ease-out)}
+.nt{font-size:12px;font-weight:600;letter-spacing:1px;padding:7px 18px;border-radius:var(--r);border:none;background:transparent;color:var(--t);cursor:pointer;transition:all .2s var(--ease-out)}
 .nt:hover{color:var(--t);background:var(--s2)}
 .nt.on{background:var(--acc);color:#000;font-weight:700;box-shadow:0 4px 20px var(--acglow)}
 .page{max-width:1200px;margin:0 auto;padding:40px 24px 120px}
@@ -36,12 +36,12 @@ textarea::placeholder{color:var(--t4)}
 .ph::before{content:'';position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:60px;height:3px;background:var(--acc);border-radius:2px;opacity:.6}
 .pt{font-family:var(--disp);font-size:42px;letter-spacing:5px;margin-bottom:10px;line-height:1.1}
 .pt b{color:var(--acc)}
-.ps{font-size:14px;color:var(--t3);font-weight:400;line-height:1.6;max-width:600px;margin:0 auto}
+.ps{font-size:14px;color:var(--t);font-weight:400;line-height:1.6;max-width:600px;margin:0 auto}
 .pc{margin-top:12px;font-size:13px;font-weight:600;color:var(--t);display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;background:var(--s2);border:1px solid var(--bd);transition:all .3s}
 .pc.full{color:var(--acc);border-color:var(--acc);background:var(--acdim)}
 .sec{margin-bottom:36px}
 .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--bd)}
-.st{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--t3)}
+.st{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--t)}
 .sb{font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:4px;background:var(--acc);color:#000;text-transform:uppercase}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 @media(max-width:900px){.grid3{grid-template-columns:repeat(2,1fr)}}
@@ -52,7 +52,7 @@ textarea::placeholder{color:var(--t4)}
 .ac.dim{opacity:.15;pointer-events:none}
 .abar{width:3px;min-height:44px;flex-shrink:0;background:transparent;transition:background .2s}
 .ac.sel .abar{background:var(--acc)}
-.an{font-size:12px;font-weight:400;padding:10px 14px;line-height:1.4;color:var(--t3);flex:1}
+.an{font-size:12px;font-weight:400;padding:10px 14px;line-height:1.4;color:var(--t);flex:1}
 .ac.sel .an{color:var(--t);font-weight:600}
 .anum{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:var(--acc);color:#000;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
 .rowpills{display:flex;flex-wrap:wrap;gap:8px}
@@ -82,7 +82,7 @@ textarea::placeholder{color:var(--t4)}
 .divider{border:none;border-top:1px solid var(--bd);margin:32px 0}
 .scene-field{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r2);padding:22px 24px;margin-bottom:28px;transition:all .2s}
 .scene-field:focus-within{border-color:var(--bd2)}
-.scene-hint{font-size:11px;color:var(--t4);margin-top:10px;line-height:1.6}
+.scene-hint{font-size:11px;color:var(--t);margin-top:10px;line-height:1.6}
 .ctrl3d{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden}
 .ctrl3d-body{display:grid;grid-template-columns:1fr 320px}
 @media(max-width:900px){.ctrl3d-body{grid-template-columns:1fr}}
@@ -94,10 +94,10 @@ textarea::placeholder{color:var(--t4)}
 .sliders{display:flex;flex-direction:column;gap:16px}
 .slider-row{display:flex;flex-direction:column;gap:8px}
 .slider-hdr{display:flex;justify-content:space-between;align-items:center}
-.slider-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3)}
+.slider-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t)}
 .slider-val{font-family:var(--mono);font-size:13px;color:var(--acc);font-weight:600;min-width:50px;text-align:right}
 .presets{display:flex;flex-direction:column;gap:8px}
-.preset-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3)}
+.preset-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t)}
 .preset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
 .preset-btn{font-size:11px;font-weight:600;padding:7px 0;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--t);cursor:pointer;transition:all .15s;text-align:center;text-transform:uppercase;letter-spacing:.5px}
 .preset-btn:hover{border-color:var(--acc);color:var(--acc);background:var(--acdim)}
@@ -105,7 +105,7 @@ textarea::placeholder{color:var(--t4)}
 .av-sec{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:22px 24px;margin-bottom:14px;transition:all .2s}
 .av-sec:hover{border-color:var(--bdh)}
 .tab-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
-.tab-p{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:30px;border:1px solid var(--bd);background:transparent;color:var(--t3);cursor:pointer;transition:all .15s;position:relative}
+.tab-p{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:30px;border:1px solid var(--bd);background:transparent;color:var(--t);cursor:pointer;transition:all .15s;position:relative}
 .tab-p:hover{color:var(--t);border-color:var(--bdh);background:var(--s2)}
 .tab-p.on{background:var(--acc);border-color:var(--acc);color:#000}
 .tab-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--acc);border:2px solid var(--s1)}
@@ -148,7 +148,7 @@ textarea::placeholder{color:var(--t4)}
 .modal-divider::before,.modal-divider::after{content:'';flex:1;height:1px;background:var(--bd)}
 .modal-skip{font-size:12px;color:var(--t4);text-align:center;cursor:pointer;padding:4px;transition:color .2s}
 .modal-skip:hover{color:var(--t)}
-.user-chip{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:20px;background:var(--s2);border:1px solid var(--bd);font-size:11px;color:var(--t3);cursor:pointer;transition:all .2s}
+.user-chip{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:20px;background:var(--s2);border:1px solid var(--bd);font-size:11px;color:var(--t);cursor:pointer;transition:all .2s}
 .user-chip:hover{border-color:var(--bdh);color:var(--t)}
 .user-chip img{width:20px;height:20px;border-radius:50%}
 .genwith{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:24px;padding-top:20px;border-top:1px solid var(--bdh)}
@@ -182,13 +182,9 @@ function useGoogleAuth(){
           const payload=JSON.parse(atob(resp.credential.split(".")[1]));
           saveUser({name:payload.name,email:payload.email,picture:payload.picture,idToken:resp.credential,exp:payload.exp});
         },
-        auto_select:true,
+        auto_select:false,
         context:"signin",
-        itp_support:true,
       });
-      // only auto-prompt if user NOT already saved (first visit)
-      const saved=localStorage.getItem(AUTH_KEY);
-      if(!saved) window.google.accounts.id.prompt();
       setReady(true);
     };
     document.head.appendChild(script);
@@ -200,9 +196,29 @@ function useGoogleAuth(){
     if(user&&user.exp&&user.exp<Date.now()/1000){saveUser(null);}
   },[]);
 
-  const signIn=()=>{if(ready)window.google.accounts.id.prompt();};
   const signOut=()=>{if(window.google)window.google.accounts.id.disableAutoSelect();saveUser(null);};
-  return{user,ready,signIn,signOut};
+  return{user,ready,signOut};
+}
+
+// ─── GOOGLE SIGN-IN BUTTON ─────────────────────────────────────────────────────
+function GoogleSignInBtn({compact}){
+  const divRef=useRef(null);
+  const{ready,user}=React.useContext(AuthCtx);
+  useEffect(()=>{
+    if(ready&&!user&&divRef.current&&window.google){
+      divRef.current.innerHTML="";
+      window.google.accounts.id.renderButton(divRef.current,{
+        type:"standard",
+        theme:"filled_black",
+        size:compact?"small":"medium",
+        text:"signin_with",
+        shape:"pill",
+        logo_alignment:"left",
+      });
+    }
+  },[ready,user]);
+  if(user)return null;
+  return <div ref={divRef} style={{display:"flex",alignItems:"center"}}/>;
 }
 
 // ─── ENHANCE API CALL ─────────────────────────────────────────────────────────
@@ -218,20 +234,18 @@ async function callEnhance(prompt, instructions, idToken){
   return data.result||"";
 }
 
-const AuthCtx=React.createContext({user:null,ready:false,signIn:()=>{},signOut:()=>{}});
+const AuthCtx=React.createContext({user:null,ready:false,signOut:()=>{}});
 
 // ─── AUTH MODAL ───────────────────────────────────────────────────────────────
 function AuthModal({onClose}){
-  const{signIn}=React.useContext(AuthCtx);
   return(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e=>e.stopPropagation()}>
         <div className="modal-title">✦ <b>Enhance</b></div>
         <div className="modal-sub">Sign in with Google to use AI-powered prompt enhancement — free, no credit card required.</div>
-        <button className="gbtn" onClick={()=>{signIn();onClose();}}>
-          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
-          Continue with Google
-        </button>
+        <div style={{display:"flex",justifyContent:"center"}}>
+          <GoogleSignInBtn/>
+        </div>
         <div className="modal-skip" onClick={onClose}>✕ Cancel</div>
       </div>
     </div>
@@ -648,8 +662,8 @@ function Viewport3D({azimuth,elevation,zoom,onChange,active}){
 
   if(!active)return(
     <div style={{minHeight:320,background:'var(--s2)',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8,borderRadius:'var(--r)'}}>
-      <span style={{color:'var(--t4)',fontSize:13}}>3D disabled</span>
-      <span style={{color:'var(--t4)',fontSize:11}}>Enable toggle to activate viewport</span>
+      <span style={{color:'var(--t)',fontSize:13}}>3D disabled</span>
+      <span style={{color:'var(--t)',fontSize:11}}>Enable toggle to activate viewport</span>
     </div>
   );
 
@@ -850,7 +864,7 @@ function AnglesPage(){
   const[enhancing,setEnhancing]=useState(false);
   const[enhanced,setEnhanced]=useState("");
   const[showAuthModal,setShowAuthModal]=useState(false);
-  const{user,signIn}=React.useContext(AuthCtx);
+  const{user}=React.useContext(AuthCtx);
   const MAX=9;
 
   const tog=(i)=>setSel(p=>p.includes(i)?p.filter(x=>x!==i):p.length>=MAX?p:[...p,i]);
@@ -867,14 +881,14 @@ function AnglesPage(){
   };
   const enhance=async()=>{
     if(!hasAny)return;
-    if(!user){signIn();doToast("PLEASE SIGN IN WITH GOOGLE TO USE ENHANCE");return;}
+    if(!user){setShowAuthModal(true);return;}
     setEnhancing(true);setEnhanced("");
     try{
       const result=await callEnhance(prompt,custom,user.idToken,null);
       setEnhanced(result);
       doToast("✦ ENHANCED BY GEMINI");
     }catch(e){
-      if(e.status===401){signIn();doToast("SESSION EXPIRED — PLEASE SIGN IN AGAIN");}
+      if(e.status===401){setShowAuthModal(true);}
       else doToast("ERROR: "+e.message);
     }
     setEnhancing(false);
@@ -921,10 +935,10 @@ function AnglesPage(){
       </div>
 
       <div style={{display:"flex",gap:0,marginBottom:20,borderRadius:10,overflow:"hidden",border:"1px solid var(--bd)",width:"fit-content"}}>
-        <button onClick={()=>setMode1("photo")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",background:mode1==="photo"?"#e8780a":"var(--s1)",color:mode1==="photo"?"#000":"var(--t3)",transition:"all .2s"}}>
+        <button onClick={()=>setMode1("photo")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",background:mode1==="photo"?"#e8780a":"var(--s1)",color:mode1==="photo"?"#000":"var(--t)",transition:"all .2s"}}>
           ⊕ From reference photo
         </button>
-        <button onClick={()=>setMode1("scratch")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",borderLeft:"1px solid var(--bd)",background:mode1==="scratch"?"#e8780a":"var(--s1)",color:mode1==="scratch"?"#000":"var(--t3)",transition:"all .2s"}}>
+        <button onClick={()=>setMode1("scratch")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",borderLeft:"1px solid var(--bd)",background:mode1==="scratch"?"#e8780a":"var(--s1)",color:mode1==="scratch"?"#000":"var(--t)",transition:"all .2s"}}>
           ✦ Create from scratch
         </button>
       </div>
@@ -982,7 +996,7 @@ function AnglesPage(){
             <button key={n} className={`batch-opt${batchSize===n?" sel":""}`} onClick={()=>setBatchSize(n)}>{n}</button>
           ))}
         </div>
-        <span style={{fontSize:11,color:'var(--t4)',marginLeft:8}}>Generate multiple prompt variations</span>
+        <span style={{fontSize:11,color:'var(--t)',marginLeft:8}}>Generate multiple prompt variations</span>
       </div>
 
       <div className="sec">
@@ -1058,7 +1072,7 @@ function AnglesPage(){
         <div className="sh"><span className="st">Film Stock & Color Grade</span></div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:20}}>
           <div>
-            <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:'uppercase',color:'var(--t3)',marginBottom:10}}>Film Stock</div>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:'uppercase',color:'var(--t)',marginBottom:10}}>Film Stock</div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           {FILM_SPRITES.map(r=>(
             <div key={r.id} onClick={()=>tog1(setFilmStock,r.id)}
@@ -1078,7 +1092,7 @@ function AnglesPage(){
         </div>
           </div>
           <div>
-            <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:'uppercase',color:'var(--t3)',marginBottom:10}}>Color Grade</div>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:'uppercase',color:'var(--t)',marginBottom:10}}>Color Grade</div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           {COLOR_SPRITES.map(r=>(
             <div key={r.id} onClick={()=>tog1(setColorGrade,r.id)}
@@ -1131,10 +1145,10 @@ function AnglesPage(){
         <div className="sh">
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <span className="st">3D Camera Control</span>
-            <span style={{fontSize:10,fontWeight:700,letterSpacing:1.5,padding:"2px 7px",borderRadius:3,border:"1px solid var(--bd)",color:"var(--t3)"}}>BETA</span>
+            <span style={{fontSize:10,fontWeight:700,letterSpacing:1.5,padding:"2px 7px",borderRadius:3,border:"1px solid var(--bd)",color:"var(--t)"}}>BETA</span>
           </div>
           <div onClick={e=>{e.stopPropagation();setUse3D(v=>!v);}} style={{display:"flex",alignItems:"center",gap:10,marginLeft:"auto",cursor:"pointer",userSelect:"none"}}>
-            <span style={{fontSize:11,color:use3D?"var(--acc)":"var(--t4)",marginLeft:"auto"}}>{use3D?"Active — added to prompt":"Disabled"}</span>
+            <span style={{fontSize:11,color:use3D?"var(--acc)":"var(--t)",marginLeft:"auto"}}>{use3D?"Active — added to prompt":"Disabled"}</span>
             <div style={{width:44,height:24,borderRadius:12,position:"relative",background:use3D?"#e8780a":"var(--s3)",border:"1px solid "+(use3D?"#e8780a":"var(--bd)"),transition:"all .2s",flexShrink:0}}>
               <div style={{position:"absolute",top:4,left:use3D?24:4,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left .2s"}}/>
             </div>
@@ -1698,7 +1712,7 @@ function AvatarsPage(){
   const[enhanced,setEnhanced]=useState("");
   const[showAuthModal,setShowAuthModal]=useState(false);
   
-  const{user,signIn}=React.useContext(AuthCtx);
+  const{user}=React.useContext(AuthCtx);
 
   const buildAvPrompt=()=>{
     const style=UNI_STYLE[c.universe]||UNI_STYLE.realism;
@@ -1767,14 +1781,14 @@ function AvatarsPage(){
   const doToast=m=>{setToast(m);setTimeout(()=>setToast(""),2200)};
   const copy=async()=>{const ok=await copyText(enhanced||prompt);doToast(ok?"COPIED TO CLIPBOARD":"COPY FAILED — SELECT MANUALLY")};
   const enhance=async()=>{
-    if(!user){signIn();doToast("PLEASE SIGN IN WITH GOOGLE TO USE ENHANCE");return;}
+    if(!user){setShowAuthModal(true);return;}
     setEnhancing(true);setEnhanced("");
     try{
       const result=await callEnhance(prompt,c.details,user.idToken,null);
       setEnhanced(result);
       doToast("✦ ENHANCED BY GEMINI");
     }catch(e){
-      if(e.status===401){signIn();doToast("SESSION EXPIRED — PLEASE SIGN IN AGAIN");}
+      if(e.status===401){setShowAuthModal(true);}
       else doToast("ERROR: "+e.message);
     }
     setEnhancing(false);
@@ -1829,15 +1843,15 @@ function AvatarsPage(){
       </div>
 
       <div style={{display:"flex",gap:0,marginBottom:28,borderRadius:10,overflow:"hidden",border:"1px solid var(--bd)",width:"fit-content"}}>
-        <button onClick={()=>setMode("scratch")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",background:mode==="scratch"?"#e8780a":"var(--s1)",color:mode==="scratch"?"#000":"var(--t3)",transition:"all .2s"}}>
+        <button onClick={()=>setMode("scratch")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",background:mode==="scratch"?"#e8780a":"var(--s1)",color:mode==="scratch"?"#000":"var(--t)",transition:"all .2s"}}>
           ✦ Create from scratch
         </button>
-        <button onClick={()=>setMode("photo")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",borderLeft:"1px solid var(--bd)",background:mode==="photo"?"#e8780a":"var(--s1)",color:mode==="photo"?"#000":"var(--t3)",transition:"all .2s"}}>
+        <button onClick={()=>setMode("photo")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",borderLeft:"1px solid var(--bd)",background:mode==="photo"?"#e8780a":"var(--s1)",color:mode==="photo"?"#000":"var(--t)",transition:"all .2s"}}>
           ⊕ From reference photo
         </button>
       </div>
       {mode==="photo"&&(
-        <div style={{background:"var(--s1)",border:"1px solid var(--bd)",borderRadius:10,padding:"16px 20px",marginBottom:28,fontSize:13,color:"var(--t3)",lineHeight:1.7}}>
+        <div style={{background:"var(--s1)",border:"1px solid var(--bd)",borderRadius:10,padding:"16px 20px",marginBottom:28,fontSize:13,color:"var(--t)",lineHeight:1.7}}>
           <span style={{color:"#e8780a",fontWeight:700}}>↑ Attach your reference photo</span> to the message when pasting this prompt into your AI image generator. The prompt will instruct the AI to use it as the identity base and apply your selected traits as modifications.
         </div>
       )}
@@ -2334,7 +2348,7 @@ function AvatarsPage(){
 
       <Sec title="Background &amp; Lighting" badge="OPTIONAL">
         <div style={{marginBottom:16}}>
-          <div style={{fontSize:11,color:"var(--t4)",marginBottom:8,fontWeight:600,letterSpacing:1,textTransform:"uppercase"}}>Lighting</div>
+          <div style={{fontSize:11,color:"var(--t)",marginBottom:8,fontWeight:600,letterSpacing:1,textTransform:"uppercase"}}>Lighting</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             {LIGHT_SPRITES.map(r=>(
               <div key={r.name} onClick={()=>set("avLight",c.avLight===r.name?"":r.name)}
@@ -2349,7 +2363,7 @@ function AvatarsPage(){
           </div>
         </div>
         <div style={{marginBottom:16}}>
-          <div style={{fontSize:11,color:"var(--t4)",marginBottom:8,fontWeight:600,letterSpacing:1,textTransform:"uppercase"}}>Environment / Background</div>
+          <div style={{fontSize:11,color:"var(--t)",marginBottom:8,fontWeight:600,letterSpacing:1,textTransform:"uppercase"}}>Environment / Background</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             {ENV_SPRITES.map(r=>(
               <div key={r.name} onClick={()=>set("avEnv",c.avEnv===r.name?"":r.name)}
@@ -2364,7 +2378,7 @@ function AvatarsPage(){
           </div>
         </div>
         <div style={{marginBottom:16}}>
-          <div style={{fontSize:11,color:"var(--t4)",marginBottom:8,fontWeight:600,letterSpacing:1,textTransform:"uppercase"}}>Lens / Focal Length</div>
+          <div style={{fontSize:11,color:"var(--t)",marginBottom:8,fontWeight:600,letterSpacing:1,textTransform:"uppercase"}}>Lens / Focal Length</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             {LENS_SPRITES.map(r=>(
               <div key={r.name} onClick={()=>set("avLens",c.avLens===r.name?"":r.name)}
@@ -2379,7 +2393,7 @@ function AvatarsPage(){
           </div>
         </div>
         <div>
-          <div style={{fontSize:11,color:"var(--t4)",marginBottom:8,fontWeight:600,letterSpacing:1,textTransform:"uppercase"}}>Aspect Ratio</div>
+          <div style={{fontSize:11,color:"var(--t)",marginBottom:8,fontWeight:600,letterSpacing:1,textTransform:"uppercase"}}>Aspect Ratio</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
             {FORMAT_SPRITES.map(r=>(
               <div key={r.id} onClick={()=>set("avAspect",r.id)}
@@ -2508,7 +2522,7 @@ function VideoPromptPage(){
 
   const ORow=({label,stateKey,val,onSet,opts})=>(
     <div style={{display:"flex",flexDirection:"column",gap:6}}>
-      <div style={{fontSize:10,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:"var(--t4)"}}>{label}</div>
+      <div style={{fontSize:10,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:"var(--t)"}}>{label}</div>
       <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
         {opts.map(o=>(
           <button key={o} className={`ob${val===o?" sel":""}`} onClick={()=>onSet(stateKey,o)}>{o}</button>
@@ -2638,19 +2652,19 @@ function VideoPromptPage(){
       {(firstFrame.trim()||lastFrame.trim())&&(
         <div className="sec">
           <div className="sh"><span className="st">Frame Generation</span><span className="sb">IMAGE PROMPTS</span></div>
-          <div style={{fontSize:11,color:"var(--t3)",marginBottom:12,lineHeight:1.6}}>
+          <div style={{fontSize:11,color:"var(--t)",marginBottom:12,lineHeight:1.6}}>
             Generate key frames as images first — use as reference for your video generation tool.
           </div>
           {firstFrame.trim()&&(
             <div style={{marginBottom:16}}>
-              <div style={{fontSize:10,fontWeight:700,letterSpacing:2,color:"var(--t4)",marginBottom:6}}>FIRST FRAME PROMPT</div>
+              <div style={{fontSize:10,fontWeight:700,letterSpacing:2,color:"var(--t)",marginBottom:6}}>FIRST FRAME PROMPT</div>
               <div className="pbox" style={{fontSize:11,marginBottom:8}}>{buildFramePrompt(firstFrame,vparams)}</div>
               <GenWithLinks getPrompt={()=>buildFramePrompt(firstFrame,vparams)} onCopy={()=>doToast("FIRST FRAME PROMPT COPIED")} targets={FRAME_GEN_TARGETS}/>
             </div>
           )}
           {lastFrame.trim()&&(
             <div>
-              <div style={{fontSize:10,fontWeight:700,letterSpacing:2,color:"var(--t4)",marginBottom:6}}>LAST FRAME PROMPT</div>
+              <div style={{fontSize:10,fontWeight:700,letterSpacing:2,color:"var(--t)",marginBottom:6}}>LAST FRAME PROMPT</div>
               <div className="pbox" style={{fontSize:11,marginBottom:8}}>{buildFramePrompt(lastFrame,vparams)}</div>
               <GenWithLinks getPrompt={()=>buildFramePrompt(lastFrame,vparams)} onCopy={()=>doToast("LAST FRAME PROMPT COPIED")} targets={FRAME_GEN_TARGETS}/>
             </div>
@@ -2685,10 +2699,10 @@ export default function App(){
                 <button className="user-chip" onClick={auth.signOut} title="Sign out">
                   <img src={auth.user.picture} alt=""/>
                   <span>{auth.user.name.split(" ")[0]}</span>
-                  <span style={{color:"var(--t4)"}}>✕</span>
+                  <span style={{color:"var(--t)"}}>✕</span>
                 </button>
               ):(
-                <button className="nt" onClick={()=>auth.signIn()} style={{fontSize:11,opacity:.6}}>Sign in</button>
+                <GoogleSignInBtn compact/>
               )}
             </div>
           </div>
