@@ -166,6 +166,13 @@ textarea::placeholder{color:var(--t4)}
 .genwith-note{font-size:12px;color:var(--t);margin-left:4px;font-weight:500}
 .genwith-btn{display:flex;align-items:center;gap:7px;padding:10px 20px;border-radius:var(--r);border:1px solid var(--bd);background:var(--s2);color:var(--t);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;white-space:nowrap}
 .genwith-btn:hover{border-color:var(--acc);color:var(--acc);background:var(--acdim);transform:translateY(-1px)}
+.sprite-grid{display:flex;flex-wrap:wrap;gap:8px}
+.scard{cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid var(--bd);transition:all .15s;background:var(--s1)}
+.scard:hover{border-color:var(--bdh);transform:translateY(-1px)}
+.scard.sel{border-color:#e8780a;box-shadow:0 0 14px rgba(232,120,10,.4)}
+.simg{background-repeat:no-repeat;flex-shrink:0}
+.slabel{padding:5px 4px 6px;text-align:center;font-size:11px;font-weight:600;color:var(--t)}
+.scard.sel .slabel{color:#e8780a}
 `;
 
 // ─── GOOGLE AUTH ──────────────────────────────────────────────────────────────
@@ -2942,9 +2949,9 @@ function VideoPromptPage(){
       <div className="sec">
         <div className="sh"><span className="st">Lighting</span></div>
         <div className="sprite-grid">
-          {LIGHTING.map(l=>(
+          {LIGHT_SPRITES.map(l=>(
             <div key={l.id} className={`scard${lighting===l.id?" sel":""}`} onClick={()=>tog1(setLighting,l.id)}>
-              <div className="simg" style={{width:150,height:105,backgroundImage:`url(${l.src})`,backgroundSize:"750px 315px",backgroundPosition:`-${l.sx}px -${l.sy}px`}}/>
+              <div className="simg" style={{width:150,height:105,backgroundImage:"url(/lighting.png)",backgroundSize:"750px 315px",backgroundPosition:`${l.sx}px ${l.sy}px`}}/>
               <div className="slabel" translate="no">{l.name}</div>
             </div>
           ))}
@@ -2954,9 +2961,9 @@ function VideoPromptPage(){
       <div className="sec">
         <div className="sh"><span className="st">Color Grade</span></div>
         <div className="sprite-grid">
-          {COLOR_GRADES.map(c=>(
+          {COLOR_SPRITES.map(c=>(
             <div key={c.id} className={`scard${colorGrade===c.id?" sel":""}`} onClick={()=>tog1(setColorGrade,c.id)}>
-              <div className="simg" style={{width:150,height:167,backgroundImage:`url(${c.src})`,backgroundSize:"600px 334px",backgroundPosition:`-${c.sx}px -${c.sy}px`}}/>
+              <div className="simg" style={{width:150,height:167,backgroundImage:"url(/color.png)",backgroundSize:"600px 334px",backgroundPosition:`${c.sx}px ${c.sy}px`}}/>
               <div className="slabel" translate="no">{c.name}</div>
             </div>
           ))}
@@ -2966,9 +2973,9 @@ function VideoPromptPage(){
       <div className="sec">
         <div className="sh"><span className="st">Lens</span></div>
         <div className="sprite-grid">
-          {LENSES.map(l=>(
+          {LENS_SPRITES.map(l=>(
             <div key={l.mm} className={`scard${lens===l.mm?" sel":""}`} onClick={()=>tog1(setLens,l.mm)}>
-              <div className="simg" style={{width:150,height:83,backgroundImage:`url(${l.src})`,backgroundSize:"600px 332px",backgroundPosition:`-${l.sx}px -${l.sy}px`}}/>
+              <div className="simg" style={{width:150,height:83,backgroundImage:"url(/lens.png)",backgroundSize:"600px 332px",backgroundPosition:`${l.sx}px ${l.sy}px`}}/>
               <div className="slabel" translate="no">{l.mm}</div>
             </div>
           ))}
@@ -2978,9 +2985,9 @@ function VideoPromptPage(){
       <div className="sec">
         <div className="sh"><span className="st">Film Stock</span></div>
         <div className="sprite-grid">
-          {FILM_STOCKS.map(f=>(
+          {FILM_SPRITES.map(f=>(
             <div key={f.id} className={`scard${filmStock===f.id?" sel":""}`} onClick={()=>tog1(setFilmStock,f.id)}>
-              <div className="simg" style={{width:150,height:167,backgroundImage:`url(${f.src})`,backgroundSize:"600px 334px",backgroundPosition:`-${f.sx}px -${f.sy}px`}}/>
+              <div className="simg" style={{width:150,height:167,backgroundImage:"url(/film.png)",backgroundSize:"600px 334px",backgroundPosition:`${f.sx}px ${f.sy}px`}}/>
               <div className="slabel" translate="no">{f.name}</div>
             </div>
           ))}
