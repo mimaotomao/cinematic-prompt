@@ -82,6 +82,11 @@ textarea::placeholder{color:var(--t4)}
 @keyframes enhbar{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .enhancing-badge{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:rgba(6,6,6,.92);border:1px solid var(--acc);color:var(--acc);font-size:11px;font-weight:700;letter-spacing:2px;padding:8px 20px;border-radius:20px;z-index:499;pointer-events:none;display:flex;align-items:center;gap:8px;backdrop-filter:blur(10px);text-transform:uppercase;animation:fadein .2s ease}
 @keyframes fadein{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.enhancing-bottom{position:fixed;bottom:0;left:0;right:0;z-index:500;pointer-events:none;animation:slideup .25s ease}
+@keyframes slideup{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.enhancing-bottom-inner{display:flex;align-items:center;justify-content:center;gap:16px;padding:18px 32px;background:linear-gradient(135deg,rgba(10,10,10,.97),rgba(20,14,0,.97));border-top:2px solid var(--acc);color:var(--acc);font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;backdrop-filter:blur(16px);box-shadow:0 -4px 40px rgba(255,160,0,.15)}
+.enhancing-spinner{display:inline-block;animation:spin 1.2s linear infinite;font-size:20px}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes ft{0%{opacity:0;transform:translateX(-50%) translateY(20px) scale(.9)}15%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}85%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-10px)}}
 .divider{border:none;border-top:1px solid var(--bd);margin:32px 0}
 .scene-field{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r2);padding:22px 24px;margin-bottom:28px;transition:all .2s}
@@ -266,13 +271,20 @@ function AuthModal({onClose}){
 function EnhancingIndicator(){
   const[dot,setDot]=useState(0);
   useEffect(()=>{const t=setInterval(()=>setDot(d=>(d+1)%4),400);return()=>clearInterval(t);},[]);
-  const dots=".".repeat(dot+1).padEnd(3," ");
+  const dots=".".repeat(dot+1).padEnd(3,"\u00a0");
   return(
     <>
       <div className="enhancing-bar"/>
       <div className="enhancing-badge">
         <span style={{fontSize:14}}>✦</span>
         AI enhancing prompt{dots}
+      </div>
+      <div className="enhancing-bottom">
+        <div className="enhancing-bottom-inner">
+          <span className="enhancing-spinner">✦</span>
+          <span>AI is enhancing your prompt{dots}</span>
+          <span style={{opacity:.6,fontSize:12}}>powered by Gemini</span>
+        </div>
       </div>
     </>
   );
@@ -885,6 +897,96 @@ async function copyText(text){
   return ok;
 }
 
+// ─── EXPAND PANEL TO FULL SHOT ────────────────────────────────────────────────
+function buildExpandPrompt(panelNum, totalPanels, {scene, lighting, bg, lens, filmStock, colorGrade, aspectRatio, mode, angleIdx}){
+  const angleObj = angleIdx!=null ? ANGLES[angleIdx] : null;
+  const techParts=[];
+  if(bg)techParts.push(BACKGROUNDS.find(b=>b.id===bg)?.p);
+  if(lighting)techParts.push(LIGHTING.find(l=>l.id===lighting)?.p);
+  if(lens)techParts.push(LENSES.find(l=>l.mm===lens)?.p);
+  if(filmStock)techParts.push(FILM_STOCKS.find(f=>f.id===filmStock)?.p);
+  if(colorGrade)techParts.push(COLOR_GRADES.find(c=>c.id===colorGrade)?.p);
+  const techBlock=techParts.filter(Boolean).join(". ")+(techParts.length?".":"");
+
+  const parts=[];
+  parts.push(
+    `You will receive a composite grid image containing ${totalPanels} numbered panels. `+
+    `Focus exclusively on panel number ${panelNum}. `+
+    `Ignore all other panels completely.`
+  );
+  parts.push(
+    `Recreate the exact content of panel ${panelNum} as a single, full-resolution standalone image. `+
+    `Preserve every visual detail from that panel with absolute fidelity: `+
+    `character identity, face, age, gender, body proportions, wardrobe, pose, gesture, expression, `+
+    `lighting direction, color palette, atmosphere, environment, and scene mood. `+
+    `Do not merge elements from other panels. Do not add new characters or objects.`
+  );
+  if(scene.trim())parts.push(scene.trim());
+  if(techBlock)parts.push(techBlock);
+  if(angleObj)parts.push(`Camera angle for this panel: ${angleObj.name} — ${angleObj.desc}`);
+  parts.push(
+    `Output as a single cinematic full-quality image in ${aspectRatio||"16:9"} aspect ratio. `+
+    `Maximum sharpness, full detail, physically plausible lighting. Not a grid — one image only.`
+  );
+  return parts.join("\n\n");
+}
+
+function ExpandToFullShot({sel, totalPanels, scene, lighting, bg, lens, filmStock, colorGrade, aspectRatio, mode, onToast}){
+  if(!sel || sel.length < 2) return null;
+  const targets = GEN_TARGETS.slice(0,3);
+  const handle = async(panelNum, angleIdx, url)=>{
+    const p = buildExpandPrompt(panelNum, totalPanels, {scene, lighting, bg, lens, filmStock, colorGrade, aspectRatio, mode, angleIdx});
+    await copyText(p);
+    onToast(`PANEL ${panelNum} PROMPT COPIED — ATTACH YOUR GRID IMAGE`);
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+  return(
+    <div style={{marginTop:20,padding:"16px 18px",borderRadius:"var(--r)",border:"1px solid rgba(120,180,255,.2)",background:"rgba(60,100,180,.06)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+        <span style={{fontSize:16}}>🔍</span>
+        <span style={{fontSize:12,fontWeight:800,letterSpacing:2,color:"var(--t)",textTransform:"uppercase"}}>Expand Panel to Full Shot</span>
+      </div>
+      <div style={{fontSize:11,color:"var(--t)",opacity:.6,marginBottom:14,lineHeight:1.5}}>
+        Attach your grid image to the generator, then click a panel below — copies a prompt that expands that exact panel into a single full-quality image.
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {sel.map((angleIdx, idx)=>{
+          const panelNum = idx+1;
+          const angle = ANGLES[angleIdx];
+          return(
+            <div key={angleIdx} style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+              <div style={{
+                minWidth:28,height:28,borderRadius:6,background:"rgba(255,255,255,.08)",
+                border:"1px solid var(--bdh)",display:"flex",alignItems:"center",justifyContent:"center",
+                fontSize:13,fontWeight:800,color:"var(--t)",flexShrink:0
+              }}>{panelNum}</div>
+              <div style={{fontSize:11,color:"var(--t)",opacity:.7,flexGrow:1,minWidth:120}}>
+                {angle.name}
+              </div>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                {targets.map(t=>(
+                  <button key={t.label}
+                    onClick={()=>handle(panelNum, angleIdx, t.url)}
+                    style={{
+                      padding:"5px 12px",borderRadius:"var(--r)",border:"1px solid var(--bd)",
+                      background:"var(--s2)",color:"var(--t)",fontSize:11,fontWeight:600,
+                      cursor:"pointer",transition:"all .2s",whiteSpace:"nowrap"
+                    }}
+                    onMouseOver={e=>{e.currentTarget.style.borderColor="var(--acc)";e.currentTarget.style.color="var(--acc)"}}
+                    onMouseOut={e=>{e.currentTarget.style.borderColor="var(--bd)";e.currentTarget.style.color="var(--t)"}}
+                  >
+                    {t.icon} {t.label} ↗
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── ANGLES PAGE ──────────────────────────────────────────────────────────────
 function AnglesPage(){
   const[scene,setScene]=useState("");
@@ -1263,6 +1365,7 @@ function AnglesPage(){
         </div>
         {hasAny&&<GenWithLinks getPrompt={()=>enhanced||prompt} onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}/>}
         {hasAny&&<RefPhotoHint/>}
+        {sel.length>=2&&<ExpandToFullShot sel={sel} totalPanels={sel.length} scene={scene} lighting={light} bg={bg} lens={lens} filmStock={filmStock} colorGrade={colorGrade} aspectRatio={aspectRatio} mode={mode1} onToast={doToast}/>}
       </div>
 
       {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)} />}
