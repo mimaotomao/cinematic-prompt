@@ -26,7 +26,7 @@ textarea::placeholder{color:var(--t4)}
 .nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:100;background:rgba(6,6,6,.95);backdrop-filter:blur(20px);transition:all .3s}
 .nav.scrolled{border-bottom-color:var(--s2);background:rgba(6,6,6,.98)}
 .logo{font-family:var(--disp);font-size:20px;letter-spacing:6px;color:var(--t)}
-.ntabs{display:flex;gap:4px}
+.ntabs{display:flex;gap:4px;position:absolute;left:50%;transform:translateX(-50%)}
 .nt{font-size:12px;font-weight:600;letter-spacing:1px;padding:7px 18px;border-radius:var(--r);border:none;background:transparent;color:var(--t3);cursor:pointer;transition:all .2s var(--ease-out)}
 .nt:hover{color:var(--t);background:var(--s2)}
 .nt.on{background:var(--acc);color:#000;font-weight:700;box-shadow:0 4px 20px var(--acglow)}
@@ -766,8 +766,8 @@ function AnglesPage(){
   return(
     <div className="page">
       <div className="ph">
-        <div className="pt">Camera <b>Angles</b></div>
-        <div className="ps">Professional prompt engineering for multi-angle cinematic composition. Select up to 9 angles with precise 3D camera control.</div>
+        <div className="pt">PrompTo <b>miniStudio</b></div>
+        <div className="ps">Multi-Shot Prompt Builder — Design cinematic angle sets (up to 9 views) with perfect subject &amp; lighting consistency. Real-time 3D camera orbit &amp; zoom.</div>
         <div className={`pc${sel.length===MAX?" full":""}`}>
           <span>{sel.length} / {MAX} angles</span>
           {batchSize>1&&<span>· {batchSize}x batch</span>}
@@ -2241,9 +2241,9 @@ export default function App(){
         <nav className={`nav${scrolled?" scrolled":""}`}>
           <div className="logo">CINEMATIC</div>
           <div className="ntabs">
-            <button className={`nt${page==="angles"?" on":""}`} onClick={()=>setPage("angles")}>Camera Angles</button>
-            <button className={`nt${page==="avatars"?" on":""}`} onClick={()=>setPage("avatars")}>Avatar Builder</button>
-            <a href="https://github.com/mimaotomao/cinematic-prompt" target="_blank" rel="noopener noreferrer" className="nt" style={{textDecoration:"none"}}>GitHub ↗</a>
+            <button className={`nt${page==="angles"?" on":""}`} onClick={()=>setPage("angles")}>Multi-Shot</button>
+            <button className={`nt${page==="avatars"?" on":""}`} onClick={()=>setPage("avatars")}>Character Sheet</button>
+            <a href="https://github.com/mimaotomao/prompto_ministudio" target="_blank" rel="noopener noreferrer" className="nt" style={{textDecoration:"none"}}>GitHub ↗</a>
           </div>
         </nav>
         {page==="angles"?<AnglesPage/>:<AvatarsPage/>}
