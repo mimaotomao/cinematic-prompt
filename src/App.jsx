@@ -3296,7 +3296,121 @@ const PET_INPUT_SPRITES=[
   {key:"pet",    label:"I have a pet photo",  sub:"real animal — used as reference", sx:-160},
   {key:"human",  label:"I have a person photo",sub:"replaced by virtual figure",    sx:-320},
 ];
-// pet-species-real.png: 1408×768, 9 cells 156.4×768 → display 100×100 (bgSize 900×491, posY -156)
+// ── EXTENDED SPECIES LIST — only animals NOT in the sprite grid ──────────────
+const PET_EXTENDED_SPECIES=[
+  {group:"🐹 Rodents",items:[
+    {id:"guinea_pig_smooth",    name:"Guinea Pig — Shorthair",   desc:"smooth coat, round body, expressive eyes"},
+    {id:"guinea_pig_abyssinian",name:"Guinea Pig — Abyssinian",  desc:"rosette swirls, rough wiry coat"},
+    {id:"guinea_pig_peruvian",  name:"Guinea Pig — Peruvian",    desc:"very long silky floor-length coat"},
+    {id:"guinea_pig_teddy",     name:"Guinea Pig — Teddy",       desc:"short dense curly coat, upturned nose"},
+    {id:"guinea_pig_skinny",    name:"Guinea Pig — Skinny (Hairless)",desc:"nearly hairless, just face and feet fur"},
+    {id:"rat_fancy",            name:"Fancy Rat",                desc:"intelligent, varied coat colors and markings, long tail"},
+    {id:"mouse_fancy",          name:"Fancy Mouse",              desc:"small, varied coat patterns, lively"},
+    {id:"chinchilla",           name:"Chinchilla",               desc:"extremely soft dense gray fur, large round ears"},
+    {id:"gerbil",               name:"Mongolian Gerbil",         desc:"sandy brown, long tufted tail, upright alert stance"},
+    {id:"degus",                name:"Degu",                     desc:"brown like squirrel, tufted dark tail, social"},
+    {id:"hamster_roborovski",   name:"Roborovski Hamster",       desc:"tiny, sandy with white eyebrows, no dorsal stripe, very fast"},
+    {id:"hamster_dwarf_russian",name:"Dwarf Russian Hamster",    desc:"small, gray-brown, dark dorsal stripe, social"},
+  ]},
+  {group:"🦜 Parrots — specific species",items:[
+    {id:"budgie",               name:"Budgerigar / Parakeet",    desc:"small, green-yellow or blue-white, long pointed tail"},
+    {id:"cockatiel",            name:"Cockatiel",                desc:"gray with yellow face and cheek patches, prominent movable crest"},
+    {id:"lovebird",             name:"Lovebird",                 desc:"small, vivid green with red-orange face, round body"},
+    {id:"conure_sun",           name:"Sun Conure",               desc:"brilliant yellow-orange, long tail, loud"},
+    {id:"conure_green_cheeked", name:"Green-cheeked Conure",     desc:"dark green, maroon chest, playful, quieter"},
+    {id:"caique",               name:"Caique",                   desc:"stocky, black cap, orange-yellow sides, very playful"},
+    {id:"african_grey",         name:"African Grey",             desc:"medium gray, bright red tail, highly intelligent talker"},
+    {id:"amazon_yellow_nape",   name:"Yellow-naped Amazon",      desc:"green with yellow nape patch, talkative, bold"},
+    {id:"macaw_blue_gold",      name:"Blue and Gold Macaw",      desc:"blue back, yellow chest, bare white face patch, long tail"},
+    {id:"macaw_scarlet",        name:"Scarlet Macaw",            desc:"vivid red with yellow and blue wings, very large"},
+    {id:"macaw_hyacinth",       name:"Hyacinth Macaw",           desc:"cobalt blue all over, yellow eye ring, largest parrot"},
+    {id:"cockatoo_sulphur",     name:"Sulphur-crested Cockatoo", desc:"white with yellow crest that fans dramatically"},
+    {id:"cockatoo_galah",       name:"Galah Cockatoo",           desc:"pink breast and face, gray back, rounded crest"},
+    {id:"eclectus",             name:"Eclectus Parrot",          desc:"male vivid green, female red and blue, extreme sexual dimorphism"},
+  ]},
+  {group:"🐦 Other Birds",items:[
+    {id:"canary",               name:"Canary",                   desc:"small, yellow or orange, melodious singer"},
+    {id:"zebra_finch",          name:"Zebra Finch",              desc:"tiny, orange cheeks, black-white striped chest"},
+    {id:"society_finch",        name:"Society Finch",            desc:"brown-white, calm, very social with other finches"},
+    {id:"dove_diamond",         name:"Diamond Dove",             desc:"tiny gray dove, red eye ring, gentle"},
+    {id:"quail_coturnix",       name:"Coturnix Quail",           desc:"plump, mottled brown, ground-dwelling"},
+    {id:"quail_button",         name:"Button Quail",             desc:"tiny, colorful, very small ground bird"},
+  ]},
+  {group:"🦎 Lizards",items:[
+    {id:"gecko_leopard",        name:"Leopard Gecko",            desc:"yellow with dark spots, fat tail, eyelids, nocturnal"},
+    {id:"gecko_crested",        name:"Crested Gecko",            desc:"eyelash-like crests over eyes, prehensile tail, varied patterns"},
+    {id:"gecko_tokay",          name:"Tokay Gecko",              desc:"blue-gray with orange-red spots, large, loud call"},
+    {id:"gecko_day",            name:"Giant Day Gecko",          desc:"vivid green with red markings, flat sticky toes, diurnal"},
+    {id:"bearded_dragon",       name:"Bearded Dragon",           desc:"spiky throat beard, flat body, arm-waving behavior, calm"},
+    {id:"iguana_green",         name:"Green Iguana",             desc:"large, green, prominent dorsal spines, dewlap, long tail"},
+    {id:"chameleon_veiled",     name:"Veiled Chameleon",         desc:"tall casque on head, banded colors, slow deliberate movement"},
+    {id:"chameleon_panther",    name:"Panther Chameleon",        desc:"vivid red-blue-green, spectacular color change, Madagascar"},
+    {id:"skink_blue_tongue",    name:"Blue-tongued Skink",       desc:"thick heavy body, bright blue tongue, short stubby legs"},
+    {id:"monitor_savannah",     name:"Savannah Monitor",         desc:"stocky, gray-brown, forked tongue, intelligent"},
+    {id:"tegu_black_white",     name:"Argentine B&W Tegu",       desc:"large, black-white banded scales, dog-like intelligence"},
+    {id:"frilled_lizard",       name:"Frilled-neck Lizard",      desc:"large neck frill fans open dramatically when threatened"},
+    {id:"basilisk_green",       name:"Green Basilisk",           desc:"crested head and back, famous for running on water"},
+  ]},
+  {group:"🐍 Snakes",items:[
+    {id:"snake_corn",           name:"Corn Snake",               desc:"orange-red saddle blotches on brown-tan, slender, very docile"},
+    {id:"snake_ball_python",    name:"Ball Python",              desc:"dark chocolate-brown with gold-tan pattern, stout, curls into tight ball"},
+    {id:"snake_boa_constrictor",name:"Boa Constrictor",          desc:"large, brown saddle pattern, tail reddening toward tip"},
+    {id:"snake_milk",           name:"Milk Snake",               desc:"red-black-white banded rings, slender, mimics coral snake"},
+    {id:"snake_rainbow_boa",    name:"Rainbow Boa",              desc:"brown base with full iridescent rainbow sheen in light"},
+    {id:"snake_hognose",        name:"Hognose Snake",            desc:"upturned pig-like snout, dramatic death-feigning bluffer"},
+    {id:"snake_green_tree_python",name:"Green Tree Python",      desc:"vivid green coiled on branch perch, white spots on back"},
+    {id:"snake_carpet_python",  name:"Carpet Python",            desc:"patterned brown-gold, variable markings, large"},
+  ]},
+  {group:"🐸 Amphibians",items:[
+    {id:"frog_pacman",          name:"Pacman Frog",              desc:"almost perfectly round, enormous mouth, brown-green with spots"},
+    {id:"frog_red_eye_tree",    name:"Red-eyed Tree Frog",       desc:"vivid green body, red eyes, orange toes, iconic"},
+    {id:"frog_dart_blue",       name:"Blue Poison Dart Frog",    desc:"brilliant cobalt blue with black spots, tiny"},
+    {id:"frog_dart_strawberry", name:"Strawberry Dart Frog",     desc:"bright red body with blue legs, small"},
+    {id:"frog_dart_yellow",     name:"Yellow Dart Frog",         desc:"yellow with black spots, bold and active"},
+    {id:"frog_tomato",          name:"Tomato Frog",              desc:"large, bright tomato red, round and inflates when threatened"},
+    {id:"frog_gray_tree",       name:"Gray Tree Frog",           desc:"gray bark-like camouflage, hidden orange thighs, calls at night"},
+    {id:"axolotl_leucistic",    name:"Axolotl — Leucistic Pink", desc:"pink-white body, red feathery external gills, dark eyes"},
+    {id:"axolotl_wild",         name:"Axolotl — Wild-type",      desc:"dark green-brown with gold iridescent spots, red gills"},
+    {id:"axolotl_golden",       name:"Axolotl — Golden Albino",  desc:"yellow-gold body, red gills, pale pink eyes"},
+    {id:"axolotl_black",        name:"Axolotl — Melanoid",       desc:"solid black all over, no iridescence, red gills"},
+    {id:"salamander_fire",      name:"Fire Salamander",          desc:"glossy black with bright yellow spots or stripes, stocky"},
+    {id:"newt_firebelly",       name:"Fire-bellied Newt",        desc:"dark brown-black back, bright orange-red spotted belly"},
+  ]},
+  {group:"🐠 Freshwater Fish",items:[
+    {id:"betta_veiltail",       name:"Betta — Veiltail",         desc:"long single drooping tail, vivid red or blue solid color"},
+    {id:"betta_halfmoon",       name:"Betta — Halfmoon",         desc:"180-degree tail fan spread, metallic multicolor"},
+    {id:"betta_crowntail",      name:"Betta — Crowntail",        desc:"spiky spiked fin ray extensions, dramatic silhouette"},
+    {id:"goldfish_fantail",     name:"Goldfish — Fantail",        desc:"egg-shaped body, double tail, classic orange"},
+    {id:"goldfish_oranda",      name:"Goldfish — Oranda",         desc:"prominent raspberry wen hood on head, red-white"},
+    {id:"goldfish_telescope",   name:"Goldfish — Telescope Eye",  desc:"protruding bulging eyes, long flowing fins"},
+    {id:"goldfish_bubble_eye",  name:"Goldfish — Bubble Eye",     desc:"large fluid-filled sacs under upward-pointing eyes"},
+    {id:"discus_fish",          name:"Discus",                   desc:"flat round disc-shaped body, highly patterned and vivid"},
+    {id:"oscar_cichlid",        name:"Oscar Cichlid",            desc:"large, orange-red irregular splotches on dark, dog-like personality"},
+    {id:"arowana_silver",       name:"Silver Arowana",           desc:"elongated silver body, large scales, surface-skimming swimmer"},
+    {id:"koi",                  name:"Koi",                      desc:"large, white-orange-black patches, dignified pond fish"},
+  ]},
+  {group:"🐡 Saltwater Fish",items:[
+    {id:"tang_blue",            name:"Blue Tang",                desc:"royal blue oval body, yellow tail fin"},
+    {id:"tang_yellow",          name:"Yellow Tang",              desc:"vivid solid yellow, oval disc body"},
+    {id:"mandarin_dragonet",    name:"Mandarin Dragonet",        desc:"psychedelic swirling blue-orange-green-red patterns"},
+    {id:"lionfish_red",         name:"Red Lionfish",             desc:"red-white banded, venomous feather-like pectoral spines"},
+    {id:"seahorse_dwarf",       name:"Dwarf Seahorse",           desc:"tiny, upright posture, curled tail, bony armor plates"},
+    {id:"angelfish_emperor",    name:"Emperor Angelfish",        desc:"adult: blue-yellow horizontal stripes, juvenile: completely different"},
+    {id:"puffer_dog_face",      name:"Dog-face Puffer",          desc:"large round face, inflates when threatened, brown with white spots"},
+  ]},
+  {group:"🐾 Other Pets",items:[
+    {id:"ferret",               name:"Ferret",                   desc:"elongated sinuous body, masked face, sable or albino or silver"},
+    {id:"sugar_glider",         name:"Sugar Glider",             desc:"tiny marsupial, gliding membrane between wrists and ankles, big dark eyes"},
+    {id:"capybara",             name:"Capybara",                 desc:"world's largest rodent, barrel-shaped, semi-aquatic, gentle"},
+    {id:"skunk_pet",            name:"Skunk (domestic)",         desc:"black with white stripe, fluffy tail, descented, curious"},
+    {id:"raccoon",              name:"Raccoon",                  desc:"black eye mask, ringed tail, dexterous washing paws"},
+    {id:"fennec_fox",           name:"Fennec Fox",               desc:"tiny fox, enormous bat-like ears for heat loss, sandy color"},
+    {id:"red_fox",              name:"Red Fox",                  desc:"orange-red fur, white chest and tail tip, black legs and ears"},
+    {id:"opossum",              name:"Virginia Opossum",         desc:"gray-white fur, pointed pink face, prehensile tail, plays dead"},
+    {id:"wallaby",              name:"Wallaby",                  desc:"small kangaroo, gray-brown, joey in pouch, hops"},
+  ]},
+];
+
 const PET_REAL_SPRITES=[
   {id:"dog",      name:"Dog",      sx:0},
   {id:"cat",      name:"Cat",      sx:-100},
@@ -3519,7 +3633,8 @@ function PetPage(){
   const[vpBeak,setVpBeak]=useState("parrot-style");
   const[vpPose,setVpPose]=useState("sitting");
   const[vpGaze,setVpGaze]=useState("toward viewer");
-  const[vpJokeLegs,setVpJokeLegs]=useState(false);
+  const[vpOtherSpecies,setVpOtherSpecies]=useState(""); // for extended dropdown
+  const[otherExpandedGrp,setOtherExpandedGrp]=useState(null);
   // ── ACCESSORIES ──
   const[accMode,setAccMode]=useState("product");
   const[accSelected,setAccSelected]=useState([]);
@@ -3649,10 +3764,20 @@ function PetPage(){
         if(vpCoatColors)L.push("Color / appearance: "+vpCoatColors);
       }else{
         const sp=PET_SPECIES_REAL.find(s=>s.id===vpSpecies)||PET_SPECIES_REAL[0];
+        // Extended species override
+        let otherData=null;
+        if(vpOtherSpecies){
+          for(const g of PET_EXTENDED_SPECIES){
+            const found=g.items.find(it=>it.id===vpOtherSpecies);
+            if(found){otherData={...found,group:g.group};break;}
+          }
+        }
         let breedDesc="";
-        if(sp.breedSprites){const bData=sp.breedSprites.find(b=>b.id===vpBreed);if(bData&&bData.desc)breedDesc=bData.desc;}
-        const breedStr=(sp.hasBreeds&&vpBreed)?" ("+vpBreed+")":"";
-        L.push("VIRTUAL PET: "+sp.name+breedStr);
+        if(!vpOtherSpecies&&sp.breedSprites){const bData=sp.breedSprites.find(b=>b.id===vpBreed);if(bData&&bData.desc)breedDesc=bData.desc;}
+        const breedStr=(!vpOtherSpecies&&sp.hasBreeds&&vpBreed)?" ("+vpBreed+")":"";
+        const petName=otherData?otherData.name:sp.name+breedStr;
+        L.push("VIRTUAL PET: "+petName);
+        if(otherData&&otherData.desc)L.push("Appearance: "+otherData.desc);
         if(breedDesc)L.push("Breed characteristics: "+breedDesc);
         if(sp.hasCoat&&(vpCoatType||vpCoatPattern||vpCoatColors)){
           const parts=[];
@@ -3864,81 +3989,74 @@ function PetPage(){
           placeholder="Describe the scene — e.g. my dog sitting in a park wearing a new harness, golden hour lighting — or skip and configure below"/>
       </div>
 
-      {/* 2. STARTING POINT — independent checkboxes */}
+      {/* 2. STARTING POINT */}
       <div className="sec">
-        <div className="sh"><span className="st">What do you have?</span><span className="sb">CHECK ALL THAT APPLY</span></div>
-        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+        <div className="sh"><span className="st">Starting point</span></div>
 
-          {/* Pet photo checkbox */}
-          <div onClick={()=>{setUsePetPhoto(v=>!v);setEnhanced("");}}
-            style={{flex:"1 1 180px",cursor:"pointer",borderRadius:10,overflow:"hidden",
+        {/* Primary: scratch vs photo — mutually exclusive */}
+        <div style={{display:"flex",gap:8,marginBottom:10}}>
+          <button onClick={()=>{setUseScratch(true);setUsePetPhoto(false);setEnhanced("");}}
+            style={{flex:1,padding:"11px 16px",borderRadius:9,cursor:"pointer",textAlign:"left",
+              border:"2px solid "+(useScratch&&!usePetPhoto?"var(--acc)":"rgba(255,255,255,.2)"),
+              background:useScratch&&!usePetPhoto?"var(--acdim)":"var(--s1)",transition:"all .15s"}}>
+            <div style={{fontSize:13,fontWeight:700,color:useScratch&&!usePetPhoto?"var(--acc)":"#fff"}}>🐾 Generate from scratch</div>
+            <div style={{fontSize:11,color:"rgba(255,255,255,.65)",marginTop:2}}>fully virtual — no photos needed</div>
+          </button>
+          <button onClick={()=>{setUseScratch(false);setUsePetPhoto(true);setEnhanced("");}}
+            style={{flex:1,padding:"11px 16px",borderRadius:9,cursor:"pointer",textAlign:"left",
               border:"2px solid "+(usePetPhoto?"var(--acc)":"rgba(255,255,255,.2)"),
               background:usePetPhoto?"var(--acdim)":"var(--s1)",transition:"all .15s"}}>
-            <div style={{width:"100%",height:90,overflow:"hidden"}}>
-              <div style={{width:"100%",height:90,backgroundImage:"url(/pet-inputs.png)",
-                backgroundSize:"480px 127px",backgroundPosition:"-160px -18px",backgroundRepeat:"no-repeat"}}/>
-            </div>
-            <div style={{padding:"8px 10px 10px",display:"flex",alignItems:"flex-start",gap:8}}>
-              <div style={{width:18,height:18,borderRadius:4,flexShrink:0,marginTop:1,display:"flex",alignItems:"center",justifyContent:"center",
-                border:"2px solid "+(usePetPhoto?"var(--acc)":"rgba(255,255,255,.4)"),background:usePetPhoto?"var(--acc)":"transparent"}}>
-                {usePetPhoto&&<span style={{color:"#000",fontSize:11,fontWeight:900}}>✓</span>}
-              </div>
-              <div>
-                <div style={{fontSize:13,fontWeight:700,color:usePetPhoto?"var(--acc)":"#fff"}}>I have a pet photo</div>
-                <div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginTop:2}}>attach when generating</div>
-              </div>
-            </div>
-          </div>
+            <div style={{fontSize:13,fontWeight:700,color:usePetPhoto?"var(--acc)":"#fff"}}>📸 I have a pet photo</div>
+            <div style={{fontSize:11,color:"rgba(255,255,255,.65)",marginTop:2}}>attach when generating — used as identity reference</div>
+          </button>
+        </div>
 
-          {/* My photo checkbox */}
+        {/* Optional additions — always available */}
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+
+          {/* My photo */}
           <div onClick={()=>{setUseMyPhoto(v=>!v);setEnhanced("");}}
-            style={{flex:"1 1 180px",cursor:"pointer",borderRadius:10,overflow:"hidden",
-              border:"2px solid "+(useMyPhoto?"var(--acc)":"rgba(255,255,255,.2)"),
+            style={{flex:"1 1 160px",cursor:"pointer",borderRadius:9,overflow:"hidden",
+              border:"2px solid "+(useMyPhoto?"var(--acc)":"rgba(255,255,255,.15)"),
               background:useMyPhoto?"var(--acdim)":"var(--s1)",transition:"all .15s"}}>
-            <div style={{width:"100%",height:90,overflow:"hidden"}}>
-              <div style={{width:"100%",height:90,backgroundImage:"url(/pet-inputs.png)",
-                backgroundSize:"480px 127px",backgroundPosition:"-320px -18px",backgroundRepeat:"no-repeat"}}/>
+            <div style={{width:"100%",height:70,overflow:"hidden"}}>
+              <div style={{width:"100%",height:70,backgroundImage:"url(/pet-inputs.png)",
+                backgroundSize:"480px 127px",backgroundPosition:"-320px -28px",backgroundRepeat:"no-repeat"}}/>
             </div>
-            <div style={{padding:"8px 10px 10px",display:"flex",alignItems:"flex-start",gap:8}}>
-              <div style={{width:18,height:18,borderRadius:4,flexShrink:0,marginTop:1,display:"flex",alignItems:"center",justifyContent:"center",
-                border:"2px solid "+(useMyPhoto?"var(--acc)":"rgba(255,255,255,.4)"),background:useMyPhoto?"var(--acc)":"transparent"}}>
-                {useMyPhoto&&<span style={{color:"#000",fontSize:11,fontWeight:900}}>✓</span>}
+            <div style={{padding:"7px 10px 9px",display:"flex",alignItems:"flex-start",gap:7}}>
+              <div style={{width:16,height:16,borderRadius:3,flexShrink:0,marginTop:1,display:"flex",alignItems:"center",justifyContent:"center",
+                border:"2px solid "+(useMyPhoto?"var(--acc)":"rgba(255,255,255,.35)"),background:useMyPhoto?"var(--acc)":"transparent"}}>
+                {useMyPhoto&&<span style={{color:"#000",fontSize:10,fontWeight:900}}>✓</span>}
               </div>
               <div>
-                <div style={{fontSize:13,fontWeight:700,color:useMyPhoto?"var(--acc)":"#fff"}}>{"I\u2019m in the scene"}</div>
-                <div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginTop:2}}>my photo — attach when generating</div>
+                <div style={{fontSize:12,fontWeight:700,color:useMyPhoto?"var(--acc)":"#fff"}}>{"I\u2019m in the scene"}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,.6)",marginTop:1}}>my photo — attach when generating</div>
               </div>
             </div>
           </div>
 
-          {/* Product checkbox */}
+          {/* Product */}
           <div onClick={()=>{setUseProduct(v=>!v);if(!useProduct)setAccOpen(true);setEnhanced("");}}
-            style={{flex:"1 1 180px",cursor:"pointer",borderRadius:10,overflow:"hidden",
-              border:"2px solid "+(useProduct?"var(--acc)":"rgba(255,255,255,.2)"),
+            style={{flex:"1 1 160px",cursor:"pointer",borderRadius:9,overflow:"hidden",
+              border:"2px solid "+(useProduct?"var(--acc)":"rgba(255,255,255,.15)"),
               background:useProduct?"var(--acdim)":"var(--s1)",transition:"all .15s"}}>
-            <div style={{width:"100%",height:90,overflow:"hidden"}}>
-              <div style={{width:"100%",height:90,backgroundImage:"url(/pet-inputs.png)",
-                backgroundSize:"480px 127px",backgroundPosition:"0px -18px",backgroundRepeat:"no-repeat"}}/>
+            <div style={{width:"100%",height:70,overflow:"hidden"}}>
+              <div style={{width:"100%",height:70,backgroundImage:"url(/pet-inputs.png)",
+                backgroundSize:"480px 127px",backgroundPosition:"0px -28px",backgroundRepeat:"no-repeat"}}/>
             </div>
-            <div style={{padding:"8px 10px 10px",display:"flex",alignItems:"flex-start",gap:8}}>
-              <div style={{width:18,height:18,borderRadius:4,flexShrink:0,marginTop:1,display:"flex",alignItems:"center",justifyContent:"center",
-                border:"2px solid "+(useProduct?"var(--acc)":"rgba(255,255,255,.4)"),background:useProduct?"var(--acc)":"transparent"}}>
-                {useProduct&&<span style={{color:"#000",fontSize:11,fontWeight:900}}>✓</span>}
+            <div style={{padding:"7px 10px 9px",display:"flex",alignItems:"flex-start",gap:7}}>
+              <div style={{width:16,height:16,borderRadius:3,flexShrink:0,marginTop:1,display:"flex",alignItems:"center",justifyContent:"center",
+                border:"2px solid "+(useProduct?"var(--acc)":"rgba(255,255,255,.35)"),background:useProduct?"var(--acc)":"transparent"}}>
+                {useProduct&&<span style={{color:"#000",fontSize:10,fontWeight:900}}>✓</span>}
               </div>
               <div>
-                <div style={{fontSize:13,fontWeight:700,color:useProduct?"var(--acc)":"#fff"}}>I have a product</div>
-                <div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginTop:2}}>photo / concept — collar, harness, toy…</div>
+                <div style={{fontSize:12,fontWeight:700,color:useProduct?"var(--acc)":"#fff"}}>I have a product</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,.6)",marginTop:1}}>collar, harness, toy — attach or describe</div>
               </div>
             </div>
           </div>
 
         </div>
-        {/* If nothing checked — scratch note */}
-        {!usePetPhoto&&!useMyPhoto&&!useProduct&&(
-          <div style={{marginTop:12,padding:"10px 14px",borderRadius:8,background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.1)",fontSize:12,color:"rgba(255,255,255,.6)"}}>
-            🐾 Nothing checked — fully virtual scene. Configure your pet below.
-          </div>
-        )}
       </div>
 
       {/* 3. PET CONFIGURATION TABS */}
@@ -4002,25 +4120,84 @@ function PetPage(){
                 </button>
               </div>
 
-              {/* Real species */}
+              {/* Real species — sprites + Other tile */}
               {!vpIsFantasy&&(
                 <>
                   <SL>Species</SL>
-                  <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:20}}>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:16}}>
                     {PET_REAL_SPRITES.map(sp=>(
-                      <div key={sp.id} onClick={()=>{setVpSpecies(sp.id);setVpBreed("");setEnhanced("");}}
+                      <div key={sp.id} onClick={()=>{setVpSpecies(sp.id);setVpBreed("");setVpOtherSpecies("");setEnhanced("");}}
                         style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
-                          border:"2px solid "+(vpSpecies===sp.id?"var(--acc)":"rgba(255,255,255,.2)"),
-                          boxShadow:vpSpecies===sp.id?"0 0 14px rgba(232,120,10,.4)":"none",
+                          border:"2px solid "+(!vpOtherSpecies&&vpSpecies===sp.id?"var(--acc)":"rgba(255,255,255,.2)"),
+                          boxShadow:!vpOtherSpecies&&vpSpecies===sp.id?"0 0 14px rgba(232,120,10,.4)":"none",
                           background:"var(--s1)",transition:"all .15s"}}>
                         <div style={{width:100,height:100,overflow:"hidden",
                           backgroundImage:"url(/pet-species-real.png)",
                           backgroundSize:"900px 491px",backgroundPosition:sp.sx+"px -156px",backgroundRepeat:"no-repeat"}}/>
                         <div style={{padding:"4px 4px 6px",textAlign:"center",fontSize:11,fontWeight:700,
-                          color:vpSpecies===sp.id?"var(--acc)":"#fff"}}>{sp.name}</div>
+                          color:!vpOtherSpecies&&vpSpecies===sp.id?"var(--acc)":"#fff"}}>{sp.name}</div>
                       </div>
                     ))}
+                    {/* OTHER tile — same size as sprites */}
+                    <div onClick={()=>{setVpOtherSpecies(vpOtherSpecies?"":"-open-");setVpSpecies("");setVpBreed("");setEnhanced("");}}
+                      style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                        border:"2px solid "+(vpOtherSpecies?"var(--acc)":"rgba(255,255,255,.2)"),
+                        boxShadow:vpOtherSpecies?"0 0 14px rgba(232,120,10,.4)":"none",
+                        background:"var(--s1)",transition:"all .15s",width:100}}>
+                      <div style={{width:100,height:100,display:"flex",alignItems:"center",justifyContent:"center",
+                        background:"rgba(255,255,255,.03)",fontSize:32}}>…</div>
+                      <div style={{padding:"4px 4px 6px",textAlign:"center",fontSize:11,fontWeight:700,
+                        color:vpOtherSpecies?"var(--acc)":"#fff"}}>Other</div>
+                    </div>
                   </div>
+
+                  {/* Other panel — only when Other tile active, all groups collapsed by default */}
+                  {vpOtherSpecies&&(
+                    <div style={{marginBottom:16,border:"1px solid var(--acc)",borderRadius:8,overflow:"hidden"}}>
+                      {/* Selected item bar */}
+                      {vpOtherSpecies!=="-open-"&&(()=>{
+                        const sel=PET_EXTENDED_SPECIES.flatMap(g=>g.items).find(it=>it.id===vpOtherSpecies);
+                        return sel?(
+                          <div style={{padding:"8px 14px",background:"var(--acdim)",display:"flex",alignItems:"center",gap:8,borderBottom:"1px solid var(--bd)"}}>
+                            <span style={{fontSize:12,fontWeight:700,color:"var(--acc)",flex:1}}>{sel.name}</span>
+                            <button onClick={()=>{setVpOtherSpecies("-open-");setEnhanced("");}}
+                              style={{padding:"3px 8px",borderRadius:4,border:"1px solid rgba(255,255,255,.2)",
+                                background:"transparent",color:"rgba(255,255,255,.5)",fontSize:11,cursor:"pointer"}}>✕</button>
+                          </div>
+                        ):null;
+                      })()}
+                      {/* Collapsible group list */}
+                      <div style={{maxHeight:340,overflowY:"auto",background:"var(--s2)"}}>
+                        {PET_EXTENDED_SPECIES.map(g=>{
+                          const isExp=otherExpandedGrp===g.group;
+                          return(
+                            <div key={g.group} style={{borderBottom:"1px solid var(--bd)"}}>
+                              <div onClick={()=>setOtherExpandedGrp(isExp?null:g.group)}
+                                style={{display:"flex",alignItems:"center",justifyContent:"space-between",
+                                  padding:"10px 14px",cursor:"pointer",userSelect:"none",
+                                  background:isExp?"rgba(255,255,255,.06)":"transparent"}}>
+                                <span style={{fontSize:12,fontWeight:800,color:"#fff"}}>{g.group}</span>
+                                <span style={{fontSize:11,color:"rgba(255,255,255,.5)",
+                                  transition:"transform .15s",display:"inline-block",
+                                  transform:isExp?"rotate(90deg)":"none"}}>▶</span>
+                              </div>
+                              {isExp&&g.items.map(it=>(
+                                <div key={it.id}
+                                  onClick={()=>{setVpOtherSpecies(it.id);setVpSpecies("");setVpBreed("");setEnhanced("");}}
+                                  style={{padding:"7px 14px 7px 24px",cursor:"pointer",
+                                    background:vpOtherSpecies===it.id?"var(--acdim)":"var(--s1)",
+                                    borderTop:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"baseline",gap:8}}>
+                                  <span style={{fontSize:12,fontWeight:vpOtherSpecies===it.id?700:500,
+                                    color:vpOtherSpecies===it.id?"var(--acc)":"#fff",flexShrink:0}}>{it.name}</span>
+                                  <span style={{fontSize:10,color:"rgba(255,255,255,.45)",lineHeight:1.4}}>{it.desc}</span>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
 
@@ -4046,25 +4223,10 @@ function PetPage(){
                 </>
               )}
 
-              {/* Breed — dropdown + sprite grid, mutually exclusive */}
-              {!vpIsFantasy&&spData.breedSprites&&(
+              {/* Breed — sprite grid only when a sprite species is selected */}
+              {!vpIsFantasy&&!vpOtherSpecies&&spData.breedSprites&&(
                 <div style={{marginBottom:24}}>
-                  <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
-                    <SL style={{marginBottom:0}}>Breed</SL>
-                    <select value={vpBreed} onChange={e=>{setVpBreed(e.target.value);setEnhanced("");}}
-                      style={{flex:1,maxWidth:280,padding:"7px 10px",borderRadius:8,
-                        border:"1px solid "+(vpBreed?"var(--acc)":"var(--bd)"),
-                        background:"var(--s2)",color:vpBreed?"var(--acc)":"rgba(255,255,255,.7)",
-                        fontSize:12,fontWeight:vpBreed?700:400,outline:"none",cursor:"pointer"}}>
-                      <option value="">— any breed</option>
-                      {spData.breedSprites.map(b=>(
-                        <option key={b.id} value={b.id}>{b.id}</option>
-                      ))}
-                    </select>
-                    {vpBreed&&<button onClick={()=>{setVpBreed("");setEnhanced("");}}
-                      style={{padding:"5px 10px",borderRadius:6,border:"1px solid rgba(255,255,255,.2)",
-                        background:"transparent",color:"rgba(255,255,255,.5)",fontSize:11,cursor:"pointer"}}>✕</button>}
-                  </div>
+                  <SL>Breed</SL>
                   <div style={{display:"grid",
                     gridTemplateColumns:vpSpecies==="horse"?"repeat(auto-fill,190px)":"repeat(auto-fill,158px)",
                     gap:8}}>
