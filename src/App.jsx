@@ -4305,7 +4305,7 @@ function PetPage(){
                   <SL>Breed</SL>
                   <div style={{display:"grid",
                     gridTemplateColumns:vpSpecies==="horse"?"repeat(auto-fill,190px)":"repeat(auto-fill,158px)",
-                    gap:8}}>
+                    gap:8,justifyContent:"start"}}>
                     {spData.breedSprites.map(b=>{
                       let srcCW,srcCH,srcC,srcR,dW,dH;
                       if(vpSpecies==="dog"){srcCW=200;srcCH=200;srcC=10;srcR=2;dW=158;dH=158;}
@@ -4318,7 +4318,7 @@ function PetPage(){
                       const ri=b.sy&&b.sy<0?1:0;
                       return(
                         <div key={b.id} onClick={()=>{setVpBreed(vpBreed===b.id?"":b.id);setEnhanced("");}}
-                          style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                          style={{cursor:"pointer",borderRadius:8,overflow:"hidden",width:dW,
                             border:"2px solid "+(vpBreed===b.id?"var(--acc)":"rgba(255,255,255,.2)"),
                             boxShadow:vpBreed===b.id?"0 0 14px rgba(232,120,10,.4)":"none",
                             background:"var(--s1)",transition:"all .15s",
