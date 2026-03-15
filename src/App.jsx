@@ -3793,7 +3793,7 @@ function PetPage(){
   const hasHumanPhotoVal=useMyPhoto;
   const showVirtualHuman=!hasHumanPhotoVal&&accMode==="product"&&accDepthHandler==="virtual_hand";
   const spData=(vpIsFantasy?PET_SPECIES_FANTASY:PET_SPECIES_REAL).find(s=>s.id===vpSpecies)||PET_SPECIES_REAL[0];
-  const accList=PET_ACCESSORIES[vpSpecies]||PET_ACCESSORIES.default;
+  const accList=PET_ACCESSORIES[vpSpecies]||(vpIsFantasy?PET_ACCESSORIES.dog:PET_ACCESSORIES.default);
   const poses=PET_POSES[vpSpecies]||PET_POSES.default;
 
   const reset=()=>{
@@ -4304,42 +4304,35 @@ function PetPage(){
                 <div style={{marginBottom:24}}>
                   <SL>Breed</SL>
                   {(()=>{
+                    // Use documented native display sizes — sx/sy are direct bgPos values
+                    let dW,dH,bgW,bgH;
+                    if(vpSpecies==="dog"){dW=100;dH=100;bgW=1000;bgH=200;}
+                    else if(vpSpecies==="cat"){dW=100;dH=100;bgW=900;bgH=197;}
+                    else{dW=130;dH=127;bgW=780;bgH=128;} // horse
                     const perRow=vpSpecies==="horse"?5:6;
                     const rows=[];
                     for(let i=0;i<spData.breedSprites.length;i+=perRow)rows.push(spData.breedSprites.slice(i,i+perRow));
-                    return rows.map((row,ri)=>{
-                      let srcCW,srcCH,srcC,srcR,dW,dH;
-                      if(vpSpecies==="dog"){srcCW=200;srcCH=200;srcC=10;srcR=2;dW=158;dH=158;}
-                      else if(vpSpecies==="cat"){srcCW=222;srcCH=218;srcC=9;srcR=2;dW=158;dH=154;}
-                      else{srcCW=333;srcCH=327;srcC=6;srcR=1;dW=190;dH=185;}
-                      const sc=dW/srcCW;
-                      const bgW=Math.round(srcCW*srcC*sc);
-                      const bgH=Math.round(srcCH*srcR*sc);
-                      return(
-                        <div key={ri} style={{display:"flex",gap:8,marginBottom:8}}>
-                          {row.map(b=>{
-                            const ci=Math.round(Math.abs(b.sx)/(vpSpecies==="horse"?130:100));
-                            const rowIdx=b.sy&&b.sy<0?1:0;
-                            return(
-                              <div key={b.id} onClick={()=>{setVpBreed(vpBreed===b.id?"":b.id);setEnhanced("");}}
-                                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
-                                  flexShrink:0,width:dW,
-                                  border:"2px solid "+(vpBreed===b.id?"var(--acc)":"rgba(255,255,255,.2)"),
-                                  boxShadow:vpBreed===b.id?"0 0 14px rgba(232,120,10,.4)":"none",
-                                  background:"var(--s1)",transition:"all .15s",
-                                  opacity:vpBreed&&vpBreed!==b.id?.6:1}}>
-                                <div style={{width:dW,height:dH,overflow:"hidden",
-                                  backgroundImage:"url(/pet-breeds-"+vpSpecies+".png)",
-                                  backgroundSize:bgW+"px "+bgH+"px",
-                                  backgroundPosition:(-ci*dW)+"px "+(-rowIdx*dH)+"px",backgroundRepeat:"no-repeat"}}/>
-                                <div style={{padding:"5px 6px 7px",textAlign:"center",fontSize:10,fontWeight:600,lineHeight:1.2,
-                                  color:vpBreed===b.id?"var(--acc)":"#fff"}}>{b.id}</div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    });
+                    return rows.map((row,ri)=>(
+                      <div key={ri} style={{display:"flex",gap:6,marginBottom:6}}>
+                        {row.map(b=>(
+                          <div key={b.id} onClick={()=>{setVpBreed(vpBreed===b.id?"":b.id);setEnhanced("");}}
+                            style={{cursor:"pointer",borderRadius:7,overflow:"hidden",
+                              flexShrink:0,width:dW,
+                              border:"2px solid "+(vpBreed===b.id?"var(--acc)":"rgba(255,255,255,.2)"),
+                              boxShadow:vpBreed===b.id?"0 0 12px rgba(232,120,10,.4)":"none",
+                              background:"var(--s1)",transition:"all .15s",
+                              opacity:vpBreed&&vpBreed!==b.id?.55:1}}>
+                            <div style={{width:dW,height:dH,
+                              backgroundImage:"url(/pet-breeds-"+vpSpecies+".png)",
+                              backgroundSize:bgW+"px "+bgH+"px",
+                              backgroundPosition:(b.sx||0)+"px "+(b.sy||0)+"px",
+                              backgroundRepeat:"no-repeat"}}/>
+                            <div style={{padding:"4px 4px 5px",textAlign:"center",fontSize:9,fontWeight:600,lineHeight:1.2,
+                              color:vpBreed===b.id?"var(--acc)":"#fff"}}>{b.id}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ));
                   })()}
                 </div>
               )}
@@ -4369,6 +4362,42 @@ function PetPage(){
                     ))}
                   </div>
                   <div style={{marginBottom:24}}>
+                    <SL>Size</SL>
+                    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                      <Pill active={vpFantasySize===""} onClick={()=>{setVpFantasySize("");setEnhanced("");}}>— none</Pill>
+                      {["tiny (dog-sized)","medium (horse-sized)","large (elephant-sized)","gigantic"].map(s=>(
+                        <Pill key={s} active={vpFantasySize===s} onClick={()=>{setVpFantasySize(s);setEnhanced("");}}>{s}</Pill>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Mood / Empathy + Size — real animals */}
+              {!vpIsFantasy&&(
+                <>
+                  <SL>Mood / Empathy</SL>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
+                    <button onClick={()=>{setVpEmpathy("");setEnhanced("");}}
+                      style={{padding:"10px 12px",borderRadius:9,cursor:"pointer",
+                        border:"2px solid "+(vpEmpathy===""?"var(--acc)":"rgba(255,255,255,.2)"),
+                        background:vpEmpathy===""?"var(--acdim)":"transparent",
+                        display:"flex",flexDirection:"column",alignItems:"center",gap:4,minWidth:64}}>
+                      <span style={{fontSize:20}}>—</span>
+                      <span style={{fontSize:10,fontWeight:700,color:vpEmpathy===""?"var(--acc)":"#fff"}}>None</span>
+                    </button>
+                    {EMPATHY_STYLES.map(e=>(
+                      <button key={e.id} onClick={()=>{setVpEmpathy(e.id);setEnhanced("");}}
+                        style={{padding:"10px 12px",borderRadius:9,cursor:"pointer",
+                          border:"2px solid "+(vpEmpathy===e.id?"var(--acc)":"rgba(255,255,255,.2)"),
+                          background:vpEmpathy===e.id?"var(--acdim)":"transparent",
+                          display:"flex",flexDirection:"column",alignItems:"center",gap:4,minWidth:64}}>
+                        <span style={{fontSize:20}}>{e.emoji}</span>
+                        <span style={{fontSize:10,fontWeight:700,color:vpEmpathy===e.id?"var(--acc)":"#fff"}}>{e.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{marginBottom:20}}>
                     <SL>Size</SL>
                     <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                       <Pill active={vpFantasySize===""} onClick={()=>{setVpFantasySize("");setEnhanced("");}}>— none</Pill>
