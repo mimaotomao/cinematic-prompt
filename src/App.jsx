@@ -3816,64 +3816,60 @@ function PetPage(){
 
   const buildPetPrompt=()=>{
     const L=[];
-    // Sources
+
+    // ── SOURCES ──
     const srcs=[];
     let n=0;
     if(hasPetPhotoVal){
       n++;
       const enhStr=petEnhancements.length?" Enhance: "+petEnhancements.join(", ")+".":"";
       srcs.push(n+". [YOUR PET PHOTO]: attach when pasting this prompt in your AI generator");
-      srcs.push("   USAGE: Use as identity reference — preserve exact breed, coat, colors, markings."+enhStr);
+      srcs.push("   USAGE: Use as the sole identity reference. Preserve exact breed, coat texture, color, and all distinctive markings with absolute fidelity."+enhStr);
     }
     if(hasHumanPhotoVal){
       n++;
       srcs.push(n+". [YOUR PHOTO]: attach when pasting this prompt in your AI generator");
-      srcs.push("   USAGE: Extract environment and props only. Replace person with virtual figure matching composition.");
+      srcs.push("   USAGE: Extract only the environment, props, and spatial context. Replace all people with a virtual figure matching the scene composition and lighting.");
     }
-    if(hasProduct&&(accProductDesc||accCreativeDesc)){
+    if(accProductDesc||accCreativeDesc){
       n++;
-      if(accMode==="product"&&accCreativeDesc){
+      if(accCreativeDesc){
         srcs.push(n+". [DESIGN NEW PRODUCT CONCEPT]: "+accCreativeDesc);
-      }else if(accMode==="product"&&accProductDesc){
+        srcs.push("   Visualize as a commercially viable, manufacturable product with realistic materials, proportions, and finish quality.");
+      }else if(accProductDesc){
         srcs.push(n+". [PRODUCT PHOTO / REFERENCE]: attach when pasting this prompt");
         srcs.push("   DESCRIPTION: "+accProductDesc);
-        const cond={new:"Keep exactly as shown.",upgrade:"Restore to pristine showroom quality.",pristine:"Idealize — perfect condition."}[productCondition];
-        srcs.push("   USAGE: "+cond+" Place as "+productFocus+" element. Preserve all material and texture detail.");
+        const cond={new:"Preserve exactly as shown — every detail, texture, and finish intact.",upgrade:"Restore to pristine showroom condition, correcting wear while preserving design integrity.",pristine:"Idealize to perfection — flawless surfaces, perfect construction, showroom-ready."}[productCondition]||"Preserve as shown.";
+        srcs.push("   USAGE: "+cond+" Position as the "+productFocus+" compositional element. Reproduce every material detail, stitching, hardware, and surface quality.");
       }
     }
-    if(sceneDesc.trim()){
-      L.push("SCENE: "+sceneDesc.trim());L.push("");
-    }
+    if(sceneDesc.trim()){L.push("SCENE BRIEF: "+sceneDesc.trim());L.push("");}
     if(srcs.length){
-      L.push("Generate a photorealistic image using the following reference photos and specifications:");
-      L.push("");
-      L.push("=== ATTACH THESE PHOTOS BEFORE GENERATING ===");
-      L.push("");
+      L.push("Generate a photorealistic image using the following reference photos and specifications:");L.push("");
+      L.push("=== ATTACH THESE PHOTOS BEFORE GENERATING ===");L.push("");
       srcs.forEach(s=>L.push(s));L.push("");
     }else{
-      L.push("Generate a photorealistic image from scratch based on the following specifications:");
-      L.push("");
+      L.push("Generate a photorealistic image entirely from scratch, based on the following specifications:");L.push("");
     }
 
-    // Virtual pet
+    // ── VIRTUAL PET ──
     if(showVirtualPet){
       L.push("=== GENERATE ===");L.push("");
       if(vpIsFantasy){
         const sp=PET_SPECIES_FANTASY.find(s=>s.id===vpSpecies)||PET_SPECIES_FANTASY[0];
         let vLine="VIRTUAL CREATURE: "+sp.name;
-        if(vpFantasySize)vLine+=", size: "+vpFantasySize;
+        if(vpFantasySize)vLine+=", size category: "+vpFantasySize;
         L.push(vLine);
-        if(vpEmpathy){const emp=EMPATHY_STYLES.find(e=>e.id===vpEmpathy);if(emp)L.push("Mood / empathy: "+emp.label+" — "+emp.visual);}
-        if(sp.hasFire)L.push("Fire / flames: active.");
-        if(sp.hasWings&&vpEars)L.push("Wings: "+vpEars);
-        else if(sp.hasWings)L.push("Wings: present.");
-        if(sp.hasHorns&&vpTail)L.push("Horns: "+vpTail);
+        if(vpEmpathy){const emp=EMPATHY_STYLES.find(e=>e.id===vpEmpathy);if(emp)L.push("Temperament & visual mood: "+emp.label+" — "+emp.visual);}
+        if(sp.hasFire)L.push("Fire / flames: actively present, physically plausible light interaction with surroundings.");
+        if(sp.hasWings&&vpEars)L.push("Wings: "+vpEars+" — anatomically detailed, feather or membrane texture rendered with care.");
+        else if(sp.hasWings)L.push("Wings: present and detailed.");
+        if(sp.hasHorns&&vpTail)L.push("Horns: "+vpTail+" — rendered with natural material texture (bone, keratin, crystal, or magical element as appropriate).");
         else if(sp.hasHorns)L.push("Horns: present.");
-        if(sp.hybrid)L.push("Hybrid form: "+sp.hybrid);
-        if(vpCoatColors)L.push("Color / appearance: "+vpCoatColors);
+        if(sp.hybrid)L.push("Hybrid anatomy: "+sp.hybrid+" — transition between forms rendered seamlessly.");
+        if(vpCoatColors)L.push("Color & surface: "+vpCoatColors);
       }else{
         const sp=PET_SPECIES_REAL.find(s=>s.id===vpSpecies)||PET_SPECIES_REAL[0];
-        // Extended species override
         let otherData=null;
         if(vpOtherSpecies){
           for(const g of PET_EXTENDED_SPECIES){
@@ -3885,137 +3881,141 @@ function PetPage(){
         if(!vpOtherSpecies&&sp.breedSprites){const bData=sp.breedSprites.find(b=>b.id===vpBreed);if(bData&&bData.desc)breedDesc=bData.desc;}
         const breedStr=(!vpOtherSpecies&&sp.hasBreeds&&vpBreed)?" ("+vpBreed+")":"";
         const petName=otherData?otherData.name:sp.name+breedStr;
-        L.push("VIRTUAL PET: "+petName);
-        if(otherData&&otherData.desc)L.push("Appearance: "+otherData.desc);
-        if(breedDesc)L.push("Breed characteristics: "+breedDesc);
+        L.push("SUBJECT: "+petName+" — rendered with full photorealistic fidelity.");
+        if(otherData&&otherData.desc)L.push("Visual characteristics: "+otherData.desc+".");
+        if(breedDesc)L.push("Breed-specific traits to reproduce precisely: "+breedDesc+".");
         if(sp.hasCoat&&(vpCoatType||vpCoatPattern||vpCoatColors)){
-          const parts=[];
-          if(vpCoatType)parts.push(vpCoatType+" coat");
-          if(vpCoatPattern)parts.push(vpCoatPattern+" pattern");
-          if(vpCoatColors)parts.push("color: "+vpCoatColors);
-          L.push("Coat: "+parts.join(", "));
+          const cParts=[];
+          if(vpCoatType)cParts.push(vpCoatType+" coat texture");
+          if(vpCoatPattern)cParts.push(vpCoatPattern+" pattern");
+          if(vpCoatColors)cParts.push("coloration: "+vpCoatColors);
+          L.push("Coat: "+cParts.join(", ")+". Render individual hair strands, natural light interaction, and subsurface texture.");
         }
-        if(sp.hasTail&&vpTail)L.push("Tail: "+vpTail);
-        if(sp.hasEars&&vpEars)L.push("Ears: "+vpEars);
-        if(sp.hasBeak&&vpBeak)L.push("Beak: "+vpBeak);
-        if(sp.hasWings)L.push("Wings: "+vpPose==="in flight"?"spread, in flight":"folded");
-        if(sp.hasSpines)L.push("Spines: raised, detailed texture");
-        if(sp.hasShell)L.push("Shell: prominent, detailed");
-        if(sp.hasFins)L.push("Fins: detailed, semi-transparent");
+        if(sp.hasTail&&vpTail)L.push("Tail: "+vpTail+" — anatomically correct, naturally positioned.");
+        if(sp.hasEars&&vpEars)L.push("Ears: "+vpEars+" — true to breed anatomy, soft tissue detail.");
+        if(sp.hasBeak&&vpBeak)L.push("Beak: "+vpBeak+" — keratin texture and correct shape.");
+        if(sp.hasWings)L.push("Wings: "+(vpPose==="in flight"?"fully spread mid-flight":"folded naturally at rest")+" — individual feather detail.");
+        if(sp.hasSpines)L.push("Spines/quills: erect, individual spine detail, natural color banding.");
+        if(sp.hasShell)L.push("Shell: prominent — scute pattern, surface texture, and natural weathering.");
+        if(sp.hasFins)L.push("Fins: extended naturally — semi-transparent membranes with visible vasculature.");
       }
       const poseParts=[];
       if(vpPose)poseParts.push("Pose: "+vpPose);
-      if(vpGaze)poseParts.push("Gaze: "+vpGaze);
-      if(poseParts.length)L.push(poseParts.join(". "));
+      if(vpGaze)poseParts.push("Gaze: "+vpGaze+" — eyes sharp, catchlights present");
+      if(poseParts.length)L.push(poseParts.join(". ")+".");
       L.push("");
     }
 
-    // Companion
+    // ── COMPANION ──
     if(companionMode!=="alone"){
       L.push("=== COMPANION ===");
       if(companionMode==="animal"){
         const csp=PET_SPECIES_REAL.find(s=>s.id===companionSpecies)||PET_SPECIES_REAL[1];
-        L.push("Second animal: "+csp.name+" ("+csp.emoji+")");
-        L.push("Interaction: "+companionInteraction);
+        L.push("Second animal: "+csp.name+" — same photorealistic standard as primary subject.");
+        L.push("Interaction: "+companionInteraction+" — natural, unposed, emotionally authentic.");
       }else if(companionMode==="human"){
-        const visT={full:"full body visible",upper_body:"upper body and torso",hands_only:"hands and forearms only — action implied",implied:"presence suggested by shadow/action only"}[vhVisibility];
-        const actT={extended_hand:"extending hand toward animal",holding_leash:"holding leash",kneeling:"kneeling at pet level",standing:"standing nearby"}[vhAction];
-        const styleT={casual:"casual everyday",outdoorsy:"outdoor/sport",smart_casual:"smart casual"}[vhStyle];
-        L.push("Human companion: "+visT+". Action: "+actT+". Style: "+styleT+". Gender and age: neutral.");
-        L.push("Interaction: "+companionInteraction);
+        const visMap={full:"full body, head to toe",upper_body:"upper body and torso, from waist up",hands_only:"hands and forearms only — presence implied, face not shown",implied:"presence suggested through shadow, touch point, or partial element only"};
+        const actMap={extended_hand:"extending hand with open palm toward the animal — gesture warm and inviting",holding_leash:"holding leash with relaxed, natural grip",kneeling:"kneeling at animal eye level — connection and equality",standing:"standing nearby in relaxed posture — calm guardian presence"};
+        const styleMap={casual:"casual attire — soft fabrics, relaxed fit, subtly textured (e.g. chambray, brushed cotton) with slightly rolled sleeves suggesting ease",outdoorsy:"outdoor/active attire — practical, weathered, functional layers",smart_casual:"smart casual — clean lines, quality fabric, polished but relaxed"};
+        L.push("Human figure: "+visMap[vhVisibility]+". "+actMap[vhAction]+".");
+        L.push("Style: "+(styleMap[vhStyle]||vhStyle)+". Gender and age: neutral, AI discretion — emphasize warmth and authenticity. Natural skin texture, no perfect model appearance.");
+        L.push("Interaction: "+companionInteraction+".");
       }
       L.push("");
     }
 
-    // Accessories
-    if(accMode==="product"&&(accPrimary||accProductDesc||accCreativeDesc)){
+    // ── PRODUCT / ACCESSORIES ──
+    if(accProductDesc||accCreativeDesc){
       const acc=accList.find(a=>a.id===accPrimary);
       L.push("=== PRODUCT PLACEMENT — DEPTH COMPOSITION ===");
       if(accCreativeDesc){
-        L.push("PRODUCT CONCEPT TO DESIGN: "+accCreativeDesc);
-        L.push("Visualize this as a real, manufacturable, commercially appealing product.");
+        L.push("PRODUCT TO DESIGN: "+accCreativeDesc);
+        L.push("Generate as a fully realized, commercially viable product with photorealistic materials, precise construction, and consistent branding.");
       }else{
-        const pName=acc?acc.name:"product";
-        L.push("PRODUCT: "+(accProductDesc||pName)+(acc?" ("+acc.cat+")":""));
+        L.push("PRODUCT: "+(accProductDesc||acc?.name||"product")+(acc?" [category: "+acc.cat+"]":""));
       }
       L.push("");
-      L.push("DEPTH PLANES:");
+      L.push("DEPTH STACK:");
       if(accDepthHandler==="virtual_hand"){
-        L.push("  FOREGROUND (sharp, hero): "+((accProductDesc||acc?.name)||"the product")+" — crisp material detail, hero lighting, occupies min 40% of frame");
-        L.push("  MIDGROUND: Virtual hand/hands extending toward or holding the product — natural, warm skin tone");
-        L.push("  BACKGROUND (soft bokeh): Animal — emotional context, connection, gentle depth of field");
+        L.push("  PLANE 1 — FOREGROUND (tack sharp, hero): The product occupies min 40% of frame. Every material detail — stitching, hardware, texture, surface sheen — rendered in full resolution. Hero lighting with specular highlights on key surfaces.");
+        L.push("  PLANE 2 — MIDGROUND: Hand(s) and forearms presenting or offering the product. Natural skin tone, authentic texture — not overly manicured. Slight movement implied in composition.");
+        L.push("  PLANE 3 — BACKGROUND (soft bokeh): The animal — present as emotional context and scale reference. Gentle focus falloff.");
       }else if(accDepthHandler==="pet_wearing"){
-        L.push("  FOREGROUND (sharp, hero): "+((accProductDesc||acc?.name)||"the product")+" worn/used by the animal — full material detail");
-        L.push("  MID-SHARP: Animal body — co-focused with the product");
-        L.push("  BACKGROUND (soft): Environment — lifestyle context");
+        L.push("  PLANE 1 — HERO: Product worn or in use on the animal. Both product and animal face in co-focus. Material integrity fully preserved.");
+        L.push("  PLANE 2 — ENVIRONMENT: Lifestyle context, gently defocused.");
       }else if(accDepthHandler==="attaching"){
-        L.push("  FOREGROUND: Hands (cropped, anonymous) in the act of attaching/adjusting the product onto the animal");
-        L.push("  MID: Animal face/body — patient, trusting expression");
-        L.push("  BACKGROUND: Environment, soft");
+        L.push("  PLANE 1 — ACTION: Hands attaching or adjusting the product on the animal — authentic, intimate trust moment.");
+        L.push("  PLANE 2 — ANIMAL FACE: Patient, trusting expression — emotionally resonant.");
+        L.push("  PLANE 3 — BACKGROUND: Environmental context, soft.");
       }
-      L.push("Product must be clearly visible, well-lit, in sharp focus. The animal is secondary — provides scale and emotional context.");
-      L.push("Professional product photography lighting: main light highlights material texture and construction details.");
+      L.push("Product photography lighting standard: primary light source highlights material and construction. Fill to reveal shadow detail. No blown highlights on product surfaces.");
       L.push("");
-    }else if(accMode==="standard"&&accSelected.length){
-      const names=accSelected.map(id=>{const a=accList.find(x=>x.id===id);const v=accVariants[id];return(a?.name||id)+(v?" ("+v+")":"");}).join(", ");
-      L.push("=== ACCESSORIES ===");
-      L.push(names);
-      L.push("The animal is the main subject. Accessories are natural additions to the scene.");
+    }else if(accSelected.length){
+      const names=accSelected.map(id=>{const a=accList.find(x=>x.id===id);const v=accVariants[id];return(a?.name||id)+(v?" — "+v+" variant":"");}).join(", ");
+      L.push("=== ACCESSORIES IN SCENE ===");
+      L.push(names+".");
+      L.push("Accessories integrated naturally. Animal is primary subject. Items positioned as authentic lifestyle elements, not artificially posed.");
       L.push("");
     }
 
-    // Virtual human (standalone, if shown)
-    if(!companionMode||companionMode==="alone"){
-      if(showVirtualHuman&&accMode==="product"&&accDepthHandler==="virtual_hand"&&!hasHumanPhoto){
-        L.push("=== VIRTUAL PERSON ===");
-        const visT={full:"full body",upper_body:"upper body",hands_only:"hands and forearms only",implied:"implied presence"}[vhVisibility];
-        const styleT={casual:"casual",outdoorsy:"outdoorsy",smart_casual:"smart casual"}[vhStyle];
-        L.push("Visibility: "+visT+". Style: "+styleT+". Gender and age: neutral, AI discretion.");
-        L.push("");
-      }
+    // ── VIRTUAL PERSON (standalone) ──
+    if(showVirtualHuman&&companionMode==="alone"&&accDepthHandler==="virtual_hand"){
+      L.push("=== VIRTUAL PERSON ===");
+      const visMap={full:"full body",upper_body:"upper body",hands_only:"hands and forearms only",implied:"implied presence"};
+      const styleMap={casual:"casual",outdoorsy:"outdoorsy",smart_casual:"smart casual"};
+      L.push("Visibility: "+(visMap[vhVisibility]||vhVisibility)+". Style: "+(styleMap[vhStyle]||vhStyle)+". Gender and age: neutral, AI discretion.");
+      L.push("");
     }
 
-    // Scene parameters
+    // ── SCENE PARAMETERS ──
     const techParts=[];
-    if(bg)techParts.push(BACKGROUNDS.find(b=>b.id===bg)?.p);
-    if(light)techParts.push(LIGHTING.find(l=>l.id===light)?.p);
-    if(lens)techParts.push(LENSES.find(l=>l.mm===lens)?.p);
-    if(filmStock)techParts.push(FILM_STOCKS.find(f=>f.id===filmStock)?.p);
-    if(colorGrade)techParts.push(COLOR_GRADES.find(c=>c.id===colorGrade)?.p);
-    L.push("=== SCENE PARAMETERS ===");
-    if(hasHumanPhoto)L.push("Note: People from reference photos are replaced by virtual figures — only environment and props are preserved.");
-    if(techParts.filter(Boolean).length)L.push(techParts.filter(Boolean).join(". ")+".");
-    L.push("Aspect ratio: "+aspectRatio+".");
-    L.push("");
+    if(bg){const b=BACKGROUNDS.find(x=>x.id===bg);if(b)techParts.push(b.p);}
+    if(light){const l=LIGHTING.find(x=>x.id===light);if(l)techParts.push(l.p);}
+    if(lens){const l=LENSES.find(x=>x.mm===lens);if(l)techParts.push(l.p);}
+    if(filmStock){const f=FILM_STOCKS.find(x=>x.id===filmStock);if(f)techParts.push(f.p);}
+    if(colorGrade){const c=COLOR_GRADES.find(x=>x.id===colorGrade);if(c)techParts.push(c.p);}
+    if(techParts.length){
+      L.push("=== SCENE PARAMETERS ===");
+      if(hasPetPhotoVal||hasHumanPhotoVal)L.push("Note: People from reference photos are replaced by virtual figures. Environment and props preserved.");
+      L.push(techParts.join(". ")+".");
+      L.push("Aspect ratio: "+aspectRatio+". All subjects and environment share identical lighting direction, consistent color temperature, and matching perspective.");
+      L.push("");
+    } else {
+      L.push("=== SCENE PARAMETERS ===");
+      L.push("Aspect ratio: "+aspectRatio+". Natural, unobtrusive studio or lifestyle environment.");
+      L.push("");
+    }
 
-    // Output layout
+    // ── OUTPUT FORMAT ──
     if(outputLayout==="grid_1x3"){
       L.push("=== OUTPUT FORMAT ===");
-      L.push("Single composite 1×3 grid image. Panel 1: portrait close-up. Panel 2: side profile. Panel 3: full body. Identical animal across all panels.");
+      L.push("Single composite 1×3 grid. Panel 1: tight portrait close-up — face and expression. Panel 2: side profile — full silhouette. Panel 3: full body — complete anatomy and posture. Perfect character consistency across all three panels.");
       L.push("");
     }else if(outputLayout==="grid_2x2"){
       L.push("=== OUTPUT FORMAT ===");
-      L.push("Single composite 2×2 grid with four distinct angles of the same animal. Strict consistency across all panels.");
+      L.push("Single composite 2×2 grid. Four distinct camera angles of the same animal in the same scene. Strict identity, lighting, and environment consistency across all four panels.");
       L.push("");
     }else if(outputLayout==="product_showcase"){
       L.push("=== OUTPUT FORMAT ===");
-      L.push("Product showcase: multiple angles or close-ups of the primary product with the animal. Clean composition. Product occupies primary visual real estate in every panel.");
+      L.push("Product showcase composite. Multiple product angles and detail shots with the animal. Product holds primary visual real estate in every panel. Commercial photography standard.");
       L.push("");
     }else if(outputLayout==="multi_custom"&&sel.length>0){
-      L.push("=== CAMERA ANGLES ===");
-      L.push("Output as a single composite "+sel.length+"-panel grid. Each panel shows the same scene from a different angle.");
-      if(use3D)L.push("3D Camera Control applies to panel 1 only. Remaining panels use standard angle descriptions below.");
+      L.push("=== CAMERA ANGLES — "+sel.length+"-PANEL COMPOSITE ===");
+      if(use3D)L.push("3D Camera Control active — applies to panel 1 only.");
       L.push(sel.map((i,idx)=>{
-        if(idx===0&&use3D)return "1. "+describe3D(cam.azimuth,cam.elevation,cam.zoom)+" [3D — panel 1 only]";
+        if(idx===0&&use3D)return "1. "+describe3D(cam.azimuth,cam.elevation,cam.zoom)+" [3D Camera — panel 1]";
         return (idx+1)+". "+ANGLES[i].name+" — "+ANGLES[i].desc;
       }).join("\n"));
       L.push("");
     }
 
-    if(custom.trim()){L.push("=== ADDITIONAL ===");L.push(custom.trim());L.push("");}
-    L.push("=== CRITICAL ===");
-    L.push("All elements share identical lighting direction and color temperature. Seamless edge integration — no visible compositing seams. Matching perspective and scale throughout.");
-    L.push("No text. No labels. No watermarks. No UI elements.");
+    // ── ADDITIONAL ──
+    if(custom.trim()){L.push("=== ADDITIONAL DIRECTION ===");L.push(custom.trim());L.push("");}
+
+    // ── CRITICAL ──
+    L.push("=== CRITICAL QUALITY REQUIREMENTS ===");
+    L.push("Absolute photorealism — every element must hold up to close inspection. Physically plausible lighting with correct directionality, intensity falloff, and color temperature across all surfaces. Subsurface scattering on skin, fur, and organic materials. Specular highlights consistent with material type. Accurate depth of field — focus plane matches compositional intent.");
+    L.push("Seamless integration — no compositing artifacts, no edge haloing, no mismatched perspective between subjects and environment. All scale relationships physically credible. No generated text, labels, watermarks, or UI elements. No additional humans, animals, or objects beyond what is specified.");
     return L.join("\n");
   };
 
@@ -4303,8 +4303,11 @@ function PetPage(){
               {!vpIsFantasy&&!vpOtherSpecies&&spData.breedSprites&&(
                 <div style={{marginBottom:24}}>
                   <SL>Breed</SL>
-                  <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
-                    {spData.breedSprites.map(b=>{
+                  {(()=>{
+                    const perRow=vpSpecies==="horse"?5:6;
+                    const rows=[];
+                    for(let i=0;i<spData.breedSprites.length;i+=perRow)rows.push(spData.breedSprites.slice(i,i+perRow));
+                    return rows.map((row,ri)=>{
                       let srcCW,srcCH,srcC,srcR,dW,dH;
                       if(vpSpecies==="dog"){srcCW=200;srcCH=200;srcC=10;srcR=2;dW=158;dH=158;}
                       else if(vpSpecies==="cat"){srcCW=222;srcCH=218;srcC=9;srcR=2;dW=158;dH=154;}
@@ -4312,26 +4315,32 @@ function PetPage(){
                       const sc=dW/srcCW;
                       const bgW=Math.round(srcCW*srcC*sc);
                       const bgH=Math.round(srcCH*srcR*sc);
-                      const ci=Math.round(Math.abs(b.sx)/(vpSpecies==="horse"?130:100));
-                      const ri=b.sy&&b.sy<0?1:0;
                       return(
-                        <div key={b.id} onClick={()=>{setVpBreed(vpBreed===b.id?"":b.id);setEnhanced("");}}
-                          style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
-                            flexShrink:0,flexGrow:0,width:dW,
-                            border:"2px solid "+(vpBreed===b.id?"var(--acc)":"rgba(255,255,255,.2)"),
-                            boxShadow:vpBreed===b.id?"0 0 14px rgba(232,120,10,.4)":"none",
-                            background:"var(--s1)",transition:"all .15s",
-                            opacity:vpBreed&&vpBreed!==b.id?.6:1}}>
-                          <div style={{width:dW,height:dH,overflow:"hidden",
-                            backgroundImage:"url(/pet-breeds-"+vpSpecies+".png)",
-                            backgroundSize:bgW+"px "+bgH+"px",
-                            backgroundPosition:(-ci*dW)+"px "+(-ri*dH)+"px",backgroundRepeat:"no-repeat"}}/>
-                          <div style={{padding:"5px 6px 7px",textAlign:"center",fontSize:10,fontWeight:600,lineHeight:1.2,
-                            color:vpBreed===b.id?"var(--acc)":"#fff"}}>{b.id}</div>
+                        <div key={ri} style={{display:"flex",gap:8,marginBottom:8}}>
+                          {row.map(b=>{
+                            const ci=Math.round(Math.abs(b.sx)/(vpSpecies==="horse"?130:100));
+                            const rowIdx=b.sy&&b.sy<0?1:0;
+                            return(
+                              <div key={b.id} onClick={()=>{setVpBreed(vpBreed===b.id?"":b.id);setEnhanced("");}}
+                                style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
+                                  flexShrink:0,width:dW,
+                                  border:"2px solid "+(vpBreed===b.id?"var(--acc)":"rgba(255,255,255,.2)"),
+                                  boxShadow:vpBreed===b.id?"0 0 14px rgba(232,120,10,.4)":"none",
+                                  background:"var(--s1)",transition:"all .15s",
+                                  opacity:vpBreed&&vpBreed!==b.id?.6:1}}>
+                                <div style={{width:dW,height:dH,overflow:"hidden",
+                                  backgroundImage:"url(/pet-breeds-"+vpSpecies+".png)",
+                                  backgroundSize:bgW+"px "+bgH+"px",
+                                  backgroundPosition:(-ci*dW)+"px "+(-rowIdx*dH)+"px",backgroundRepeat:"no-repeat"}}/>
+                                <div style={{padding:"5px 6px 7px",textAlign:"center",fontSize:10,fontWeight:600,lineHeight:1.2,
+                                  color:vpBreed===b.id?"var(--acc)":"#fff"}}>{b.id}</div>
+                              </div>
+                            );
+                          })}
                         </div>
                       );
-                    })}
-                  </div>
+                    });
+                  })()}
                 </div>
               )}
 
