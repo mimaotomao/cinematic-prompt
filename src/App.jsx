@@ -3561,9 +3561,9 @@ function PetPage(){
   const toggleAccSel=(id)=>setAccSelected(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
   const doToast=m=>{setToast(m);setTimeout(()=>setToast(""),2500);};
   // source drives photo logic
-  const showVirtualPet=source==="scratch";
-  const hasPetPhotoVal=source==="pet"||source==="pet_human";
-  const hasHumanPhotoVal=source==="pet_human";
+  const showVirtualPet=source==="scratch"||source==="product";
+  const hasPetPhotoVal=source==="photo";
+  const hasHumanPhotoVal=source==="photo"&&hasHumanPhoto;
   const showVirtualHuman=!hasHumanPhotoVal&&accMode==="product"&&accDepthHandler==="virtual_hand";
   const spData=(vpIsFantasy?PET_SPECIES_FANTASY:PET_SPECIES_REAL).find(s=>s.id===vpSpecies)||PET_SPECIES_REAL[0];
   const accList=PET_ACCESSORIES[vpSpecies]||PET_ACCESSORIES.default;
@@ -3858,28 +3858,34 @@ function PetPage(){
           placeholder="Describe the scene: 'my dog sitting in a park wearing a new harness, golden hour lighting' — or skip and configure below"/>
       </div>
 
-      {/* 2. SOURCE — 4 options */}
+      {/* 2. SOURCE — 3 options */}
       <div className="sec">
         <div className="sh"><span className="st">Starting point</span></div>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
           {[
-            {id:"scratch",   label:"Build from scratch",      sub:"fully virtual — no photos",    icon:"🐾"},
-            {id:"pet",       label:"I have a pet photo",       sub:"attach when generating",        img:true, sx:-160},
-            {id:"pet_human", label:"Pet + my photo",           sub:"both photos, attach when gen.", img:true, sx:null},
-            {id:"product_only",label:"Product only",           sub:"showcase accessory, no pet",   icon:"🛍"},
+            {id:"scratch", label:"Build from scratch", sub:"fully virtual — no photos needed", icon:"🐾"},
+            {id:"photo",   label:"I have a photo",      sub:"pet / pet + me — attach when generating", img:true},
+            {id:"product", label:"Product photo",       sub:"showcase collar, harness, toy…", collar:true},
           ].map(opt=>{
             const active=source===opt.id;
             return(
-              <div key={opt.id} onClick={()=>{setSource(opt.id);setEnhanced("");}}
-                style={{flex:"1 1 140px",cursor:"pointer",borderRadius:10,overflow:"hidden",
+              <div key={opt.id} onClick={()=>{setSource(opt.id);if(opt.id==="product")setAccOpen(true);setEnhanced("");}}
+                style={{flex:"1 1 160px",cursor:"pointer",borderRadius:10,overflow:"hidden",
                   border:"2px solid "+(active?"var(--acc)":"rgba(255,255,255,.2)"),
                   background:active?"var(--acdim)":"var(--s1)",transition:"all .15s"}}>
                 {opt.img?(
                   <div style={{width:"100%",height:100,overflow:"hidden",display:"flex"}}>
                     <div style={{flex:1,height:100,backgroundImage:"url(/pet-inputs.png)",
                       backgroundSize:"480px 127px",backgroundPosition:"-160px 0px",backgroundRepeat:"no-repeat"}}/>
-                    {opt.id==="pet_human"&&<div style={{flex:1,height:100,backgroundImage:"url(/pet-inputs.png)",
-                      backgroundSize:"480px 127px",backgroundPosition:"-320px 0px",backgroundRepeat:"no-repeat"}}/>}
+                    <div style={{flex:1,height:100,backgroundImage:"url(/pet-inputs.png)",
+                      backgroundSize:"480px 127px",backgroundPosition:"-320px 0px",backgroundRepeat:"no-repeat"}}/>
+                  </div>
+                ):opt.collar?(
+                  <div style={{width:"100%",height:100,display:"flex",alignItems:"center",justifyContent:"center",
+                    background:"rgba(255,255,255,.03)"}}>
+                    <div style={{width:70,height:70,backgroundImage:"url(/pet-inputs.png)",
+                      backgroundSize:"480px 127px",backgroundPosition:"0px -13px",backgroundRepeat:"no-repeat",
+                      borderRadius:8,overflow:"hidden"}}/>
                   </div>
                 ):(
                   <div style={{width:"100%",height:100,display:"flex",alignItems:"center",justifyContent:"center",
@@ -3896,26 +3902,27 @@ function PetPage(){
             );
           })}
         </div>
-        {/* Photo quality hint when photo source selected */}
-        {(source==="pet"||source==="pet_human")&&(
-          <div style={{marginTop:14,display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",padding:"10px 14px",borderRadius:8,background:"rgba(255,255,255,.03)",border:"1px solid var(--bd)"}}>
-            <span style={{fontSize:12,color:"rgba(255,255,255,.8)"}}>Pet photo quality:</span>
-            <select value={petPhotoQuality} onChange={e=>setPetPhotoQuality(e.target.value)}
-              style={{padding:"6px 10px",borderRadius:6,border:"1px solid var(--bd)",background:"var(--s2)",color:"#fff",fontSize:12}}>
-              <option value="poor">Poor (dark / blurry)</option>
-              <option value="average">Average</option>
-              <option value="good">Good, needs polish</option>
-            </select>
-            <span style={{fontSize:12,color:"rgba(255,255,255,.6)"}}>Enhance:</span>
-            {["lighting","sharpness","background","pose","fur detail"].map(e=>(
-              <Pill key={e} active={petEnhancements.includes(e)} onClick={()=>toggleEnh(e)}>{petEnhancements.includes(e)?"✓ ":""}{e}</Pill>
-            ))}
+        {/* Photo sub-toggle: pet only vs pet+me */}
+        {source==="photo"&&(
+          <div style={{marginTop:12,display:"flex",gap:8}}>
+            <button onClick={()=>{setHasPetPhoto(true);setHasHumanPhoto(false);setEnhanced("");}}
+              style={{flex:1,padding:"9px 14px",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:600,
+                border:"2px solid "+(!hasHumanPhoto?"var(--acc)":"rgba(255,255,255,.2)"),
+                background:!hasHumanPhoto?"var(--acdim)":"transparent",color:!hasHumanPhoto?"var(--acc)":"#fff"}}>
+              🐾 Pet photo only
+            </button>
+            <button onClick={()=>{setHasPetPhoto(true);setHasHumanPhoto(true);setEnhanced("");}}
+              style={{flex:1,padding:"9px 14px",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:600,
+                border:"2px solid "+(hasHumanPhoto?"var(--acc)":"rgba(255,255,255,.2)"),
+                background:hasHumanPhoto?"var(--acdim)":"transparent",color:hasHumanPhoto?"var(--acc)":"#fff"}}>
+              🐾+📸 Pet + my photo
+            </button>
           </div>
         )}
       </div>
 
       {/* 3. PET CONFIGURATION TABS */}
-      {source!=="product_only"&&(
+      {source!=="product"&&(
         <div className="sec">
           <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:20,borderBottom:"1px solid var(--bd)",paddingBottom:12}}>
             {[
@@ -4250,15 +4257,16 @@ function PetPage(){
         </div>
       )}
 
-      {/* 4. ACCESSORIES — always available, collapsible */}
+      {/* 4. ACCESSORIES — always available, collapsible, open by default for product source */}
       <div className="sec" style={{borderRadius:10,border:"1px solid var(--bd)",overflow:"hidden",marginBottom:28}}>
         <div onClick={()=>setAccOpen(v=>!v)}
           style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 18px",cursor:"pointer",background:"var(--s1)",userSelect:"none"}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:20}}>🛍</span>
             <div>
               <div style={{fontSize:13,fontWeight:700}}>Accessories & Product placement</div>
-              <div style={{fontSize:11,color:"rgba(255,255,255,.65)",marginTop:1}}>Optional — add collar, harness, toy or showcase a product</div>
+              <div style={{fontSize:11,color:"rgba(255,255,255,.65)",marginTop:1}}>
+                {source==="product"?"Define your product and how it appears in the scene":"Optional — add collar, harness, toy or showcase a product"}
+              </div>
             </div>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -4268,23 +4276,8 @@ function PetPage(){
         </div>
         {accOpen&&(
           <div style={{padding:"16px 18px",borderTop:"1px solid var(--bd)"}}>
-            <div style={{display:"flex",gap:8,marginBottom:16}}>
-              <button onClick={()=>{setAccMode("product");setEnhanced("");}}
-                style={{flex:1,padding:"10px 14px",borderRadius:8,cursor:"pointer",textAlign:"left",
-                  border:"2px solid "+(accMode==="product"?"var(--acc)":"rgba(255,255,255,.2)"),
-                  background:accMode==="product"?"var(--acdim)":"transparent"}}>
-                <div style={{fontSize:12,fontWeight:800,color:accMode==="product"?"var(--acc)":"#fff"}}>🛍 Product Placement</div>
-                <div style={{fontSize:10,color:"rgba(255,255,255,.65)",marginTop:2}}>Product is hero — pet is context</div>
-              </button>
-              <button onClick={()=>{setAccMode("standard");setEnhanced("");}}
-                style={{flex:1,padding:"10px 14px",borderRadius:8,cursor:"pointer",textAlign:"left",
-                  border:"2px solid "+(accMode==="standard"?"var(--acc)":"rgba(255,255,255,.2)"),
-                  background:accMode==="standard"?"var(--acdim)":"transparent"}}>
-                <div style={{fontSize:12,fontWeight:800,color:accMode==="standard"?"var(--acc)":"#fff"}}>🐾 Standard Accessories</div>
-                <div style={{fontSize:10,color:"rgba(255,255,255,.65)",marginTop:2}}>Pet is hero — accessories are additions</div>
-              </button>
-            </div>
 
+            {/* Product placement always shown first — start with Existing/Creative */}
             {accMode==="product"&&(
               <>
                 <div style={{marginBottom:12,display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -4316,7 +4309,7 @@ function PetPage(){
                     ))}
                   </div>
                 </div>
-                {accDepthHandler==="virtual_hand"&&source!=="pet_human"&&(
+                {accDepthHandler==="virtual_hand"&&source!=="photo"&&(
                   <div style={{marginTop:12,padding:"10px 14px",borderRadius:8,border:"1px solid rgba(232,120,10,.3)",background:"rgba(232,120,10,.04)"}}>
                     <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:1.5,color:"var(--acc)",marginBottom:8}}>Virtual hand style</div>
                     <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
@@ -4342,6 +4335,7 @@ function PetPage(){
               </>
             )}
 
+            {/* Standard accessories OR switch to product */}
             {accMode==="standard"&&(
               <>
                 <SL>Select accessories</SL>
@@ -4359,6 +4353,22 @@ function PetPage(){
                 ))}
               </>
             )}
+
+            {/* Mode toggle — product placement vs standard accessories */}
+            <div style={{display:"flex",gap:8,marginTop:16,paddingTop:14,borderTop:"1px solid var(--bd)"}}>
+              <button onClick={()=>{setAccMode("product");setEnhanced("");}}
+                style={{flex:1,padding:"8px 12px",borderRadius:8,cursor:"pointer",textAlign:"left",
+                  border:"1px solid "+(accMode==="product"?"var(--acc)":"rgba(255,255,255,.15)"),
+                  background:accMode==="product"?"var(--acdim)":"transparent"}}>
+                <div style={{fontSize:11,fontWeight:700,color:accMode==="product"?"var(--acc)":"rgba(255,255,255,.7)"}}>Product placement</div>
+              </button>
+              <button onClick={()=>{setAccMode("standard");setEnhanced("");}}
+                style={{flex:1,padding:"8px 12px",borderRadius:8,cursor:"pointer",textAlign:"left",
+                  border:"1px solid "+(accMode==="standard"?"var(--acc)":"rgba(255,255,255,.15)"),
+                  background:accMode==="standard"?"var(--acdim)":"transparent"}}>
+                <div style={{fontSize:11,fontWeight:700,color:accMode==="standard"?"var(--acc)":"rgba(255,255,255,.7)"}}>Standard accessories</div>
+              </button>
+            </div>
           </div>
         )}
       </div>
