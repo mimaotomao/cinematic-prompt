@@ -4046,10 +4046,25 @@ function PetPage(){
                 </>
               )}
 
-              {/* Breed — fixed 6-column grid, correct math */}
+              {/* Breed — dropdown + sprite grid, mutually exclusive */}
               {!vpIsFantasy&&spData.breedSprites&&(
                 <div style={{marginBottom:24}}>
-                  <SL>Breed</SL>
+                  <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+                    <SL style={{marginBottom:0}}>Breed</SL>
+                    <select value={vpBreed} onChange={e=>{setVpBreed(e.target.value);setEnhanced("");}}
+                      style={{flex:1,maxWidth:280,padding:"7px 10px",borderRadius:8,
+                        border:"1px solid "+(vpBreed?"var(--acc)":"var(--bd)"),
+                        background:"var(--s2)",color:vpBreed?"var(--acc)":"rgba(255,255,255,.7)",
+                        fontSize:12,fontWeight:vpBreed?700:400,outline:"none",cursor:"pointer"}}>
+                      <option value="">— any breed</option>
+                      {spData.breedSprites.map(b=>(
+                        <option key={b.id} value={b.id}>{b.id}</option>
+                      ))}
+                    </select>
+                    {vpBreed&&<button onClick={()=>{setVpBreed("");setEnhanced("");}}
+                      style={{padding:"5px 10px",borderRadius:6,border:"1px solid rgba(255,255,255,.2)",
+                        background:"transparent",color:"rgba(255,255,255,.5)",fontSize:11,cursor:"pointer"}}>✕</button>}
+                  </div>
                   <div style={{display:"grid",
                     gridTemplateColumns:vpSpecies==="horse"?"repeat(auto-fill,190px)":"repeat(auto-fill,158px)",
                     gap:8}}>
@@ -4061,14 +4076,15 @@ function PetPage(){
                       const sc=dW/srcCW;
                       const bgW=Math.round(srcCW*srcC*sc);
                       const bgH=Math.round(srcCH*srcR*sc);
-                      const ci=Math.round(Math.abs(b.sx)/100); // col index (sx uses -100 step)
+                      const ci=Math.round(Math.abs(b.sx)/100);
                       const ri=b.sy&&b.sy<0?1:0;
                       return(
-                        <div key={b.id} onClick={()=>{setVpBreed(b.id);setEnhanced("");}}
+                        <div key={b.id} onClick={()=>{setVpBreed(vpBreed===b.id?"":b.id);setEnhanced("");}}
                           style={{cursor:"pointer",borderRadius:8,overflow:"hidden",
                             border:"2px solid "+(vpBreed===b.id?"var(--acc)":"rgba(255,255,255,.2)"),
                             boxShadow:vpBreed===b.id?"0 0 14px rgba(232,120,10,.4)":"none",
-                            background:"var(--s1)",transition:"all .15s"}}>
+                            background:"var(--s1)",transition:"all .15s",
+                            opacity:vpBreed&&vpBreed!==b.id?.6:1}}>
                           <div style={{width:dW,height:dH,overflow:"hidden",
                             backgroundImage:"url(/pet-breeds-"+vpSpecies+".png)",
                             backgroundSize:bgW+"px "+bgH+"px",
