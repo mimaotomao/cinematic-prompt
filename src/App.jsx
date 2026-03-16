@@ -3788,15 +3788,15 @@ function PetPage(){
   const MAX_A=9;
 
   // auto-start enhance after login if pending
-  const doEnhance=useCallback(async(idToken)=>{
-    setEnhancing(true);setEnhanced("");setPetPromptView("enhanced");
-    try{const r=await callEnhance(prompt,custom,idToken);setEnhanced(r);doToast("ENHANCED BY GEMINI");}
-    catch(e){if(e.status===401)setShowAuthModal(true);else doToast("ERROR: "+e.message);}
-    setEnhancing(false);
-  },[prompt,custom]);
-
   useEffect(()=>{
-    if(user&&pendingEnhance){setPendingEnhance(false);doEnhance(user.idToken);}
+    if(user&&pendingEnhance){
+      setPendingEnhance(false);
+      setEnhancing(true);setEnhanced("");setPetPromptView("enhanced");
+      callEnhance(buildPetPrompt(),custom,user.idToken)
+        .then(r=>{setEnhanced(r);setToast("ENHANCED BY GEMINI");setTimeout(()=>setToast(""),2500);})
+        .catch(e=>{if(e.status===401)setShowAuthModal(true);else{setToast("ERROR: "+e.message);setTimeout(()=>setToast(""),2500);}})
+        .finally(()=>setEnhancing(false));
+    }
   },[user,pendingEnhance]);
 
   const tog1=(setter,id)=>setter(p=>p===id?null:id);
@@ -5020,7 +5020,7 @@ function PetPage(){
           {/* Enhance + inline disclaimer → becomes Copy Enhanced after done */}
           {!enhanced?(
             <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-              <button className="btn" onClick={async()=>{if(!user){setPendingEnhance(true);setShowAuthModal(true);return;}doEnhance(user.idToken);}} disabled={enhancing}
+              <button className="btn" onClick={async()=>{if(!user){setPendingEnhance(true);setShowAuthModal(true);return;}setEnhancing(true);setEnhanced("");setPetPromptView("enhanced");try{const r=await callEnhance(prompt,custom,user.idToken);setEnhanced(r);doToast("ENHANCED BY GEMINI");}catch(e){if(e.status===401)setShowAuthModal(true);else doToast("ERROR: "+e.message);}setEnhancing(false);}} disabled={enhancing}
                 style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"rgba(255,255,255,.4)":"var(--acc)",background:"var(--acdim)",flexShrink:0}}>
                 {enhancing?"ENHANCING\u2026":"\u2192 AI Prompt Enhance"}
               </button>
