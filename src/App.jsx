@@ -297,6 +297,121 @@ function EnhancingIndicator(){
     </>
   );
 }
+// ─── REUSABLE PROMPT OUTPUT PANEL ────────────────────────────────────────────
+// Tabs (Original green / AI Enhanced orange), buttons, disclaimer, auto-enhance after login.
+// Props: prompt (string), custom (string), hasAny (bool), extraButtons (jsx), onToast (fn)
+function PromptOutputPanel({prompt,custom="",hasAny=true,extraButtons=null,onToast}){
+  const[enhanced,setEnhanced]=useState("");
+  const[enhancing,setEnhancing]=useState(false);
+  const[view,setView]=useState("base");
+  const[pending,setPending]=useState(false);
+  const[showAuth,setShowAuth]=useState(false);
+  const{user}=React.useContext(AuthCtx);
+  const toast=m=>{if(onToast)onToast(m);};
+
+  // auto-start enhance after login
+  useEffect(()=>{
+    if(user&&pending){
+      setPending(false);
+      setEnhancing(true);setEnhanced("");setView("enhanced");
+      callEnhance(prompt,custom,user.idToken)
+        .then(r=>{setEnhanced(r);toast("ENHANCED BY GEMINI");})
+        .catch(e=>{if(e.status===401)setShowAuth(true);else toast("ERROR: "+e.message);})
+        .finally(()=>setEnhancing(false));
+    }
+  },[user,pending]);
+
+  // reset enhanced when base prompt changes significantly
+  useEffect(()=>{ setEnhanced(""); setView("base"); },[prompt]);
+
+  const doEnhance=()=>{
+    if(!user){setPending(true);setShowAuth(true);return;}
+    setEnhancing(true);setEnhanced("");setView("enhanced");
+    callEnhance(prompt,custom,user.idToken)
+      .then(r=>{setEnhanced(r);toast("ENHANCED BY GEMINI");})
+      .catch(e=>{if(e.status===401)setShowAuth(true);else toast("ERROR: "+e.message);})
+      .finally(()=>setEnhancing(false));
+  };
+
+  const shown=(enhanced&&view==="enhanced")?enhanced:prompt;
+
+  return(
+    <>
+      <div style={{borderRadius:"var(--r2)",border:"1px solid "+(enhanced?"var(--bd2)":"var(--bd)"),overflow:"hidden",background:"var(--s2)",transition:"border-color .2s"}}>
+        {/* Tab strip — always visible */}
+        <div style={{display:"flex",borderBottom:"1px solid var(--bd)",background:"var(--s1)"}}>
+          {/* Original — always green */}
+          <button onClick={()=>setView("base")}
+            style={{padding:"9px 18px",cursor:"pointer",fontSize:11,fontWeight:700,border:"none",borderRight:"1px solid var(--bd)",
+              background:view==="base"?"rgba(34,197,94,.12)":"transparent",
+              color:view==="base"?"#4ade80":"rgba(74,222,128,.5)",
+              transition:"all .15s",letterSpacing:.5,whiteSpace:"nowrap"}}>
+            Original Prompt
+          </button>
+          {/* AI Enhanced — greyed until ready, orange after */}
+          <button onClick={()=>{if(enhanced)setView("enhanced");}}
+            style={{padding:"9px 18px",cursor:enhanced?"pointer":"default",fontSize:11,fontWeight:700,border:"none",
+              background:enhanced&&view==="enhanced"?"var(--acdim)":"transparent",
+              color:enhanced?(view==="enhanced"?"var(--acc)":"rgba(255,255,255,.38)"):"rgba(255,255,255,.18)",
+              transition:"all .15s",letterSpacing:.5,whiteSpace:"nowrap"}}>
+            {"\u2726"} AI Enhanced Prompt
+          </button>
+          {enhanced&&(
+            <button onClick={()=>{setEnhanced("");setView("base");}}
+              style={{marginLeft:"auto",padding:"9px 14px",cursor:"pointer",fontSize:10,fontWeight:600,
+                border:"none",borderLeft:"1px solid var(--bd)",background:"transparent",color:"rgba(255,255,255,.22)"}}>
+              {"\u2715"} discard
+            </button>
+          )}
+        </div>
+        {/* Prompt text */}
+        <div style={{fontFamily:"var(--mono)",fontSize:12,lineHeight:1.9,color:"var(--t)",padding:"14px 16px",
+          whiteSpace:"pre-wrap",wordBreak:"break-word",userSelect:"text",cursor:"text",minHeight:120}}>
+          {hasAny?shown:<span style={{color:"var(--t4)",fontStyle:"italic",fontSize:13,fontFamily:"var(--font)"}}>Fill fields above to generate your prompt in real time.</span>}
+        </div>
+      </div>
+
+      {/* Button bar */}
+      <div className="pbar" translate="no" style={{flexWrap:"wrap",gap:8,alignItems:"flex-start"}}>
+        {extraButtons}
+
+        {/* Copy Original — always primary */}
+        <button className={`btn${hasAny?" pri":""}`} disabled={!hasAny}
+          onClick={async()=>{const ok=await copyText(prompt);toast(ok?"ORIGINAL PROMPT COPIED — ATTACH YOUR PHOTOS IN TARGET AI":"COPY FAILED");}}>
+          Copy Original Prompt
+        </button>
+
+        {/* Enhance → Copy Enhanced after done */}
+        {!enhanced?(
+          <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+            <button className="btn" disabled={!hasAny||enhancing}
+              onClick={doEnhance}
+              style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"rgba(255,255,255,.4)":"var(--acc)",background:"var(--acdim)",flexShrink:0}}>
+              {enhancing?"ENHANCING\u2026":"\u2192 AI Prompt Enhance"}
+            </button>
+            <div style={{display:"flex",flexDirection:"column",gap:3,maxWidth:420}} translate="no">
+              <span style={{fontSize:11,color:"rgba(255,255,255,.6)",lineHeight:1.5,whiteSpace:"nowrap"}}>
+                <span style={{color:"var(--acc)",marginRight:5}}>▸</span>Generates artistic, narrative version — richer mood, more cinematic.
+              </span>
+              <span style={{fontSize:11,color:"rgba(255,255,255,.6)",lineHeight:1.5,whiteSpace:"nowrap"}}>
+                <span style={{color:"rgba(255,100,100,.7)",marginRight:5}}>▸</span>Some technical params (lens, lighting, ratio) may be rewritten. <span style={{color:"rgba(255,255,255,.75)",fontWeight:600}}>Requires Google sign-in.</span>
+              </span>
+            </div>
+          </div>
+        ):(
+          <button className="btn pri"
+            onClick={async()=>{const ok=await copyText(enhanced);toast(ok?"ENHANCED PROMPT COPIED":"COPY FAILED");}}>
+            {"\u2726"} Copy Enhanced Prompt
+          </button>
+        )}
+      </div>
+
+      {showAuth&&<AuthModal onClose={()=>setShowAuth(false)}/>}
+      {enhancing&&<EnhancingIndicator/>}
+    </>
+  );
+}
+
 const GEN_TARGETS=[
   {label:"Grok Imagine",url:"https://grok.com/imagine",icon:"✦"},
   {label:"Gemini",url:"https://gemini.google.com",icon:"◈",warn:"Gemini (Imagen) may truncate long prompts — grid consistency is limited. Best for short/single-shot."},
@@ -1161,9 +1276,6 @@ function AnglesPage(){
   const[toast,setToast]=useState("");
   const[history,setHistory]=useState([]);
   const[showHistory,setShowHistory]=useState(false);
-  const[enhancing,setEnhancing]=useState(false);
-  const[enhanced,setEnhanced]=useState("");
-  const[showAuthModal,setShowAuthModal]=useState(false);
   const{user}=React.useContext(AuthCtx);
   const MAX=9;
 
@@ -1178,20 +1290,6 @@ function AnglesPage(){
     const ok=await copyText(enhanced||prompt);
     setHistory(p=>[{prompt:enhanced||prompt,date:new Date().toLocaleTimeString()},...p].slice(0,20));
     doToast(ok?"COPIED TO CLIPBOARD":"COPY FAILED — SELECT MANUALLY");
-  };
-  const enhance=async()=>{
-    if(!hasAny)return;
-    if(!user){setShowAuthModal(true);return;}
-    setEnhancing(true);setEnhanced("");
-    try{
-      const result=await callEnhance(prompt,custom,user.idToken,null);
-      setEnhanced(result);
-      doToast("✦ ENHANCED BY GEMINI");
-    }catch(e){
-      if(e.status===401){setShowAuthModal(true);}
-      else doToast("ERROR: "+e.message);
-    }
-    setEnhancing(false);
   };
   const reset=()=>{
     setScene("");setSel([]);setLight(null);setBg(null);setLens(null);
@@ -1501,25 +1599,20 @@ function AnglesPage(){
 
       <div className="sec">
         <div className="sh"><span className="st">Generated Prompt</span>{hasAny&&<span className="sb" translate="no">LIVE</span>}</div>
-        <div className={`pbox${hasAny?" live":""}`}>
-          {hasAny?(enhanced||prompt):<span className="pbox-empty">Fill fields above to generate your prompt in real time.</span>}
-        </div>
-        {enhanced&&(
-          <div style={{marginTop:8,fontSize:11,color:"var(--acc)",fontWeight:600,letterSpacing:1}}>
-            ✦ Enhanced by Gemini — <button onClick={()=>setEnhanced("")} style={{background:"none",border:"none",color:"var(--t4)",fontSize:11,cursor:"pointer",textDecoration:"underline"}}>revert to original</button>
-          </div>
-        )}
-        <div className="pbar" translate="no">
-          <button className="btn" onClick={reset}>Reset</button>
-          <button className="btn" onClick={random}>Random</button>
-          <button className="btn" onClick={enhance} disabled={!hasAny||enhancing}
-            style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"var(--t4)":"var(--acc)",background:"var(--acdim)"}}>
-            {enhancing?"ENHANCING…":"✦ AI Prompt Enhance"}
-          </button>
-          <button className={`btn${hasAny?" pri":""}`} onClick={copy} disabled={!hasAny}><span translate="no">Copy Prompt</span> <span style={{fontSize:10,opacity:.6,fontWeight:400}}>EN</span></button>
-        </div>
+        <PromptOutputPanel
+          prompt={prompt}
+          custom={custom}
+          hasAny={hasAny}
+          onToast={doToast}
+          extraButtons={
+            <>
+              <button className="btn" onClick={reset}>Reset</button>
+              <button className="btn" onClick={random}>Random</button>
+            </>
+          }
+        />
         {hasAny&&<WorkflowPanel
-          getPrompt={()=>enhanced||prompt}
+          getPrompt={()=>prompt}
           onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}
           sel={sel} scene={scene} lighting={light} bg={bg} lens={lens}
           filmStock={filmStock} colorGrade={colorGrade} aspectRatio={aspectRatio}
@@ -1527,8 +1620,6 @@ function AnglesPage(){
         />}
       </div>
 
-      {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)} />}
-      {enhancing&&<EnhancingIndicator/>}
       {toast&&<div className="toast">{toast}</div>}
 
       <button className={`floating-btn${showHistory?" active":""}`} onClick={()=>setShowHistory(v=>!v)}>
@@ -2015,10 +2106,6 @@ function AvatarsPage(){
   const[toast,setToast]=useState("");
   const[mode,setMode]=useState("scratch"); // "scratch" | "photo"
   const set=(k,v)=>setC(p=>({...p,[k]:v}));
-  const[enhancing,setEnhancing]=useState(false);
-  const[enhanced,setEnhanced]=useState("");
-  const[showAuthModal,setShowAuthModal]=useState(false);
-  
   const{user}=React.useContext(AuthCtx);
 
   const buildAvPrompt=()=>{
@@ -2093,20 +2180,6 @@ function AvatarsPage(){
 
   const prompt=buildAvPrompt();
   const doToast=m=>{setToast(m);setTimeout(()=>setToast(""),2200)};
-  const copy=async()=>{const ok=await copyText(enhanced||prompt);doToast(ok?"COPIED TO CLIPBOARD":"COPY FAILED — SELECT MANUALLY")};
-  const enhance=async()=>{
-    if(!user){setShowAuthModal(true);return;}
-    setEnhancing(true);setEnhanced("");
-    try{
-      const result=await callEnhance(prompt,c.details,user.idToken,null);
-      setEnhanced(result);
-      doToast("✦ ENHANCED BY GEMINI");
-    }catch(e){
-      if(e.status===401){setShowAuthModal(true);}
-      else doToast("ERROR: "+e.message);
-    }
-    setEnhancing(false);
-  };
   const surprise=()=>{
     try{
     const pick=a=>a[~~(Math.random()*a.length)];
@@ -2741,30 +2814,25 @@ function AvatarsPage(){
 
       <div className="sec">
         <div className="sh"><span className="st">Generated Prompt</span><span className="sb" translate="no">LIVE</span></div>
-        <div className="pbox live" style={{fontSize:11}}>{enhanced||prompt}</div>
-        {enhanced&&(
-          <div style={{marginTop:8,fontSize:11,color:"var(--acc)",fontWeight:600,letterSpacing:1}}>
-            ✦ Enhanced by Gemini — <button onClick={()=>setEnhanced("")} style={{background:"none",border:"none",color:"var(--t4)",fontSize:11,cursor:"pointer",textDecoration:"underline"}}>revert to original</button>
-          </div>
-        )}
-        <div className="pbar" translate="no">
-          <button className="btn" onClick={()=>{setC(AV_DEF);setEnhanced("");setITab("universe");setFTab("hair");setBTab("bodyType");doToast("RESET");}}>Reset</button>
-          <button className="btn" onClick={surprise}>Surprise Me</button>
-          <button className="btn" onClick={enhance} disabled={enhancing}
-            style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"var(--t4)":"var(--acc)",background:"var(--acdim)"}}>
-            {enhancing?"ENHANCING…":"✦ AI Prompt Enhance"}
-          </button>
-          <button className="btn pri" onClick={copy}><span translate="no">Copy Prompt</span> <span style={{fontSize:10,opacity:.6,fontWeight:400}}>EN</span></button>
-        </div>
+        <PromptOutputPanel
+          prompt={prompt}
+          custom={c.details}
+          hasAny={true}
+          onToast={doToast}
+          extraButtons={
+            <>
+              <button className="btn" onClick={()=>{setC(AV_DEF);setITab("universe");setFTab("hair");setBTab("bodyType");doToast("RESET");}}>Reset</button>
+              <button className="btn" onClick={surprise}>Surprise Me</button>
+            </>
+          }
+        />
         <WorkflowPanel
-          getPrompt={()=>enhanced||prompt}
+          getPrompt={()=>prompt}
           onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}
           sel={[]} scene={""} onToast={doToast} isPhoto={mode==="photo"}
         />
       </div>
 
-      {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)} />}
-      {enhancing&&<EnhancingIndicator/>}
       {toast&&<div className="toast">{toast}</div>}
     </div>
   );
@@ -3777,9 +3845,9 @@ function PetPage(){
   const[sel,setSel]=useState([]);
   // ── MISC ──
   const[custom,setCustom]=useState("");
-  const[enhanced,setEnhanced]=useState("");
+  const[enhanced,setEnhanced]=useState(""); // kept for legacy reset btn ref — unused by panel
   const[enhancing,setEnhancing]=useState(false);
-  const[petPromptView,setPetPromptView]=useState("base"); // "base"|"enhanced"
+  const[petPromptView,setPetPromptView]=useState("base");
   const[showAuthModal,setShowAuthModal]=useState(false);
   const[pendingEnhance,setPendingEnhance]=useState(false);
   const[toast,setToast]=useState("");
@@ -4974,77 +5042,21 @@ function PetPage(){
       {/* 8. PROMPT OUTPUT */}
       <div className="sec">
         <div className="sh"><span className="st">Generated Prompt</span><span className="sb" translate="no">LIVE</span></div>
-
-        <div style={{borderRadius:"var(--r2)",border:"1px solid "+(enhanced?"var(--bd2)":"var(--bd)"),overflow:"hidden",background:"var(--s2)",transition:"border-color .2s"}}>
-          {/* Tab strip — always visible */}
-          <div style={{display:"flex",borderBottom:"1px solid var(--bd)",background:"var(--s1)"}}>
-            {/* Original — ALWAYS GREEN */}
-            <button onClick={()=>setPetPromptView("base")}
-              style={{padding:"9px 18px",cursor:"pointer",fontSize:11,fontWeight:700,border:"none",borderRight:"1px solid var(--bd)",
-                background:petPromptView==="base"?"rgba(34,197,94,.12)":"transparent",
-                color:petPromptView==="base"?"#4ade80":"rgba(74,222,128,.5)",
-                transition:"all .15s",letterSpacing:.5,whiteSpace:"nowrap"}}>
-              Original Prompt
-            </button>
-            {/* AI Enhanced — greyed until available, orange after */}
-            <button onClick={()=>{if(enhanced)setPetPromptView("enhanced");}}
-              style={{padding:"9px 18px",cursor:enhanced?"pointer":"default",fontSize:11,fontWeight:700,border:"none",
-                background:enhanced&&petPromptView==="enhanced"?"var(--acdim)":"transparent",
-                color:enhanced?(petPromptView==="enhanced"?"var(--acc)":"rgba(255,255,255,.38)"):"rgba(255,255,255,.18)",
-                transition:"all .15s",letterSpacing:.5,whiteSpace:"nowrap"}}>
-              {"\u2726"} AI Enhanced Prompt
-            </button>
-            {enhanced&&(
-              <button onClick={()=>{setEnhanced("");setPetPromptView("base");}}
-                style={{marginLeft:"auto",padding:"9px 14px",cursor:"pointer",fontSize:10,fontWeight:600,
-                  border:"none",borderLeft:"1px solid var(--bd)",background:"transparent",color:"rgba(255,255,255,.22)"}}>
-                {"\u2715"} discard
-              </button>
-            )}
-          </div>
-          <div style={{fontFamily:"var(--mono)",fontSize:12,lineHeight:1.9,color:"var(--t)",padding:"14px 16px",
-            whiteSpace:"pre-wrap",wordBreak:"break-word",userSelect:"text",cursor:"text",minHeight:120}}>
-            {(enhanced&&petPromptView==="enhanced")?enhanced:prompt}
-          </div>
-        </div>
-
-        {/* Button bar */}
-        <div className="pbar" translate="no" style={{flexWrap:"wrap",gap:8,alignItems:"flex-start"}}>
-          <button className="btn" onClick={()=>{setUseScratch(true);setUsePetPhoto(false);setUseMyPhoto(false);setUseProduct(false);setSceneDesc("");setVpIsFantasy(false);setVpSpecies("dog");setVpBreed("Golden Retriever");setVpEmpathy("playful");setVpFantasySize("medium (horse-sized)");setVpCoatType("long");setVpCoatPattern("solid");setVpCoatColors("golden");setVpTail("long");setVpEars("floppy");setVpPose("sitting");setVpGaze("toward viewer");setLight(null);setBg(null);setLens(null);setFilmStock(null);setColorGrade(null);setAspectRatio("16:9");setOutputLayout("single");setSel([]);setAccMode("product");setAccSelected([]);setAccPrimary("");setAccProductMode("existing");setProductFocus("hero");setAccProductDesc("");setAccCreativeDesc("");setAccDepthHandler("virtual_hand");setCompanionMode("alone");setCustom("");setEnhanced("");setPetEnhancements([]);setAccOpen(false);setPetPromptView("base");doToast("RESET COMPLETE");}}>Reset</button>
-
-          {/* Copy Original Prompt — always primary */}
-          <button className="btn pri" onClick={async()=>{const ok=await copyText(prompt);doToast(ok?"ORIGINAL PROMPT COPIED — ATTACH YOUR PHOTOS IN TARGET AI":"COPY FAILED");}}>
-            Copy Original Prompt
-          </button>
-
-          {/* Enhance + inline disclaimer → becomes Copy Enhanced after done */}
-          {!enhanced?(
-            <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-              <button className="btn" onClick={async()=>{if(!user){setPendingEnhance(true);setShowAuthModal(true);return;}setEnhancing(true);setEnhanced("");setPetPromptView("enhanced");try{const r=await callEnhance(prompt,custom,user.idToken);setEnhanced(r);doToast("ENHANCED BY GEMINI");}catch(e){if(e.status===401)setShowAuthModal(true);else doToast("ERROR: "+e.message);}setEnhancing(false);}} disabled={enhancing}
-                style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"rgba(255,255,255,.4)":"var(--acc)",background:"var(--acdim)",flexShrink:0}}>
-                {enhancing?"ENHANCING\u2026":"\u2192 AI Prompt Enhance"}
-              </button>
-              <div style={{display:"flex",flexDirection:"column",gap:3,maxWidth:420}} translate="no">
-                <span style={{fontSize:11,color:"rgba(255,255,255,.6)",lineHeight:1.5,whiteSpace:"nowrap"}}>
-                  <span style={{color:"var(--acc)",marginRight:5}}>▸</span>Generates artistic, narrative version — richer mood, more cinematic.
-                </span>
-                <span style={{fontSize:11,color:"rgba(255,255,255,.6)",lineHeight:1.5,whiteSpace:"nowrap"}}>
-                  <span style={{color:"rgba(255,100,100,.7)",marginRight:5}}>▸</span>Some technical params (lens, lighting, ratio) may be rewritten. <span style={{color:"rgba(255,255,255,.75)",fontWeight:600}}>Requires Google sign-in.</span>
-                </span>
-              </div>
-            </div>
-          ):(
-            <button className="btn pri" onClick={async()=>{const ok=await copyText(enhanced);doToast(ok?"ENHANCED PROMPT COPIED":"COPY FAILED");}}>
-              {"\u2726"} Copy Enhanced Prompt
-            </button>
-          )}
-        </div>
+        <PromptOutputPanel
+          prompt={prompt}
+          custom={custom}
+          hasAny={true}
+          onToast={doToast}
+          extraButtons={
+            <button className="btn" onClick={()=>{setUseScratch(true);setUsePetPhoto(false);setUseMyPhoto(false);setUseProduct(false);setSceneDesc("");setVpIsFantasy(false);setVpSpecies("dog");setVpBreed("Golden Retriever");setVpEmpathy("playful");setVpFantasySize("medium (horse-sized)");setVpCoatType("long");setVpCoatPattern("solid");setVpCoatColors("golden");setVpTail("long");setVpEars("floppy");setVpPose("sitting");setVpGaze("toward viewer");setLight(null);setBg(null);setLens(null);setFilmStock(null);setColorGrade(null);setAspectRatio("16:9");setOutputLayout("single");setSel([]);setAccMode("product");setAccSelected([]);setAccPrimary("");setAccProductMode("existing");setProductFocus("hero");setAccProductDesc("");setAccCreativeDesc("");setAccDepthHandler("virtual_hand");setCompanionMode("alone");setCustom("");setPetEnhancements([]);setAccOpen(false);doToast("RESET COMPLETE");}}>Reset</button>
+          }
+        />
         <div style={{marginTop:14,padding:"14px 16px",borderRadius:10,border:"1px solid var(--bd)",background:"var(--s1)"}}>
           <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",marginBottom:10}}>Generate with</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:12}} translate="no">
             {GEN_TARGETS.map(t=>(
               <div key={t.label} style={{position:"relative",display:"inline-flex",alignItems:"center",gap:4}}>
-                <button className="genwith-btn" onClick={async()=>{await copyText(enhanced||prompt);doToast("PROMPT COPIED — ATTACH YOUR PHOTOS");window.open(t.url,"_blank","noopener,noreferrer");}}>
+                <button className="genwith-btn" onClick={async()=>{await copyText(prompt);doToast("PROMPT COPIED — ATTACH YOUR PHOTOS");window.open(t.url,"_blank","noopener,noreferrer");}}>
                   <span>{t.icon}</span>{t.label} ↗
                 </button>
                 {t.warn&&<span title={t.warn} style={{cursor:"help",fontSize:13,opacity:.7}}>⚠️</span>}
@@ -5064,8 +5076,6 @@ function PetPage(){
       </div>
 
       {toast&&<div className="toast">{toast}</div>}
-      {enhancing&&<EnhancingIndicator/>}
-      {showAuthModal&&<AuthModal onClose={()=>setShowAuthModal(false)}/>}
     </div>
   );
 }
