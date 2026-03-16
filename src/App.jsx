@@ -4251,6 +4251,8 @@ function PetPage(){
                   setVpPose((PET_POSES[vpSpecies]||PET_POSES.default)[Math.floor(Math.random()*((PET_POSES[vpSpecies]||PET_POSES.default).length))]);
                   setVpGaze(["toward viewer","toward owner / hand","into distance","at product"][Math.floor(Math.random()*4)]);
                   setLight(LIGHT_SPRITES[Math.floor(Math.random()*LIGHT_SPRITES.length)].id);
+                  setBg(ENV_SPRITES[Math.floor(Math.random()*ENV_SPRITES.length)].id);
+                  setOutputLayout(PET_OUTPUT_LAYOUTS[Math.floor(Math.random()*PET_OUTPUT_LAYOUTS.length)].id);
                   setEnhanced("");
                 }}
                   style={{padding:"10px 16px",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:700,
@@ -4993,25 +4995,24 @@ function PetPage(){
           </div>
         </div>
 
-        {/* Button bar — order: Reset | Copy Prompt (pri) | Enhance+ℹ  →  after enhance: Copy Prompt | ✦ Copy Enhanced (pri) */}
-        <div className="pbar" translate="no">
+        {/* Button bar */}
+        <div className="pbar" translate="no" style={{flexWrap:"wrap",gap:8,alignItems:"flex-start"}}>
           <button className="btn" onClick={()=>{setUseScratch(true);setUsePetPhoto(false);setUseMyPhoto(false);setUseProduct(false);setSceneDesc("");setVpIsFantasy(false);setVpSpecies("dog");setVpBreed("Golden Retriever");setVpEmpathy("playful");setVpFantasySize("medium (horse-sized)");setVpCoatType("long");setVpCoatPattern("solid");setVpCoatColors("golden");setVpTail("long");setVpEars("floppy");setVpPose("sitting");setVpGaze("toward viewer");setLight(null);setBg(null);setLens(null);setFilmStock(null);setColorGrade(null);setAspectRatio("16:9");setOutputLayout("single");setSel([]);setAccMode("product");setAccSelected([]);setAccPrimary("");setAccProductMode("existing");setProductFocus("hero");setAccProductDesc("");setAccCreativeDesc("");setAccDepthHandler("virtual_hand");setCompanionMode("alone");setCustom("");setEnhanced("");setPetEnhancements([]);setAccOpen(false);setPetPromptView("base");doToast("RESET COMPLETE");}}>Reset</button>
 
-          {/* Copy Prompt — always primary orange, first action button */}
+          {/* Copy Original Prompt — always primary */}
           <button className="btn pri" onClick={async()=>{const ok=await copyText(prompt);doToast(ok?"ORIGINAL PROMPT COPIED — ATTACH YOUR PHOTOS IN TARGET AI":"COPY FAILED");}}>
-            Copy Prompt
+            Copy Original Prompt
           </button>
 
-          {/* Enhance → after done becomes Copy Enhanced (primary) */}
+          {/* Enhance + inline disclaimer → becomes Copy Enhanced after done */}
           {!enhanced?(
-            <div style={{display:"flex",alignItems:"center",gap:6}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
               <button className="btn" onClick={async()=>{if(!user){setShowAuthModal(true);return;}setEnhancing(true);setEnhanced("");setPetPromptView("enhanced");try{const r=await callEnhance(prompt,custom,user.idToken);setEnhanced(r);doToast("ENHANCED BY GEMINI");}catch(e){if(e.status===401)setShowAuthModal(true);else doToast("ERROR: "+e.message);}setEnhancing(false);}} disabled={enhancing}
-                style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"rgba(255,255,255,.4)":"var(--acc)",background:"var(--acdim)"}}>
+                style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"rgba(255,255,255,.4)":"var(--acc)",background:"var(--acdim)",flexShrink:0}}>
                 {enhancing?"ENHANCING\u2026":"\u2726 AI Prompt Enhance"}
               </button>
-              <span title="Generates an artistic, narrative version of your prompt — richer visual descriptions, cinematic language, more evocative mood. Less technically precise: some parameters (lens, lighting, aspect ratio) may be reinterpreted by the AI. Requires a free Google account sign-in."
-                style={{cursor:"help",fontSize:15,opacity:.4,lineHeight:1,userSelect:"none",fontStyle:"normal"}}>
-                &#9432;
+              <span style={{fontSize:10,color:"rgba(255,255,255,.35)",lineHeight:1.55,maxWidth:260}} translate="no">
+                Generates an artistic, narrative version — richer mood, less technical precision. Some params (lens, lighting, ratio) may be rewritten. <span style={{color:"rgba(255,255,255,.5)",fontWeight:600}}>Requires Google sign-in.</span>
               </span>
             </div>
           ):(
