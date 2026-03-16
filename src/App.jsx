@@ -3885,6 +3885,15 @@ function PetPage(){
     }
   },[user,pendingEnhance]);
 
+  // auto-fix companion species when it conflicts with main species
+  useEffect(()=>{
+    if(companionSpecies===vpSpecies){
+      // pick first available species that's not the main one
+      const fallback=PET_REAL_SPRITES.find(s=>s.id!==vpSpecies);
+      if(fallback)setCompanionSpecies(fallback.id);
+    }
+  },[vpSpecies]);
+
   const tog1=(setter,id)=>setter(p=>p===id?null:id);
   const togAngle=(i)=>setSel(p=>p.includes(i)?p.filter(x=>x!==i):p.length>=MAX_A?p:[...p,i]);
   const toggleEnh=(e)=>setPetEnhancements(p=>p.includes(e)?p.filter(x=>x!==e):[...p,e]);
