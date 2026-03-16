@@ -115,7 +115,7 @@ textarea::placeholder{color:var(--t4)}
 .av-sec{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:22px 24px;margin-bottom:14px;transition:all .2s}
 .av-sec:hover{border-color:var(--bdh)}
 .tab-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
-.tab-p{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:30px;border:1px solid var(--bd);background:transparent;color:var(--t);cursor:pointer;transition:all .15s;position:relative}
+.tab-p{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:var(--r);border:1px solid var(--bd);background:transparent;color:var(--t);cursor:pointer;transition:all .15s;position:relative}
 .tab-p:hover{color:var(--t);border-color:var(--bdh);background:var(--s2)}
 .tab-p.on{background:var(--acc);border-color:var(--acc);color:#000}
 .tab-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--acc);border:2px solid var(--s1)}
@@ -128,7 +128,7 @@ textarea::placeholder{color:var(--t4)}
 .toggle-knob{width:44px;height:24px;border-radius:12px;position:relative;transition:all .2s;flex-shrink:0}
 .toggle-dot{position:absolute;top:4px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .quick-actions{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
-.quick-btn{font-size:11px;padding:8px 16px;border-radius:20px;border:1px solid var(--bd);background:var(--s1);color:var(--t);cursor:pointer;transition:all .15s}
+.quick-btn{font-size:11px;padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd);background:var(--s1);color:var(--t);cursor:pointer;transition:all .15s}
 .quick-btn:hover{border-color:var(--acc);color:var(--acc);background:var(--acdim)}
 .quick-btn.active{border-color:var(--acc);background:var(--acc);color:#000}
 .batch-size{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:16px 20px;background:var(--s1);border-radius:var(--r);border:1px solid var(--bd)}
@@ -1332,7 +1332,7 @@ function AnglesPage(){
         </div>
       </div>
 
-      <div style={{display:"flex",gap:0,marginBottom:20,borderRadius:10,overflow:"hidden",border:"1px solid var(--bd)",width:"fit-content"}}>
+      <div style={{display:"flex",gap:0,marginBottom:20,borderRadius:"var(--r)",overflow:"hidden",border:"1px solid var(--bd)",width:"fit-content"}}>
         <button onClick={()=>setMode1("photo")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",background:mode1==="photo"?"#e8780a":"var(--s1)",color:mode1==="photo"?"#000":"var(--t)",transition:"all .2s"}}>
           ⊕ From reference photo
         </button>
@@ -2239,7 +2239,7 @@ function AvatarsPage(){
         <div className="ps">Character reference sheet prompt builder with detailed anatomy and style controls</div>
       </div>
 
-      <div style={{display:"flex",gap:0,marginBottom:28,borderRadius:10,overflow:"hidden",border:"1px solid var(--bd)",width:"fit-content"}}>
+      <div style={{display:"flex",gap:0,marginBottom:28,borderRadius:"var(--r)",overflow:"hidden",border:"1px solid var(--bd)",width:"fit-content"}}>
         <button onClick={()=>setMode("scratch")} style={{padding:"10px 24px",fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",border:"none",background:mode==="scratch"?"#e8780a":"var(--s1)",color:mode==="scratch"?"#000":"var(--t)",transition:"all .2s"}}>
           ✦ Create from scratch
         </button>
@@ -2248,7 +2248,7 @@ function AvatarsPage(){
         </button>
       </div>
       {mode==="photo"&&(
-        <div style={{background:"var(--s1)",border:"1px solid var(--bd)",borderRadius:10,padding:"16px 20px",marginBottom:28,fontSize:13,color:"var(--t)",lineHeight:1.7}}>
+        <div style={{background:"var(--s1)",border:"1px solid var(--bd)",borderRadius:"var(--r)",padding:"16px 20px",marginBottom:28,fontSize:13,color:"var(--t)",lineHeight:1.7}}>
           <span style={{color:"#e8780a",fontWeight:700}}>↑ Attach your reference photo</span> to the message when pasting this prompt into your AI image generator. The prompt will instruct the AI to use it as the identity base and apply your selected traits as modifications.
         </div>
       )}
@@ -3011,7 +3011,7 @@ function VideoPromptPage(){
 
   const modeBtn=(id,icon,title,sub)=>(
     <button onClick={()=>setVideoMode(id)} style={{
-      flex:1,padding:"14px 16px",borderRadius:10,cursor:"pointer",textAlign:"left",
+      flex:1,padding:"14px 16px",borderRadius:"var(--r)",cursor:"pointer",textAlign:"left",
       border:`2px solid ${videoMode===id?"var(--acc)":"var(--bdh)"}`,
       background:videoMode===id?"var(--acdim)":"var(--s2)",
       transition:"all .2s"
@@ -3203,7 +3203,7 @@ function PipelineStrip({active}){
   ];
   const colors=["#e8780a","#4fa3e0","#a78bfa","#34d399"];
   return(
-    <div style={{display:"flex",alignItems:"center",gap:2,marginBottom:20,padding:"8px 12px",borderRadius:10,background:"var(--s2)",border:"1px solid var(--bdh)",overflowX:"auto",flexWrap:"nowrap"}}>
+    <div style={{display:"flex",alignItems:"center",gap:2,marginBottom:20,padding:"8px 12px",borderRadius:"var(--r)",background:"var(--s2)",border:"1px solid var(--bdh)",overflowX:"auto",flexWrap:"nowrap"}}>
       {steps.map((s,i)=>{
         const isActive=s.n===active;
         const isDone=s.n<active;
@@ -3301,7 +3301,7 @@ function HowItWorksPage(){
               {/* RIGHT: card */}
               <div style={{
                 flexGrow:1,marginBottom:isLast?0:16,marginLeft:16,
-                padding:"18px 20px",borderRadius:10,
+                padding:"18px 20px",borderRadius:"var(--r)",
                 border:`1px solid ${color}33`,
                 background:`${color}08`
               }}>
@@ -4229,7 +4229,7 @@ function PetPage(){
 
   // ── PILL BUTTON HELPER ──
   const Pill=({active,onClick,children,style={}})=>(
-    <button onClick={onClick} style={{padding:"7px 13px",borderRadius:20,cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .15s",
+    <button onClick={onClick} style={{padding:"7px 13px",borderRadius:"var(--r)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .15s",
       border:"1px solid "+(active?"var(--acc)":"rgba(255,255,255,.22)"),
       background:active?"var(--acdim)":"rgba(255,255,255,.05)",
       color:active?"var(--acc)":"#fff",...style}}>
@@ -4256,7 +4256,7 @@ function PetPage(){
       </div>
 
       {/* HOW IT WORKS — collapsible */}
-      <div style={{marginBottom:28,borderRadius:10,border:"1px solid var(--bd)",overflow:"hidden"}}>
+      <div style={{marginBottom:28,borderRadius:"var(--r)",border:"1px solid var(--bd)",overflow:"hidden"}}>
         <div onClick={()=>setPHowOpen(v=>!v)}
           style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 16px",cursor:"pointer",background:"var(--s1)",userSelect:"none"}}>
           <span style={{fontSize:12,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase"}}>How Pet Studio works</span>
@@ -4297,7 +4297,7 @@ function PetPage(){
              checkbox:true, active:useProduct, onClick:()=>{setUseProduct(v=>!v);if(!useProduct)setAccOpen(true);setEnhanced("");}},
           ].map(b=>(
             <div key={b.key} onClick={b.onClick}
-              style={{flex:"1 1 180px",cursor:"pointer",borderRadius:10,padding:"14px 16px",
+              style={{flex:"1 1 180px",cursor:"pointer",borderRadius:"var(--r)",padding:"14px 16px",
                 border:"2px solid "+(b.active?"var(--acc)":"rgba(255,255,255,.18)"),
                 background:b.active?"var(--acdim)":"var(--s1)",transition:"all .15s",
                 display:"flex",alignItems:"flex-start",gap:10}}>
@@ -4511,7 +4511,7 @@ function PetPage(){
                   <SL>Mood / Empathy</SL>
                   <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
                     <button onClick={()=>{setVpEmpathy("");setEnhanced("");}}
-                      style={{padding:"12px 14px",borderRadius:10,cursor:"pointer",
+                      style={{padding:"12px 14px",borderRadius:"var(--r)",cursor:"pointer",
                         border:"2px solid "+(vpEmpathy===""?"var(--acc)":"rgba(255,255,255,.2)"),
                         background:vpEmpathy===""?"var(--acdim)":"transparent",
                         display:"flex",flexDirection:"column",alignItems:"center",gap:5,minWidth:70}}>
@@ -4520,7 +4520,7 @@ function PetPage(){
                     </button>
                     {EMPATHY_STYLES.map(e=>(
                       <button key={e.id} onClick={()=>{setVpEmpathy(e.id);setEnhanced("");}}
-                        style={{padding:"12px 14px",borderRadius:10,cursor:"pointer",
+                        style={{padding:"12px 14px",borderRadius:"var(--r)",cursor:"pointer",
                           border:"2px solid "+(vpEmpathy===e.id?"var(--acc)":"rgba(255,255,255,.2)"),
                           background:vpEmpathy===e.id?"var(--acdim)":"transparent",
                           display:"flex",flexDirection:"column",alignItems:"center",gap:5,minWidth:70}}>
@@ -4585,7 +4585,7 @@ function PetPage(){
                     const humanBlocked=m.id==="human"&&(conflictH3_photoHuman||conflictH4_productHuman);
                     return(
                     <button key={m.id} onClick={()=>{if(!humanBlocked){setCompanionMode(m.id);setEnhanced("");}}}
-                      style={{flex:"1 1 120px",padding:"12px 14px",borderRadius:10,cursor:humanBlocked?"not-allowed":"pointer",textAlign:"center",
+                      style={{flex:"1 1 120px",padding:"12px 14px",borderRadius:"var(--r)",cursor:humanBlocked?"not-allowed":"pointer",textAlign:"center",
                         opacity:humanBlocked?.25:1,
                         border:"2px solid "+(companionMode===m.id?"var(--acc)":"rgba(255,255,255,.2)"),
                         background:companionMode===m.id?"var(--acdim)":"transparent",transition:"opacity .2s"}}>
@@ -4682,7 +4682,7 @@ function PetPage(){
 
           {/* TAB: LOOK */}
           {pTab==="look"&&(
-            <div style={{border:"1px solid var(--bd)",borderRadius:10,padding:"16px 18px",background:"var(--s1)"}}>
+            <div style={{border:"1px solid var(--bd)",borderRadius:"var(--r)",padding:"16px 18px",background:"var(--s1)"}}>
               <div style={{fontSize:10,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:"var(--t3)",marginBottom:14}}>
                 Coat · Tail · Ears · Pose · Gaze
               </div>
@@ -4795,7 +4795,7 @@ function PetPage(){
       </div>
 
       {/* 4. ACCESSORIES */}
-      <div className="sec" style={{borderRadius:10,border:"1px solid "+(useProduct?"var(--acc)":accOpen?"var(--bdh)":"var(--bd)"),overflow:"hidden",marginBottom:28,transition:"border-color .2s"}}
+      <div className="sec" style={{borderRadius:"var(--r)",border:"1px solid "+(useProduct?"var(--acc)":accOpen?"var(--bdh)":"var(--bd)"),overflow:"hidden",marginBottom:28,transition:"border-color .2s"}}
         onMouseEnter={e=>{if(!accOpen&&!useProduct)e.currentTarget.style.borderColor="var(--bdh)";}}
         onMouseLeave={e=>{if(!accOpen&&!useProduct)e.currentTarget.style.borderColor="var(--bd)";}}>
         <div onClick={()=>setAccOpen(v=>!v)}
@@ -5038,7 +5038,7 @@ function PetPage(){
         <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:outputLayout==="multi_custom"?20:0}}>
           {[...PET_OUTPUT_LAYOUTS,{id:"multi_custom",name:"Custom Multi-Shot",icon:"🎬",desc:"Pick angles + 3D camera"}].map(l=>(
             <button key={l.id} onClick={()=>{setOutputLayout(l.id);setEnhanced("");}}
-              style={{flex:"1 1 130px",padding:"12px 14px",borderRadius:10,cursor:"pointer",textAlign:"left",
+              style={{flex:"1 1 130px",padding:"12px 14px",borderRadius:"var(--r)",cursor:"pointer",textAlign:"left",
                 border:"2px solid "+(outputLayout===l.id?"var(--acc)":"rgba(255,255,255,.2)"),
                 background:outputLayout===l.id?"var(--acdim)":"transparent"}}>
               <div style={{fontSize:18,marginBottom:5}}>{l.icon}</div>
@@ -5085,7 +5085,7 @@ function PetPage(){
             </>
           }
         />
-        <div style={{marginTop:14,padding:"14px 16px",borderRadius:10,border:"1px solid var(--bd)",background:"var(--s1)"}}>
+        <div style={{marginTop:14,padding:"14px 16px",borderRadius:"var(--r)",border:"1px solid var(--bd)",background:"var(--s1)"}}>
           <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",marginBottom:10}}>Generate with</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:12}} translate="no">
             {GEN_TARGETS.map(t=>(
