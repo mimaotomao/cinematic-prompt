@@ -5024,11 +5024,11 @@ function PetPage(){
                 style={{borderColor:enhancing?"var(--bd)":"var(--acc)",color:enhancing?"rgba(255,255,255,.4)":"var(--acc)",background:"var(--acdim)",flexShrink:0}}>
                 {enhancing?"ENHANCING\u2026":"\u2192 AI Prompt Enhance"}
               </button>
-              <div style={{display:"flex",flexDirection:"column",gap:3,maxWidth:280}} translate="no">
-                <span style={{fontSize:11,color:"rgba(255,255,255,.6)",lineHeight:1.5}}>
+              <div style={{display:"flex",flexDirection:"column",gap:3,maxWidth:420}} translate="no">
+                <span style={{fontSize:11,color:"rgba(255,255,255,.6)",lineHeight:1.5,whiteSpace:"nowrap"}}>
                   <span style={{color:"var(--acc)",marginRight:5}}>▸</span>Generates artistic, narrative version — richer mood, more cinematic.
                 </span>
-                <span style={{fontSize:11,color:"rgba(255,255,255,.6)",lineHeight:1.5}}>
+                <span style={{fontSize:11,color:"rgba(255,255,255,.6)",lineHeight:1.5,whiteSpace:"nowrap"}}>
                   <span style={{color:"rgba(255,100,100,.7)",marginRight:5}}>▸</span>Some technical params (lens, lighting, ratio) may be rewritten. <span style={{color:"rgba(255,255,255,.75)",fontWeight:600}}>Requires Google sign-in.</span>
                 </span>
               </div>
