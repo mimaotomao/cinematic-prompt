@@ -611,8 +611,8 @@ function PromptOutputPanel({prompt,custom="",hasAny=true,extraButtons=null,onToa
       </div>
 
       {isExpert&&(
-        <div style={{marginTop:8,fontSize:11,color:"rgba(255,255,255,.45)",lineHeight:1.5}}>
-          <span style={{color:"var(--acc)",marginRight:5}}>⚠</span>JSON Format Note: some free generators (Gemini, Bing Create, Craiyon) may not parse JSON directly — use <b style={{color:"rgba(255,255,255,.6)"}}>Original Prompt</b> or <b style={{color:"rgba(255,255,255,.6)"}}>AI Enhanced</b> for broader compatibility.
+        <div style={{marginTop:8,fontSize:11,color:"var(--acc)",lineHeight:1.5}}>
+          <span style={{marginRight:5}}>⚠</span>JSON Format Note: some free generators (Gemini, Bing Create, Craiyon) may not parse JSON directly — use <b>Original Prompt</b> or <b>AI Enhanced</b> for broader compatibility.
         </div>
       )}
 
@@ -648,8 +648,8 @@ function PromptOutputPanel({prompt,custom="",hasAny=true,extraButtons=null,onToa
         )}
       </div>
 
-      {!enhanced&&<div style={{marginTop:8,fontSize:11,color:"rgba(255,255,255,.45)",lineHeight:1.5}}>
-        <span style={{color:"var(--acc)",marginRight:5}}>▸</span>AI Enhance generates artistic, narrative version. <span style={{color:"rgba(255,255,255,.6)",fontWeight:600}}>Requires Google sign-in.</span>
+      {!enhanced&&<div style={{marginTop:8,fontSize:11,color:"var(--acc)",lineHeight:1.5}}>
+        <span style={{marginRight:5}}>▸</span>AI Enhance generates artistic, narrative version. <b>Requires Google sign-in.</b>
       </div>}
 
       {showAuth&&<AuthModal onClose={()=>setShowAuth(false)}/>}
@@ -702,7 +702,6 @@ function GenWithLinks({getPrompt,onCopy,targets}){
 
 // ─── WORKFLOW PANEL (replaces GenWithLinks + RefPhotoHint + ExpandToFullShot) ──
 function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmStock, colorGrade, aspectRatio, mode, onToast, isPhoto}){
-  const targets = GEN_TARGETS.slice(0,5);
   const[expanded, setExpanded] = useState(false);
   const[showPhotoTip, setShowPhotoTip] = useState(false);
   const hasGrid = sel && sel.length >= 2;
@@ -714,11 +713,7 @@ function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmS
   };
 
   const handleGenerateClick = (url)=>{
-    if(isPhoto){
-      setShowPhotoTip(url); // store url to open after confirm
-    } else {
-      handleGenerate(url);
-    }
+    if(isPhoto){ setShowPhotoTip(url); } else { handleGenerate(url); }
   };
 
   const handleExpand = async(panelNum, angleIdx, url)=>{
@@ -727,26 +722,6 @@ function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmS
     onToast(`PANEL ${panelNum} PROMPT COPIED — ATTACH YOUR GRID IMAGE`);
     window.open(url, "_blank", "noopener,noreferrer");
   };
-
-  const stepStyle = {
-    borderRadius:8,
-    border:"1px solid var(--bdh)",
-    background:"var(--s2)",
-    overflow:"hidden",
-    marginTop:12
-  };
-  const stepHeadStyle = {
-    display:"flex", alignItems:"center", gap:10,
-    padding:"12px 16px",
-    borderBottom:"1px solid var(--bdh)"
-  };
-  const badgeStyle = (color)=>({
-    width:22, height:22, borderRadius:"50%",
-    background:color, color:"#000",
-    fontSize:11, fontWeight:800,
-    display:"flex", alignItems:"center", justifyContent:"center",
-    flexShrink:0
-  });
 
   return(
     <div style={{marginTop:8}}>
@@ -762,63 +737,49 @@ function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmS
               The prompt will use it as the identity base — without it, the AI generates a random character.
             </div>
             <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:20,flexWrap:"wrap"}}>
-              <button
-                onClick={()=>{handleGenerate(showPhotoTip);setShowPhotoTip(false);}}
-                style={{padding:"10px 20px",borderRadius:8,border:"1px solid var(--acc)",background:"var(--acdim)",color:"var(--acc)",fontSize:13,fontWeight:700,cursor:"pointer"}}
-              >Got it — open generator ↗</button>
-              <button
-                onClick={()=>setShowPhotoTip(false)}
-                style={{padding:"10px 20px",borderRadius:8,border:"1px solid var(--bdh)",background:"transparent",color:"var(--t)",fontSize:13,cursor:"pointer"}}
-              >Cancel</button>
+              <button onClick={()=>{handleGenerate(showPhotoTip);setShowPhotoTip(false);}}
+                style={{padding:"10px 20px",borderRadius:8,border:"1px solid var(--acc)",background:"var(--acdim)",color:"var(--acc)",fontSize:13,fontWeight:700,cursor:"pointer"}}>
+                Got it — open generator ↗
+              </button>
+              <button onClick={()=>setShowPhotoTip(false)}
+                style={{padding:"10px 20px",borderRadius:8,border:"1px solid var(--bdh)",background:"transparent",color:"var(--t)",fontSize:13,cursor:"pointer"}}>
+                Cancel
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* STEP 1 */}
-      <div style={stepStyle}>
-        <div style={stepHeadStyle}>
-          <div style={badgeStyle("var(--acc)")}>1</div>
-          <div>
-            <div style={{fontSize:12,fontWeight:800,color:"var(--t)",letterSpacing:.5}} translate="no">
-              Generate the grid
-            </div>
-            <div style={{fontSize:11,color:"var(--t)",opacity:.6,marginTop:1}}>
-              {isPhoto
-                ? "📎 Attach your reference photo, then open a generator"
-                : "Open a generator and paste the prompt"}
-            </div>
+      {/* STEP 3 — Generate */}
+      {isPhoto&&(
+        <div style={{marginBottom:8,padding:"8px 12px",borderRadius:6,border:"1px solid rgba(232,120,10,.3)",background:"rgba(232,120,10,.06)",fontSize:11,color:"var(--acc)",lineHeight:1.5}}>
+          📎 <b>Attach your reference photo</b> before generating — the AI uses it as identity base.
+        </div>
+      )}
+      <div className="genwith" translate="no">
+        <span className="genwith-label">Generate with</span>
+        {GEN_TARGETS.map(t=>(
+          <div key={t.label} style={{position:"relative",display:"inline-flex",alignItems:"center",gap:4}}>
+            <button className="genwith-btn" onClick={()=>handleGenerateClick(t.url)}
+              title={t.note||t.warn||""}
+              style={t.hi?{borderColor:"var(--acc)",background:"var(--acdim)",color:"var(--acc)",fontWeight:700}:{}}>
+              <span>{t.icon}</span>{t.label} ↗
+            </button>
+            {t.warn&&<span title={t.warn} style={{cursor:"help",fontSize:13,opacity:.7}}>⚠️</span>}
           </div>
-        </div>
-        <div style={{padding:"12px 16px",display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"}} translate="no">
-          {targets.map(t=>(
-            <div key={t.label} style={{position:"relative",display:"inline-flex",alignItems:"center",gap:4}}>
-              <button className="genwith-btn" onClick={()=>handleGenerateClick(t.url)}
-                title={t.note||t.warn||""}
-                style={t.hi?{borderColor:"var(--acc)",background:"var(--acdim)",color:"var(--acc)",fontWeight:700}:{}}>
-                <span>{t.icon}</span>{t.label} ↗
-              </button>
-              {t.warn&&(
-                <span title={t.warn} style={{cursor:"help",fontSize:13,opacity:.7,lineHeight:1}}>⚠️</span>
-              )}
-            </div>
-          ))}
-          <span style={{fontSize:11,color:"var(--acc)",fontWeight:600,marginLeft:4}}>prompt copied to clipboard — just paste</span>
-        </div>
+        ))}
+        <span className="genwith-note">prompt copied to clipboard — just paste</span>
       </div>
 
-      {/* STEP 2 — only when grid has multiple panels */}
+      {/* STEP 4 — Expand panel (only when grid) */}
       {hasGrid&&(
-        <div style={stepStyle}>
-          <div style={{...stepHeadStyle,cursor:"pointer",userSelect:"none"}} onClick={()=>setExpanded(v=>!v)}>
-            <div style={badgeStyle("rgba(120,180,255,.8)")}>2</div>
+        <div style={{marginTop:12,borderRadius:8,border:"1px solid var(--bdh)",background:"var(--s2)",overflow:"hidden"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,padding:"12px 16px",cursor:"pointer",userSelect:"none",borderBottom:expanded?"1px solid var(--bd)":"none"}}
+            onClick={()=>setExpanded(v=>!v)}>
+            <div style={{width:22,height:22,borderRadius:"50%",background:"rgba(120,180,255,.2)",border:"1.5px solid rgba(120,180,255,.6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"rgba(120,180,255,.9)",flexShrink:0}}>4</div>
             <div style={{flexGrow:1}}>
-              <div style={{fontSize:12,fontWeight:800,color:"var(--t)",letterSpacing:.5}}>
-                Expand a panel to full shot
-              </div>
-              <div style={{fontSize:11,color:"var(--t)",opacity:.6,marginTop:1}}>
-                Got your grid? Attach it and expand any panel to a single full-quality image
-              </div>
+              <div style={{fontSize:12,fontWeight:800,color:"var(--t)",letterSpacing:.5}}>Expand a panel to full resolution</div>
+              <div style={{fontSize:11,color:"var(--t)",opacity:.6,marginTop:1}}>Got your grid? Attach it and expand any panel to a single full-quality image</div>
             </div>
             <span style={{fontSize:14,color:"var(--t)",opacity:.5}}>{expanded?"▲":"▼"}</span>
           </div>
@@ -827,27 +788,17 @@ function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmS
               <div style={{fontSize:11,color:"var(--t)",opacity:.55,marginBottom:10}}>
                 Attach the grid image you just generated, then click a panel:
               </div>
-              {sel.map((angleIdx, idx)=>{
-                const panelNum = idx+1;
-                const angle = ANGLES[angleIdx];
+              {sel.map((angleIdx,idx)=>{
+                const panelNum=idx+1;
+                const angle=ANGLES[angleIdx];
                 return(
                   <div key={angleIdx} style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",padding:"6px 0",borderTop:idx>0?"1px solid var(--bd)":"none"}}>
-                    <div style={{
-                      width:24,height:24,borderRadius:5,
-                      background:"rgba(255,255,255,.07)",border:"1px solid var(--bdh)",
-                      display:"flex",alignItems:"center",justifyContent:"center",
-                      fontSize:12,fontWeight:800,color:"var(--t)",flexShrink:0
-                    }}>{panelNum}</div>
-                    <div style={{fontSize:11,color:"var(--t)",opacity:.75,flexGrow:1,minWidth:100}}>
-                      {angle.name}
-                    </div>
+                    <div style={{width:24,height:24,borderRadius:5,background:"rgba(255,255,255,.07)",border:"1px solid var(--bdh)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:"var(--t)",flexShrink:0}}>{panelNum}</div>
+                    <div style={{fontSize:11,color:"var(--t)",opacity:.75,flexGrow:1,minWidth:100}}>{angle.name}</div>
                     <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                      {targets.slice(0,3).map(t=>(
-                        <button key={t.label}
-                          onClick={()=>handleExpand(panelNum, angleIdx, t.url)}
-                          className="genwith-btn"
-                          style={{fontSize:11,padding:"5px 10px"}}
-                        >
+                      {GEN_TARGETS.map(t=>(
+                        <button key={t.label} onClick={()=>handleExpand(panelNum,angleIdx,t.url)}
+                          className="genwith-btn" style={{fontSize:11,padding:"5px 10px"}}>
                           {t.icon} {t.label} ↗
                         </button>
                       ))}
@@ -1902,7 +1853,6 @@ function AnglesPage(){
           filmStock={filmStock} colorGrade={colorGrade} aspectRatio={aspectRatio}
           mode={mode1} onToast={doToast} isPhoto={mode1==="photo"}
         />}
-        {hasAny&&<GenWithLinks getPrompt={()=>prompt} onCopy={()=>doToast("PROMPT COPIED")}/>}
       </div>
 
       {toast&&<div className="toast">{toast}</div>}
@@ -3134,7 +3084,17 @@ function AvatarsPage(){
           onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}
           sel={[]} scene={""} onToast={doToast} isPhoto={mode==="photo"}
         />
-        <GenWithLinks getPrompt={()=>prompt} onCopy={()=>doToast("PROMPT COPIED")}/>
+        <div style={{marginTop:14,padding:"14px 16px",borderRadius:8,border:"1px solid var(--bd)",background:"var(--s1)"}}>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+            <span style={{fontSize:11,color:"rgba(255,255,255,.65)"}}>💡 Next step:</span>
+            <button onClick={()=>setPage("angles")} style={{padding:"7px 14px",borderRadius:6,border:"1px solid var(--acc)",background:"var(--acdim)",color:"var(--acc)",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+              🎬 Multi-Shot
+            </button>
+            <button onClick={()=>setPage("video")} style={{padding:"7px 14px",borderRadius:6,border:"1px solid var(--bd)",background:"var(--s2)",color:"var(--t)",fontSize:11,fontWeight:600,cursor:"pointer"}}>
+              🎥 Video
+            </button>
+          </div>
+        </div>
       </div>
 
       {toast&&<div className="toast">{toast}</div>}
@@ -3802,7 +3762,7 @@ function HowItWorksPage(){
           <div style={{padding:"16px 20px",borderRadius:10,border:"1px solid rgba(168,85,247,.25)",background:"rgba(168,85,247,.04)"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
               <span style={{fontSize:11,fontWeight:700,color:"#c4b5fd",letterSpacing:1,padding:"3px 10px",borderRadius:4,background:"rgba(168,85,247,.12)"}}>EXPERT JSON</span>
-              <span style={{fontSize:10,color:"var(--t4)"}}>advanced</span>
+              <span style={{fontSize:10,color:"var(--acc)",fontWeight:600}}>advanced</span>
             </div>
             <div style={{fontSize:13,color:"var(--t)",opacity:.8,lineHeight:1.7,marginBottom:10}}>
               Structured JSON with embedded markdown — the same data, but organized into layers: identity anchoring (0.99 lock strength), scene description, camera rig, lighting setup, quality controls, and negative prompts as categorized arrays. Based on the Astronomerozge1 architecture used in NanoBanana Pro prompts.
@@ -3819,7 +3779,7 @@ function HowItWorksPage(){
           <div style={{padding:"16px 20px",borderRadius:10,border:"1px solid rgba(232,120,10,.25)",background:"rgba(232,120,10,.04)"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
               <span style={{fontSize:11,fontWeight:700,color:"var(--acc)",letterSpacing:1,padding:"3px 10px",borderRadius:4,background:"var(--acdim)"}}>✦ AI ENHANCED</span>
-              <span style={{fontSize:10,color:"var(--t4)"}}>requires Google sign-in</span>
+              <span style={{fontSize:10,color:"var(--acc)",fontWeight:600}}>requires Google sign-in</span>
             </div>
             <div style={{fontSize:13,color:"var(--t)",opacity:.8,lineHeight:1.7}}>
               Gemini rewrites your Original Prompt as a richer, more narrative version — adding atmospheric details, cinematic language, and artistic flair. The meaning stays the same but the prose becomes more evocative. Some technical parameters (lens, lighting) may be rephrased. Free, no credit card — just a one-time Google sign-in.
