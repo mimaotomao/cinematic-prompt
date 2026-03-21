@@ -4463,7 +4463,7 @@ function PetPage(){
     setPTab("species");
     setVpIsFantasy(false);setVpSpecies("dog");setVpBreed("Golden Retriever");setVpFantasySize("");
     setVpEmpathy("");setVpCoatType("long");setVpCoatPattern("solid");setVpCoatColors("golden");
-    setVpTail("long");setVpEars("floppy");setVpPose("sitting");setVpGaze("toward viewer");setVpJokeLegs(false);
+    setVpTail("long");setVpEars("floppy");setVpPose("sitting");setVpGaze("toward viewer");
     setAccMode("product");setAccSelected([]);setAccPrimary("");setAccProductMode("existing");
     setAccProductDesc("");setAccCreativeDesc("");setAccDepthHandler("virtual_hand");
     setCompanionMode("alone");setCompanionSpecies("cat");setCompanionInteraction("playing together");
