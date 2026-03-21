@@ -240,10 +240,11 @@ function GoogleSignInBtn({compact}){
 
 // ─── ENHANCE API CALL ─────────────────────────────────────────────────────────
 async function callEnhance(prompt, instructions, idToken){
+  const lockInstructions=ENHANCE_LOCK+(instructions||"");
   const resp=await fetch("/api/enhance",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({prompt,instructions,idToken})
+    body:JSON.stringify({prompt,instructions:lockInstructions,idToken})
   });
   let data;
   try{data=await resp.json();}
@@ -310,15 +311,45 @@ const EXPERT_NEG={
   style:["cartoon","anime","illustration","painting","3d render","cg look"]
 };
 
+// ── Shared quality suffix for ALL text prompt builders ──────────────────────
+const QUALITY_BLOCK=[
+  "=== QUALITY & ANATOMY REQUIREMENTS ===",
+  "Realistic skin texture with visible pores and subsurface scattering. No beauty filter, no plastic skin effect, no airbrushed look.",
+  "Hands: exactly 5 fingers per hand, no exceptions. Correct finger length proportions, natural joint bending, no fused or extra digits.",
+  "Facial structure: natural facial symmetry (not mathematically perfect), correct eye alignment, no warped or melted features.",
+  "Physically plausible lighting with correct directionality, intensity falloff, and color temperature. Subsurface scattering on skin and organic materials.",
+  "=== MUST NOT GENERATE ===",
+  "No extra fingers, no missing fingers, no deformed hands, no broken wrists, no warped face, no asymmetrical eyes, no melted features, no disconnected limbs, no duplicate limbs, no unnatural spine.",
+  "No plastic skin, no uncanny valley effect, no beauty retouch artifacts.",
+  "No text, watermarks, logos, signatures, captions, labels, UI elements, branding, or frame borders.",
+].join("\n");
+
+// ── Lock instructions prepended to AI Enhance calls ────────────────────────
+const ENHANCE_LOCK="IMPORTANT RULES FOR REWRITING:\n"+
+  "1. DO NOT change any lens/focal length values (e.g. 85mm, 50mm, 24mm). Keep them exactly as written.\n"+
+  "2. DO NOT change any lighting type names (e.g. golden hour, neon night, studio key). Keep the exact lighting setup.\n"+
+  "3. DO NOT change any film stock names (e.g. Kodak Vision3, Cinestill 800T, Ilford B&W). Keep them verbatim.\n"+
+  "4. DO NOT change any color grade names (e.g. Teal & Orange, Bleach Bypass). Keep them verbatim.\n"+
+  "5. DO NOT change aspect ratios, grid layouts, panel counts, or output format specifications.\n"+
+  "6. DO NOT change character identity details: race, gender, age, body type, clothing, accessories, species, breed.\n"+
+  "7. DO NOT remove or weaken the quality requirements, anatomy rules, or negative prompt sections.\n"+
+  "8. DO NOT add new characters, animals, or objects not mentioned in the original.\n"+
+  "9. You MAY enrich scene descriptions, add atmospheric details, enhance mood language, and make the prose more cinematic and evocative.\n"+
+  "10. You MAY add sensory details (sounds, textures, temperature, smells) that support the existing mood.\n"+
+  "Rewrite the prompt below following these rules:\n\n";
+
 function buildExpertJSON(cfg){
   try{
-  // cfg: {taskType, inputMode, subject, scene, lighting, environment, lens, filmStock,
+  // cfg: {taskType, inputMode, originalPrompt, subject, scene, lighting, environment, lens, filmStock,
   //       colorGrade, aspectRatio, grid, expressions, custom, style, mood, composition, extra}
   const L=cfg.lighting?LIGHTING.find(x=>x.id===cfg.lighting):null;
   const E=cfg.environment?BACKGROUNDS.find(x=>x.id===cfg.environment):null;
   const Le=cfg.lens?LENSES.find(x=>x.mm===cfg.lens):null;
   const F=cfg.filmStock?FILM_STOCKS.find(x=>x.id===cfg.filmStock):null;
   const C=cfg.colorGrade?COLOR_GRADES.find(x=>x.id===cfg.colorGrade):null;
+  const isImg=cfg.inputMode==="image_to_image";
+  const hasGrid=!!(cfg.grid);
+  const styleStr=cfg.style?(typeof cfg.style==="string"?cfg.style:(cfg.style.name||cfg.style.id||"photorealistic")):"photorealistic";
 
   // ── L5: Meta-Context ──
   const meta={
@@ -329,8 +360,7 @@ function buildExpertJSON(cfg){
     version:`v1.0_${(cfg.taskType||"SCENE").toUpperCase().replace(/\s+/g,"_")}`
   };
 
-  // ── Input (Anchor zone — identity) ──
-  const isImg=cfg.inputMode==="image_to_image";
+  // ── Input (Anchor zone) — identity lock 0.99 for ALL grids, not just img2img ──
   const input={
     mode:cfg.inputMode||"text_to_image",
     ...(isImg?{
@@ -342,104 +372,142 @@ function buildExpertJSON(cfg){
       identity_lock_strength:0.99,
       notes:"Use reference as primary anchor. Strict identity preservation across all panels. Natural skin texture, no beauty filters."
     }:{
-      notes:"Generate from text description. Maintain strict consistency if multi-panel."
+      ...(hasGrid?{
+        preserve_identity:true,
+        identity_lock_strength:0.99,
+        notes:"Generate from text description. Strict identity consistency across all grid panels — same face, same body, same wardrobe."
+      }:{
+        notes:"Generate from text description with maximum detail fidelity."
+      })
     })
   };
 
-  // ── Creative layer (markdown inside JSON — hybrid) ──
-  // Semantic density: concrete first, then technical, then abstract mood
-  const md=[];
-  if(cfg.subject)md.push(`**Subject**: ${cfg.subject}`);
-  if(cfg.scene)md.push(`**Scene**: ${cfg.scene}`);
-  if(E)md.push(`**Environment**: ${E.p}`);
-  if(L)md.push(`**Lighting**: ${L.p}`);
-  if(Le)md.push(`**Lens**: ${Le.p}`);
-  if(F)md.push(`**Film stock**: ${F.p}`);
-  if(C)md.push(`**Color grade**: ${C.p}`);
-  if(cfg.mood){const mt=typeof cfg.mood==="string"?cfg.mood:(cfg.mood&&cfg.mood.tone)||"";if(mt)md.push(`**Mood**: ${mt}`);}
-  if(cfg.composition){const cd=typeof cfg.composition==="string"?cfg.composition:(cfg.composition&&(cfg.composition.desc||cfg.composition.label))||"";if(cd)md.push(`**Composition**: ${cd}`);}
-  if(cfg.style){const sn=typeof cfg.style==="string"?cfg.style:(cfg.style&&(cfg.style.name||cfg.style.id))||"";if(sn)md.push(`**Style**: ${sn}`);}
-  if(cfg.custom)md.push(`**Additional direction**: ${cfg.custom}`);
+  // ── Creative direction — FULL original prompt as markdown ──
+  const creativeContent=cfg.originalPrompt||"[no prompt generated yet]";
 
-  // ── L3: Photography/Optics ──
-  const photography={
-    camera:{
-      lens:Le?`${Le.mm} — ${Le.name}`:(cfg.lens||"50mm standard"),
-      framing:cfg.grid?"mixed framing per panel":"medium shot",
-      focus:"sharp on subject, eyes critical in every panel",
-      depth_of_field:"natural separation"
-    },
-    lighting:{
-      setup:L?L.p:"natural ambient lighting",
-      skin_rendering:"realistic skin texture, visible pores, no plastic effect",
-      shadow_quality:"physically plausible, consistent directionality"
-    },
-    ...(F?{film_stock:{name:F.name,look:F.p}}:{}),
-    ...(C?{color_grade:{name:C.name,look:C.p}}:{})
+  // ── Scene (enriched — not just "contextual") ──
+  const scene={
+    environment:E?E.p:(cfg.extra?.scene_config?.environment||"contextual to subject and creative direction"),
+    ...(L?{lighting:{style:L.name,description:L.p,quality:"physically plausible, consistent directionality"}}:
+      (cfg.extra?.scene_config?.lighting?{lighting:{style:"studio",description:cfg.extra.scene_config.lighting}}:{})),
+    mood:cfg.mood?(typeof cfg.mood==="string"?cfg.mood:(cfg.mood.tone||undefined)):undefined
   };
 
-  // ── L4: Output/Layout ──
+  // ── Subject/Identity (Anchor zone) ──
+  const subject={
+    description:cfg.subject||"as described in creative direction",
+    ...(hasGrid?{consistency_rules:{
+      same_subject_all_panels:true,
+      wardrobe_continuity:true,
+      lighting_consistency:true,
+      identity_lock:isImg?"strict":"strict_generated",
+      identity_lock_strength:0.99
+    }}:{}),
+    anatomy_rules:"correct facial proportions, no warped eyes/mouth, realistic hand structure, strict 5 fingers per hand"
+  };
+
+  // ── Photography/Optics ──
+  const defaultLens=hasGrid?"50mm standard":"85mm portrait";
+  const photography={
+    camera:{
+      lens:Le?`${Le.mm} — ${Le.name}`:(cfg.lens||defaultLens),
+      framing:hasGrid?"mixed framing per panel as described in creative direction":"medium shot",
+      angle:"as specified in creative direction",
+      focus:"sharp on subject, eyes critical in every panel",
+      depth_of_field:hasGrid?"clean studio clarity":"natural shallow separation"
+    },
+    lighting:{
+      setup:L?L.p:(cfg.extra?.scene_config?.lighting||"soft natural lighting"),
+      quality:"realistic, physically plausible light physics",
+      skin_rendering:"realistic skin texture, visible pores, subsurface scattering, no plastic effect",
+      shadow_quality:"soft gradations, consistent directionality across all panels"
+    },
+    ...(F?{film_stock:{name:F.name,description:F.p}}:{}),
+    ...(C?{color_grade:{name:C.name,description:C.p}}:{})
+  };
+
+  // ── Output/Layout ──
   const output={
     aspect_ratio:cfg.aspectRatio||"16:9",
     resolution_target:"ultra_high_res",
     num_images:1,
+    render_style:styleStr.includes("anime")?"anime_illustration":styleStr.includes("pixel")?"pixel_art":styleStr.includes("oil")?"classical_oil":"photorealistic_editorial",
     sharpness:"editorial_crisp",
     grain:"subtle_film",
     dynamic_range:"rich_natural",
-    ...(cfg.grid?{layout:{
+    ...(C?{color_grade:C.name}:{}),
+    ...(hasGrid?{layout:{
       type:"grid",
       rows:cfg.grid.rows,
       cols:cfg.grid.cols,
       gutter:"thin",
+      outer_border:"none",
       panel_consistency:"very_high"
     }}:{})
   };
 
-  // ── L2: Subject/Identity (Anchor zone) ──
-  const subject={
-    description:cfg.subject||"as described in creative direction",
-    ...(cfg.grid?{consistency_rules:{
-      same_subject_all_panels:true,
-      wardrobe_continuity:true,
-      lighting_consistency:true,
-      identity_lock:isImg?"strict":"generate_consistent"
-    }}:{}),
-    anatomy_rules:"correct facial proportions, no warped eyes/mouth, realistic hand structure"
-  };
-
-  // ── L1: Expression/Variation zone ──
+  // ── Expression/Panel plan (Variation zone) ──
   const expressions=cfg.expressions||null;
 
-  // ── L0: Constraints (Lock zone) ──
+  // ── must_have — critical requirements array ──
+  const mustHave=["photoreal quality","perfect anatomy","realistic hands","physically accurate posture"];
+  if(hasGrid){
+    mustHave.push(`${cfg.grid.rows}x${cfg.grid.cols} grid layout`);
+    mustHave.push("one subject across all panels with strong identity consistency");
+    mustHave.push("different poses/angles per panel");
+    mustHave.push("lighting continuity across all panels");
+  }
+  if(L)mustHave.push(L.name+" lighting");
+  if(E)mustHave.push(E.name+" environment");
+  if(F)mustHave.push(F.name+" film look");
+
+  // ── Quality control ──
   const quality={
-    identity_lock:isImg?"strict":"consistent",
+    identity_preservation:{
+      facial_features:isImg?"strict_lock":"strict_generated",
+      hair_consistency:"exact_match_across_panels",
+      body_proportions:"maintain",
+      identity_lock_strength:hasGrid||isImg?0.99:undefined
+    },
     hands_priority:"high",
     anatomy_safeguards:{
       hand_structure:"strict_5_per_hand",
+      finger_count:"exactly 5 per hand, no exceptions",
       facial_symmetry:"natural_not_perfect",
-      skin_texture:"realistic_pores_visible"
+      skin_texture:"realistic_pores_visible",
+      no_warping:true
     },
-    avoid:[...EXPERT_NEG.anatomy,...EXPERT_NEG.technical.slice(0,4)]
+    avoid:[...EXPERT_NEG.anatomy,...EXPERT_NEG.technical.slice(0,5)]
   };
 
-  const negatives=[...EXPERT_NEG.anatomy,...EXPERT_NEG.technical,...EXPERT_NEG.content,...EXPERT_NEG.style];
+  // ── Negative constraints — CATEGORIZED (Astronomerozge1 pattern) ──
+  const negativeConstraints={
+    anatomy:EXPERT_NEG.anatomy,
+    technical:EXPERT_NEG.technical,
+    content:EXPERT_NEG.content,
+    style_violations:EXPERT_NEG.style
+  };
 
-  // ── Assemble (onion order: meta→input→creative→scene→subject→photography→output→expressions→quality→negative) ──
+  // ── Flat negative_prompt array (for compatibility) ──
+  const negativesFlat=[...EXPERT_NEG.anatomy,...EXPERT_NEG.technical,...EXPERT_NEG.content,...EXPERT_NEG.style];
+
+  // ── Assemble (onion: L5 meta → input → creative → scene → subject → photography → output → expressions → must_have → quality → negatives) ──
   const json={generation_request:{
     meta_data:meta,
     input:input,
-    creative_direction:{format:"markdown_enhanced",content:md.join("\n")},
-    scene:{environment:E?E.p:(cfg.scene||"contextual"),lighting:L?{style:L.name,description:L.p}:undefined,mood:cfg.mood?(typeof cfg.mood==="string"?cfg.mood:(cfg.mood.tone||undefined)):undefined},
+    creative_direction:{format:"markdown_enhanced",content:creativeContent},
+    scene:scene,
     subject:subject,
     photography:photography,
     output_settings:output,
     ...(expressions?{expression_set:expressions}:{}),
+    must_have:mustHave,
     quality_control:quality,
     ...(cfg.extra||{}),
-    negative_prompt:negatives
+    negative_constraints:negativeConstraints,
+    negative_prompt:negativesFlat
   }};
 
-  // Strip undefineds
   return JSON.parse(JSON.stringify(json));
   }catch(e){console.error("buildExpertJSON error:",e);return null;}
 }
@@ -577,12 +645,26 @@ function PromptOutputPanel({prompt,custom="",hasAny=true,extraButtons=null,onToa
 }
 
 const GEN_TARGETS=[
+  {label:"Arena.ai",url:"https://arena.ai/?mode=direct&chat-modality=image",icon:"⊕",hi:true},
   {label:"Grok Imagine",url:"https://grok.com/imagine",icon:"✦"},
-  {label:"Gemini",url:"https://gemini.google.com",icon:"◈",warn:"Gemini (Imagen) may truncate long prompts — grid consistency is limited. Best for short/single-shot."},
-  {label:"Arena.ai",url:"https://arena.ai/?mode=direct&chat-modality=image",icon:"⊕"},
+  {label:"ChatGPT Images",url:"https://chatgpt.com/images",icon:"◈"},
+  {label:"Gemini",url:"https://gemini.google.com",icon:"◇",warn:"May truncate long prompts — best for single-shot"},
+  {label:"Meta AI",url:"https://www.meta.ai/",icon:"◉"},
+  {label:"FreeGen",url:"https://freegen.app/",icon:"▸",note:"100% free, no signup"},
+  {label:"DiGen",url:"https://digen.ai/image",icon:"◆"},
+  {label:"Playground",url:"https://playground.com/design/new",icon:"▢"},
+  {label:"FLUX.1-dev",url:"https://huggingface.co/spaces/black-forest-labs/FLUX.1-dev",icon:"⚡",note:"Open-source on HuggingFace"},
+  {label:"Qwen Image",url:"https://huggingface.co/spaces/Qwen/Qwen-Image-2512",icon:"◐",note:"Qwen 20B — free on HuggingFace"},
+  {label:"Bing Create",url:"https://www.bing.com/images/create",icon:"▣"},
+  {label:"Craiyon",url:"https://www.craiyon.com/en",icon:"✏"},
+  {label:"ImgsOAI",url:"https://www.imgsoai.com/",icon:"◫"},
+  {label:"JoyFun",url:"https://joyfun.ai/ai-image-generator/",icon:"☺"},
+  {label:"Leonardo.ai",url:"https://app.leonardo.ai/image-generation",icon:"▲",note:"Free tier available"},
+  {label:"Mage.space",url:"https://www.mage.space/creations",icon:"✦"},
+  {label:"HF Spaces",url:"https://huggingface.co/spaces?category=image-generation",icon:"🤗",note:"Browse all HuggingFace image generators"},
+  {label:"Heartsync",url:"https://huggingface.co/spaces/Heartsync/Adult?not-for-all-audiences=true",icon:"♡",note:"Test the best — not for all audiences"},
 ];
 function GenWithLinks({getPrompt,onCopy,targets}){
-  // kept for VideoPromptPage which uses custom targets
   const list=targets||GEN_TARGETS;
   const handle=async(url)=>{
     await copyText(getPrompt());
@@ -593,18 +675,20 @@ function GenWithLinks({getPrompt,onCopy,targets}){
     <div className="genwith">
       <span className="genwith-label">Generate with</span>
       {list.map(t=>(
-        <button key={t.label} className="genwith-btn" onClick={()=>handle(t.url)}>
+        <button key={t.label} className="genwith-btn" onClick={()=>handle(t.url)}
+          title={t.note||t.warn||""}
+          style={t.hi?{borderColor:"var(--acc)",background:"var(--acdim)",color:"var(--acc)",fontWeight:700}:{}}>
           <span>{t.icon}</span>{t.label} ↗
         </button>
       ))}
-      <span className="genwith-note">— clicking copies prompt to clipboard</span>
+      <span className="genwith-note">prompt copied to clipboard — just paste</span>
     </div>
   );
 }
 
 // ─── WORKFLOW PANEL (replaces GenWithLinks + RefPhotoHint + ExpandToFullShot) ──
 function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmStock, colorGrade, aspectRatio, mode, onToast, isPhoto}){
-  const targets = GEN_TARGETS;
+  const targets = GEN_TARGETS.slice(0,5);
   const[expanded, setExpanded] = useState(false);
   const[showPhotoTip, setShowPhotoTip] = useState(false);
   const hasGrid = sel && sel.length >= 2;
@@ -695,7 +779,9 @@ function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmS
         <div style={{padding:"12px 16px",display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"}} translate="no">
           {targets.map(t=>(
             <div key={t.label} style={{position:"relative",display:"inline-flex",alignItems:"center",gap:4}}>
-              <button className="genwith-btn" onClick={()=>handleGenerateClick(t.url)}>
+              <button className="genwith-btn" onClick={()=>handleGenerateClick(t.url)}
+                title={t.note||t.warn||""}
+                style={t.hi?{borderColor:"var(--acc)",background:"var(--acdim)",color:"var(--acc)",fontWeight:700}:{}}>
                 <span>{t.icon}</span>{t.label} ↗
               </button>
               {t.warn&&(
@@ -703,7 +789,7 @@ function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmS
               )}
             </div>
           ))}
-          <span style={{fontSize:11,color:"var(--t)",opacity:.5,marginLeft:4}}>— copies prompt on click</span>
+          <span style={{fontSize:11,color:"var(--t)",opacity:.5,marginLeft:4}}>prompt copied to clipboard — just paste</span>
         </div>
       </div>
 
@@ -1218,6 +1304,7 @@ function buildPrompt({scene,selectedAngles,lighting,bg,lens,cam,use3D,custom,fil
     parts.push(modePrefix);
     if(scene.trim())parts.push(scene.trim());
     if(techBlock)parts.push(techBlock);
+    parts.push(QUALITY_BLOCK);
     if(custom.trim())parts.push(custom.trim());
     return parts.join("\n\n");
   }
@@ -1235,6 +1322,7 @@ function buildPrompt({scene,selectedAngles,lighting,bg,lens,cam,use3D,custom,fil
       :("Camera angle: "+angleObj.name+" — "+angleObj.desc+".");
     parts.push(camBlock);
     parts.push("Output as a single cinematic image with sharp detail, physically plausible lighting, and no added characters.");
+    parts.push(QUALITY_BLOCK);
     if(custom.trim())parts.push(custom.trim());
     return parts.join("\n\n");
   }
@@ -1308,7 +1396,10 @@ function buildPrompt({scene,selectedAngles,lighting,bg,lens,cam,use3D,custom,fil
     "cinematic color grading, sharp detail, physically plausible lighting, and no added characters."
   );
 
-  // 9. Custom additions (always last)
+  // 9. Quality & anatomy
+  parts.push(QUALITY_BLOCK);
+
+  // 10. Custom additions (always last)
   if(custom.trim())parts.push(custom.trim());
 
   return parts.join("\n\n");
@@ -1452,6 +1543,7 @@ function AnglesPage(){
   const anglesEJ=hasAny?buildExpertJSON({
     taskType:n>1?`multi_shot_${n}panel_grid`:"cinematic_single_shot",
     inputMode:mode1==="photo"?"image_to_image":"text_to_image",
+    originalPrompt:prompt,
     subject:scene.trim()||"subject from attached reference photo",
     lighting:light,environment:bg,lens,filmStock,colorGrade,aspectRatio,
     custom:custom.trim()||null,
@@ -1501,6 +1593,7 @@ function AnglesPage(){
       <PipelineStrip active={2}/>
       <div className="ph">
         <div className="ps">Multi-Shot Prompt Builder — Design cinematic angle sets (up to 9 views) with perfect subject &amp; lighting consistency. Real-time 3D camera orbit &amp; zoom.</div>
+        <div style={{marginTop:8,textAlign:"center"}}><HowLink section="pipeline"/></div>
         <div className={`pc${sel.length===MAX?" full":""}`}>
           <span>{sel.length} / {MAX} angles</span>
           {batchSize>1&&<span>· {batchSize}x batch</span>}
@@ -1795,6 +1888,7 @@ function AnglesPage(){
           filmStock={filmStock} colorGrade={colorGrade} aspectRatio={aspectRatio}
           mode={mode1} onToast={doToast} isPhoto={mode1==="photo"}
         />}
+        {hasAny&&<GenWithLinks getPrompt={()=>prompt} onCopy={()=>doToast("PROMPT COPIED")}/>}
       </div>
 
       {toast&&<div className="toast">{toast}</div>}
@@ -2348,9 +2442,10 @@ function AvatarsPage(){
     const layoutSpec=isMultiPanel?"single 1x3 grid image":"single image";
     parts.push(
       [avEnvStr,avLightStr,avLensStr,avAspectStr].filter(Boolean).join(" ")+"\n"+
-      "Output as a "+layoutSpec+". Ultra high resolution, sharp focus, physically accurate anatomy. "+
-      "No text, captions, labels, UI elements, branding, or watermarks."
+      "Output as a "+layoutSpec+". Ultra high resolution, sharp focus, physically accurate anatomy."
     );
+
+    parts.push(QUALITY_BLOCK);
 
     return parts.join("\n\n");
   };
@@ -2359,6 +2454,7 @@ function AvatarsPage(){
   const avatarEJ=buildExpertJSON({
     taskType:c.avLayout==="Style Sheet"?"character_sheet_3panel":"character_"+c.avLayout.toLowerCase().replace(/\s+/g,"_"),
     inputMode:mode==="photo"?"image_to_image":"text_to_image",
+    originalPrompt:prompt,
     subject:`${c.race} ${c.gender}, ${c.age}, ${c.region} heritage. Body: ${c.bodyType}. Expression: ${c.expression}. Hair: ${c.hair}, ${c.eyeColor} eyes. Clothing: ${c.clothing}.`,
     lighting:null,environment:null,lens:c.avLens||null,filmStock:null,colorGrade:null,
     aspectRatio:c.avAspect||"16:9",custom:c.details||null,
@@ -2428,6 +2524,7 @@ function AvatarsPage(){
       <div className="ph">
         <div className="pt">Character <b>Sheet</b></div>
         <div className="ps">Character reference sheet prompt builder with detailed anatomy and style controls</div>
+        <div style={{marginTop:8,textAlign:"center"}}><HowLink section="pipeline"/></div>
       </div>
 
       <div style={{display:"flex",gap:0,marginBottom:28,borderRadius:8,overflow:"hidden",border:"1px solid var(--bd)",width:"fit-content"}}>
@@ -3023,6 +3120,7 @@ function AvatarsPage(){
           onCopy={()=>doToast("PROMPT COPIED — PASTE IN TARGET APP")}
           sel={[]} scene={""} onToast={doToast} isPhoto={mode==="photo"}
         />
+        <GenWithLinks getPrompt={()=>prompt} onCopy={()=>doToast("PROMPT COPIED")}/>
       </div>
 
       {toast&&<div className="toast">{toast}</div>}
@@ -3043,9 +3141,9 @@ const VID_GEN_TARGETS=[
   {label:"Pika",url:"https://pika.art",icon:"⚡"},
 ];
 const FRAME_GEN_TARGETS=[
+  {label:"Arena.ai",url:"https://arena.ai/?mode=direct&chat-modality=image",icon:"⊕",hi:true},
   {label:"Grok Imagine",url:"https://grok.com/imagine",icon:"✦"},
-  {label:"Gemini",url:"https://gemini.google.com",icon:"◈"},
-  {label:"Arena.ai",url:"https://arena.ai/?mode=direct&chat-modality=image",icon:"⊕"},
+  {label:"Gemini",url:"https://gemini.google.com",icon:"◇"},
 ];
 
 function buildVideoPrompt({scene,firstFrame,lastFrame,camMove,pacing,duration,sound,lighting,colorGrade,lens,filmStock,style,custom,videoMode}){
@@ -3123,8 +3221,8 @@ function buildVideoPrompt({scene,firstFrame,lastFrame,camMove,pacing,duration,so
   // Custom
   if(custom.trim())parts.push(custom.trim());
 
-  // Output spec
-  parts.push("Ultra high resolution, smooth motion, no artifacts, no text or watermarks.");
+  // Output spec + quality
+  parts.push("Ultra high resolution, smooth motion, physically plausible lighting with consistent directionality. Realistic skin texture if people visible — no plastic effect. Correct anatomy and proportions throughout all frames. No flickering, no morphing artifacts, no temporal inconsistencies. No text, watermarks, logos, or UI elements.");
 
   return parts.join(" ");
 }
@@ -3139,7 +3237,7 @@ function buildFramePrompt(frameDesc,{lighting,colorGrade,lens,filmStock,style}){
   if(vis.length)parts.push(vis.join(". ")+".");
   if(lens)parts.push(lens+" focal length lens.");
   const styleMap={"Cinematic":"cinematic film quality, professional cinematography","Documentary":"documentary realism","Commercial":"polished commercial photography","Music Video":"stylized music video aesthetic"};
-  parts.push((styleMap[style]||"cinematic quality")+", ultra high resolution, sharp focus, no text or watermarks.");
+  parts.push((styleMap[style]||"cinematic quality")+", ultra high resolution, sharp focus. Realistic skin texture with visible pores if people present, exactly 5 fingers per hand. No text, watermarks, logos, no extra fingers, no deformed hands, no plastic skin.");
   return parts.join(" ");
 }
 
@@ -3167,6 +3265,7 @@ function VideoPromptPage(){
   const videoEJ=hasAny?buildExpertJSON({
     taskType:`video_${videoMode}`,
     inputMode:videoMode==="img2vid"?"image_to_image":"text_to_image",
+    originalPrompt:prompt,
     subject:scene.trim()||"as described in frame directions",
     lighting,environment:null,lens,filmStock,colorGrade:null,aspectRatio:"16:9",
     style:style,mood:null,composition:null,custom:custom.trim()||null,
@@ -3233,6 +3332,7 @@ function VideoPromptPage(){
       <div className="ph">
         <div className="pt">🎬 Video <b>Prompt</b></div>
         <div className="ps">Build cinematic video prompts for Sora, Runway, Kling and Pika.</div>
+        <div style={{marginTop:8,textAlign:"center"}}><HowLink section="standalone tools"/></div>
       </div>
 
       {/* MODE SELECTOR */}
@@ -3438,6 +3538,39 @@ function PipelineStrip({active}){
 }
 
 // ─── HOW IT WORKS PAGE ────────────────────────────────────────────────────────
+// ─── EXPANDABLE "MORE" BLOCK ─────────────────────────────────────────────────
+function ExMoreBlock({children}){
+  const[open,setOpen]=useState(false);
+  const items=Array.isArray(children)?children:[];
+  return(
+    <div>
+      <button onClick={()=>setOpen(v=>!v)} style={{fontSize:11,fontWeight:700,color:"var(--t4)",cursor:"pointer",background:"none",border:"none",padding:0,letterSpacing:1}}>
+        {open?"▾ Less":"▸ More details..."}
+      </button>
+      {open&&(
+        <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:8}}>
+          {items.map((item,i)=>(
+            <div key={i} style={{fontSize:12,color:"var(--t)",opacity:.65,lineHeight:1.7,paddingLeft:12,borderLeft:"2px solid var(--bd)"}}>
+              {item}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HowLink({section}){
+  const setPage=React.useContext(PageCtx);
+  return(
+    <span onClick={()=>setPage("how")} style={{fontSize:11,color:"var(--t4)",cursor:"pointer",marginLeft:8,fontWeight:500,opacity:.7,transition:"all .15s"}}
+      onMouseOver={e=>{e.currentTarget.style.color="var(--acc)";e.currentTarget.style.opacity=1;}}
+      onMouseOut={e=>{e.currentTarget.style.color="var(--t4)";e.currentTarget.style.opacity=.7;}}>
+      How it works{section?` — ${section}`:""} →
+    </span>
+  );
+}
+
 function HowItWorksPage(){
   const setPage = React.useContext(PageCtx);
   const acc = ["#e8780a","#4fa3e0","#a78bfa","#34d399"];
@@ -3467,14 +3600,14 @@ function HowItWorksPage(){
             {icon:"🎬", title:"Multi-Shot", sub:"Compose cinematic camera angles", page:"angles",
              body:"Pick camera angles, lighting, environment, lens and film stock. The tool builds a structured prompt that tells the AI to produce multiple numbered shots of the same subject in one composite grid.",
              note:null, links:null, cta:"Open Multi-Shot →"},
-            {icon:"✦", title:"Generate in your AI of choice", sub:"Grok · Gemini · Arena.ai",
+            {icon:"✦", title:"Generate in your AI of choice", sub:"Arena.ai · Grok · Gemini · ChatGPT",
              body:"Copy the prompt, paste it into an image generator, and attach your reference photo if you have one. The AI returns a numbered composite grid — one image, multiple cinematic shots.",
              note:"📎 Attach your reference photo every time for consistent character identity.",
              links:[
+               {label:"Arena.ai ↗", url:"https://arena.ai/?mode=direct&chat-modality=image"},
                {label:"Grok Imagine ↗", url:"https://grok.com/imagine"},
                {label:"Gemini ↗", url:"https://gemini.google.com"},
-               {label:"Midjourney ↗", url:"https://midjourney.com"},
-               {label:"Arena.ai ↗", url:"https://www.arena.ai"},
+               {label:"ChatGPT Images ↗", url:"https://chatgpt.com/images"},
              ], cta:null},
             {icon:"🔍", title:"Expand any panel to full resolution", sub:"Back in Multi-Shot", page:"angles",
              body:"Attach your generated grid back to the AI. In Multi-Shot → Expand Panel to Full Shot, each numbered panel has its own expansion prompt. Click the panel number, attach the grid, get a single full-quality image.",
@@ -3608,6 +3741,75 @@ function HowItWorksPage(){
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ GENERATORS ═══ */}
+      <div style={{marginTop:56}} id="generators">
+        <div style={{fontSize:11,fontWeight:700,letterSpacing:4,textTransform:"uppercase",color:"var(--t4)",marginBottom:16}}>FREE IMAGE GENERATORS</div>
+        <div style={{fontSize:13,color:"var(--t)",opacity:.7,marginBottom:8,lineHeight:1.7}}>
+          Every tool in PrompTo miniStudio outputs a prompt you copy and paste into an external AI image generator. These generators are free (with limits) and open in a new tab when you click them. <span style={{color:"var(--acc)",fontWeight:600}}>Arena.ai</span> is highlighted as default — it accepts long prompts well and runs multiple models side by side.
+        </div>
+        <div style={{fontSize:12,color:"rgba(255,255,255,.45)",marginBottom:20,lineHeight:1.6,padding:"10px 14px",borderRadius:8,border:"1px solid var(--bd)",background:"var(--s2)"}}>
+          ⚠ These are third-party services — free tiers have daily/weekly limits, some require signup, and availability may change without notice. PrompTo miniStudio is not affiliated with any of them.
+        </div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
+          {GEN_TARGETS.map(t=>(
+            <a key={t.label} href={t.url} target="_blank" rel="noopener noreferrer"
+              title={t.note||t.warn||""}
+              style={{padding:"7px 14px",borderRadius:6,fontSize:12,fontWeight:t.hi?700:500,textDecoration:"none",transition:"all .15s",
+                border:t.hi?"1px solid var(--acc)":"1px solid var(--bd)",
+                background:t.hi?"var(--acdim)":"var(--s2)",
+                color:t.hi?"var(--acc)":"var(--t)"}}>
+              {t.icon} {t.label} ↗
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* ═══ OUTPUT FORMATS ═══ */}
+      <div style={{marginTop:48}} id="output-formats">
+        <div style={{fontSize:11,fontWeight:700,letterSpacing:4,textTransform:"uppercase",color:"var(--t4)",marginBottom:16}}>OUTPUT FORMATS — WHAT YOU GET</div>
+        <div style={{fontSize:13,color:"var(--t)",opacity:.7,marginBottom:20,lineHeight:1.7}}>
+          Every page in the studio generates your prompt in three formats. Switch between them using the tabs above the prompt preview.
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          {/* Original Prompt */}
+          <div style={{padding:"16px 20px",borderRadius:10,border:"1px solid rgba(74,222,128,.25)",background:"rgba(34,197,94,.04)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+              <span style={{fontSize:11,fontWeight:700,color:"#4ade80",letterSpacing:1,padding:"3px 10px",borderRadius:4,background:"rgba(34,197,94,.12)"}}>ORIGINAL PROMPT</span>
+            </div>
+            <div style={{fontSize:13,color:"var(--t)",opacity:.8,lineHeight:1.7}}>
+              Plain text — works everywhere. Copy and paste into any generator from the list above. This is what most people use. The prompt describes your scene, character, or pet in natural language with all the technical parameters (lighting, lens, film stock) embedded as descriptive sentences.
+            </div>
+          </div>
+          {/* Expert JSON */}
+          <div style={{padding:"16px 20px",borderRadius:10,border:"1px solid rgba(168,85,247,.25)",background:"rgba(168,85,247,.04)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+              <span style={{fontSize:11,fontWeight:700,color:"#c4b5fd",letterSpacing:1,padding:"3px 10px",borderRadius:4,background:"rgba(168,85,247,.12)"}}>EXPERT JSON</span>
+              <span style={{fontSize:10,color:"var(--t4)"}}>advanced</span>
+            </div>
+            <div style={{fontSize:13,color:"var(--t)",opacity:.8,lineHeight:1.7,marginBottom:10}}>
+              Structured JSON with embedded markdown — the same data, but organized into layers: identity anchoring (0.99 lock strength), scene description, camera rig, lighting setup, quality controls, and negative prompts as categorized arrays. Based on the Astronomerozge1 architecture used in NanoBanana Pro prompts.
+            </div>
+            <ExMoreBlock>{[
+              "Expert JSON follows the Anchor-Variation-Lock pattern: identity never changes between panels, expressions/poses vary, and constraint arrays catch common AI errors (extra fingers, plastic skin, text artifacts).",
+              "The creative_direction field contains markdown inside JSON — a hybrid approach. Concrete details first (subject, environment), then technical (lighting, lens), then abstract mood. This 'semantic density gradient' prevents style hallucinations.",
+              "Identity lock is set to 0.99, not 1.0 — leaving 1% adaptation room for lighting prevents the 'wax figure effect' where faces look unnaturally rigid across panels.",
+              "Negative prompts are split into 4 structured arrays: anatomy (11 items), technical (8), content (7), style (6) — not a single string. This gives the AI model clearer constraint boundaries.",
+              "Not all generators support JSON. Best results: paste into ChatGPT, Gemini, or Grok which understand structured prompts. Arena.ai and most HuggingFace models work with the Original Prompt format.",
+            ]}</ExMoreBlock>
+          </div>
+          {/* AI Enhanced */}
+          <div style={{padding:"16px 20px",borderRadius:10,border:"1px solid rgba(232,120,10,.25)",background:"rgba(232,120,10,.04)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+              <span style={{fontSize:11,fontWeight:700,color:"var(--acc)",letterSpacing:1,padding:"3px 10px",borderRadius:4,background:"var(--acdim)"}}>✦ AI ENHANCED</span>
+              <span style={{fontSize:10,color:"var(--t4)"}}>requires Google sign-in</span>
+            </div>
+            <div style={{fontSize:13,color:"var(--t)",opacity:.8,lineHeight:1.7}}>
+              Gemini rewrites your Original Prompt as a richer, more narrative version — adding atmospheric details, cinematic language, and artistic flair. The meaning stays the same but the prose becomes more evocative. Some technical parameters (lens, lighting) may be rephrased. Free, no credit card — just a one-time Google sign-in.
+            </div>
           </div>
         </div>
       </div>
@@ -4465,7 +4667,14 @@ function PetPage(){
     // ── CRITICAL ──
     L.push("=== CRITICAL QUALITY REQUIREMENTS ===");
     L.push("Absolute photorealism — every element must hold up to close inspection. Physically plausible lighting with correct directionality, intensity falloff, and color temperature across all surfaces. Subsurface scattering on skin, fur, and organic materials. Specular highlights consistent with material type. Accurate depth of field — focus plane matches compositional intent.");
-    L.push("Seamless integration — no compositing artifacts, no edge haloing, no mismatched perspective between subjects and environment. All scale relationships physically credible. No generated text, labels, watermarks, or UI elements. No additional humans, animals, or objects beyond what is specified.");
+    L.push("Realistic skin texture with visible pores and subsurface scattering. No beauty filter, no plastic skin effect, no airbrushed look.");
+    L.push("Hands (if human present): exactly 5 fingers per hand, no exceptions. Correct finger length proportions, natural joint bending, no fused or extra digits.");
+    L.push("Animal anatomy: correct limb count and joint structure for species. Realistic fur/feather/scale texture at macro level. Eyes with proper reflections and species-accurate iris shape.");
+    L.push("Seamless integration — no compositing artifacts, no edge haloing, no mismatched perspective between subjects and environment. All scale relationships physically credible.");
+    L.push("=== MUST NOT GENERATE ===");
+    L.push("No extra fingers, no missing fingers, no deformed hands, no broken wrists, no warped face, no asymmetrical eyes, no melted features, no disconnected limbs, no duplicate limbs, no unnatural spine.");
+    L.push("No plastic skin, no uncanny valley effect, no beauty retouch artifacts.");
+    L.push("No text, watermarks, logos, signatures, captions, labels, UI elements, branding, or frame borders. No additional humans, animals, or objects beyond what is specified.");
     return L.join("\n");
   };
 
@@ -4473,6 +4682,7 @@ function PetPage(){
   const petEJ=buildExpertJSON({
     taskType:`pet_studio_${vpIsFantasy?"fantasy":"real"}_${outputLayout}`,
     inputMode:usePetPhoto?"image_to_image":"text_to_image",
+    originalPrompt:prompt,
     subject:`${vpIsFantasy?"Fantasy creature":vpSpecies}${vpBreed?", breed: "+vpBreed:""}${vpEmpathy?". Mood: "+vpEmpathy:""}${vpFantasySize?". Size: "+vpFantasySize:""}`,
     lighting:light,environment:bg,lens,filmStock,
     colorGrade:filmStock==="ilford"?null:colorGrade,
@@ -4539,6 +4749,7 @@ function PetPage(){
       <div className="ph">
         <div className="pt">Pet <b>Studio</b></div>
         <div className="ps">Compose pets, products and people into perfect reference images for AI generators</div>
+        <div style={{marginTop:8,textAlign:"center"}}><HowLink section="standalone tools"/></div>
       </div>
 
       {/* HOW IT WORKS — collapsible */}
@@ -5372,19 +5583,9 @@ function PetPage(){
             </>
           }
         />
+        <GenWithLinks getPrompt={()=>prompt} onCopy={()=>doToast("PROMPT COPIED — ATTACH YOUR PHOTOS")}/>
         <div style={{marginTop:14,padding:"14px 16px",borderRadius:8,border:"1px solid var(--bd)",background:"var(--s1)"}}>
-          <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",marginBottom:10}}>Generate with</div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:12}} translate="no">
-            {GEN_TARGETS.map(t=>(
-              <div key={t.label} style={{position:"relative",display:"inline-flex",alignItems:"center",gap:4}}>
-                <button className="genwith-btn" onClick={async()=>{await copyText(prompt);doToast("PROMPT COPIED — ATTACH YOUR PHOTOS");window.open(t.url,"_blank","noopener,noreferrer");}}>
-                  <span>{t.icon}</span>{t.label} ↗
-                </button>
-                {t.warn&&<span title={t.warn} style={{cursor:"help",fontSize:13,opacity:.7}}>⚠️</span>}
-              </div>
-            ))}
-          </div>
-          <div style={{borderTop:"1px solid var(--bd)",paddingTop:12,display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
             <span style={{fontSize:11,color:"rgba(255,255,255,.65)"}}>💡 Next step:</span>
             <button onClick={()=>setPage("angles")} style={{padding:"7px 14px",borderRadius:6,border:"1px solid var(--bd)",background:"var(--s2)",color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer"}}>
               🎬 Multi-Shot
@@ -5487,13 +5688,21 @@ const MAP_DATA={
     ]},
     {id:"common",label:"Common Features",color:"#f472b6",children:[
       {id:"cm1",label:"✦ AI Prompt Enhance — Gemini rewrites prompt as artistic/narrative version"},
-      {id:"cm2",label:"Dual prompt view — Original (green tab) / AI Enhanced (orange tab) always preserved"},
-      {id:"cm3",label:"Auto-enhance after Google Sign-In — no second click needed"},
-      {id:"cm4",label:"Copy Orig. Prompt · Copy Enhanced Prompt — separate actions"},
-      {id:"cm5",label:"🌐 EN toggle — force English UI, disable Chrome auto-translate"},
-      {id:"cm6",label:"Visual sprite selectors — all options shown as thumbnail previews"},
-      {id:"cm7",label:"Live prompt preview — updates in real time as you configure"},
-      {id:"cm8",label:"App Map — interactive feature overview with navigation"},
+      {id:"cm2",label:"Three output tabs — Original (green) / Expert JSON (purple) / AI Enhanced (orange)"},
+      {id:"cm3",label:"Expert JSON — Astronomerozge1 architecture: identity lock 0.99, semantic density gradient, structured negative arrays"},
+      {id:"cm4",label:"Copy Orig. Prompt · Copy Expert JSON · Copy Enhanced Prompt — each switches to its tab"},
+      {id:"cm5",label:"Auto-enhance after Google Sign-In — no second click needed"},
+      {id:"cm6",label:"🌐 EN toggle — force English UI, disable Chrome auto-translate"},
+      {id:"cm7",label:"Visual sprite selectors — all options shown as thumbnail previews"},
+      {id:"cm8",label:"Live prompt preview — updates in real time as you configure"},
+      {id:"cm9",label:"App Map — interactive feature overview with navigation"},
+    ]},
+    {id:"gens",label:"Free Generators (18)",color:"#f472b6",children:[
+      {id:"g1",label:"⊕ Arena.ai (default) · ✦ Grok Imagine · ◈ ChatGPT Images · ◇ Gemini · ◉ Meta AI"},
+      {id:"g2",label:"▸ FreeGen · ◆ DiGen · ▢ Playground · ⚡ FLUX.1-dev · ◐ Qwen Image"},
+      {id:"g3",label:"▣ Bing Create · ✏ Craiyon · ◫ ImgsOAI · ☺ JoyFun · ▲ Leonardo.ai"},
+      {id:"g4",label:"✦ Mage.space · 🤗 HF Spaces · ♡ Heartsync"},
+      {id:"g5",label:"All free (with limits) · Third-party · No guarantee of availability"},
     ]},
     {id:"univ",label:"Scene Universe",color:"#facc15",page:"universe",children:[
       {id:"uvi",label:"Scene Idea Input",color:"#facc15",children:[
@@ -5512,8 +5721,8 @@ const MAP_DATA={
         {id:"uvt3",label:"Conflict resolution — B&W disables grades, fisheye→1:1, anamorphic→2.39:1"},
       ]},
       {id:"uvo",label:"Output",color:"#facc15",children:[
-        {id:"uvo1",label:"Live prompt preview with PromptOutputPanel"},
-        {id:"uvo2",label:"AI Enhance + Copy + GenWithLinks (Grok, Gemini, Arena.ai)"},
+        {id:"uvo1",label:"Live prompt preview — Original / Expert JSON / AI Enhanced tabs"},
+        {id:"uvo2",label:"18 free generators — Arena.ai default, copies prompt on click"},
         {id:"uvo3",label:"Random — one click full configuration · Reset"},
       ]},
     ]},
@@ -5578,6 +5787,7 @@ function buildUniversePrompt({idea,uStyle,uMood,uComp,light,bg,lens,filmStock,co
   if(aspectRatio)parts.push(`Output aspect ratio: ${aspectRatio}.`);
   const suffixes={realism:"hyper-detailed, 8k resolution, ray tracing, subsurface scattering",anime:"clean line art, vivid colors, professional anime production quality","3d":"octane render, global illumination, PBR materials, cinematic depth of field","2d":"clean shapes, professional vector quality, balanced composition",pixel:"clean pixel grid, limited palette, retro aesthetic, detailed sprite work",oil:"visible brushwork, impasto technique, museum quality, rich pigments"};
   parts.push(suffixes[uStyle]||suffixes.realism);
+  parts.push(QUALITY_BLOCK);
   return parts.join("\n\n");
 }
 
@@ -5606,6 +5816,7 @@ function UniversePage(){
   const uniEJ=hasAny?buildExpertJSON({
     taskType:`scene_universe_${uStyle}_${uComp}`,
     inputMode:"text_to_image",
+    originalPrompt:prompt+(custom.trim()?"\n\n"+custom.trim():""),
     subject:idea.trim(),
     lighting:light,environment:bg,lens,filmStock,
     colorGrade:conflictColorGrade?null:colorGrade,
@@ -5636,6 +5847,7 @@ function UniversePage(){
       <div className="ph">
         <div className="pt">Scene <b>Universe</b></div>
         <div className="ps">Free-form scene generator with full cinematic control. Describe any idea — the app adds lighting, lens, film stock, environment, and composition automatically.</div>
+        <div style={{marginTop:8,textAlign:"center"}}><HowLink section="standalone tools"/></div>
       </div>
 
       {/* ── Idea input ── */}
@@ -5800,7 +6012,7 @@ function UniversePage(){
 function MapPage(){
   const setPage=React.useContext(PageCtx);
   const[hovered,setHovered]=useState(null);
-  const[expanded,setExpanded]=useState(new Set(["root","char","multi","video","pet","univ","common"]));
+  const[expanded,setExpanded]=useState(new Set(["root","char","multi","video","pet","univ","common","gens"]));
 
   function countLeaves(node){
     if(!node.children||!node.children.length)return 1;
