@@ -480,14 +480,6 @@ function buildExpertJSON(cfg){
     avoid:[...EXPERT_NEG.anatomy,...EXPERT_NEG.technical.slice(0,5)]
   };
 
-  // ── Negative constraints — CATEGORIZED (Astronomerozge1 pattern) ──
-  const negativeConstraints={
-    anatomy:EXPERT_NEG.anatomy,
-    technical:EXPERT_NEG.technical,
-    content:EXPERT_NEG.content,
-    style_violations:styleNeg
-  };
-
   const styleNeg=EXPERT_NEG.style.filter(s=>{
     if(styleStr.includes("anime")&&(s==="anime"||s==="illustration"))return false;
     if(styleStr.includes("oil")&&s==="painting")return false;
@@ -495,6 +487,14 @@ function buildExpertJSON(cfg){
     if(styleStr.includes("pixel")&&s==="cartoon")return false;
     return true;
   });
+
+  // ── Negative constraints — CATEGORIZED (Astronomerozge1 pattern) ──
+  const negativeConstraints={
+    anatomy:EXPERT_NEG.anatomy,
+    technical:EXPERT_NEG.technical,
+    content:EXPERT_NEG.content,
+    style_violations:styleNeg
+  };
 
   // ── Flat negative_prompt array (for compatibility) ──
   const negativesFlat=[...EXPERT_NEG.anatomy,...EXPERT_NEG.technical,...EXPERT_NEG.content,...styleNeg];
