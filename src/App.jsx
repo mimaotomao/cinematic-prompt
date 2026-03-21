@@ -163,7 +163,7 @@ textarea::placeholder{color:var(--t4)}
 .user-chip img{width:20px;height:20px;border-radius:50%}
 .genwith{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:24px;padding-top:20px;border-top:1px solid var(--bdh)}
 .genwith-label{font-size:14px;font-weight:800;letter-spacing:1.5px;color:var(--t);text-transform:uppercase;white-space:nowrap}
-.genwith-note{font-size:12px;color:var(--t);margin-left:4px;font-weight:500}
+.genwith-note{font-size:12px;color:var(--acc);margin-left:4px;font-weight:600}
 .genwith-btn{display:flex;align-items:center;gap:7px;padding:10px 20px;border-radius:var(--r);border:1px solid var(--bd);background:var(--s2);color:var(--t);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;white-space:nowrap}
 .genwith-btn:hover{border-color:var(--acc);color:var(--acc);background:var(--acdim);transform:translateY(-1px)}
 .sprite-grid{display:flex;flex-wrap:wrap;gap:8px}
@@ -803,7 +803,7 @@ function WorkflowPanel({getPrompt, onCopy, sel, scene, lighting, bg, lens, filmS
               )}
             </div>
           ))}
-          <span style={{fontSize:11,color:"var(--t)",opacity:.5,marginLeft:4}}>prompt copied to clipboard — just paste</span>
+          <span style={{fontSize:11,color:"var(--acc)",fontWeight:600,marginLeft:4}}>prompt copied to clipboard — just paste</span>
         </div>
       </div>
 
